@@ -45,14 +45,17 @@ export default class GrafanaWidget extends Widget {
         if (btn === 'ok') {
           if (value === 'statsd') {
             this.options.widgetType = value;
-            this.widget = widgetItem.statsd.object;
+            this.widget = new widgetItem.statsd.object(this.options.widgetOptions);
           }
           this.saveSettings();
           super.init();
         }
       });
     }else {
-
+      if (this.options.widgetType === 'statsd') {
+        this.widget = new widgetItem.statsd.object(this.options.widgetOptions);
+      }
+      this.saveSettings();
       super.init();
     }
   }

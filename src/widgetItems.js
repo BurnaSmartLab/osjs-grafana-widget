@@ -1,7 +1,7 @@
 import StatsdtWidget from './items/statsd';
 const widgetItem = {
   statsd:{
-    object: new StatsdtWidget(),
+    object: StatsdtWidget,
     name: 'STATSD'
   }
 };
