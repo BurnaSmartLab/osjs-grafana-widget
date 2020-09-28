@@ -15,7 +15,10 @@ export const en_EN = {
   MSG_TIME_GROUP_BY: 'Select Time',
   TTL_AGGREGATE_FUNCTION: 'Aggregate Function',
   MSG_AGGREGATE_FUNCTION: 'Select Aggregate Function',
-  MSG_Off: 'Off'
+  MSG_Off: 'Off',
+  TTL_SETTING: 'Settings',
+  MSG_SETTING: 'Choose Your Custom Settings',
+  STATSD: 'Statsd',
 };
 
 export const fa_FA = {
@@ -35,5 +38,8 @@ export const fa_FA = {
   MSG_TIME_GROUP_BY: 'دسته بندی زمانی را انتخاب نمایید:',
   TTL_AGGREGATE_FUNCTION: 'تابع تجمعی',
   MSG_AGGREGATE_FUNCTION: 'تابع تجمعی را انتخاب نمایید:',
-  MSG_Off: 'خاموش'
+  MSG_Off: 'خاموش',
+  TTL_SETTING: 'تنظیمات',
+  MSG_SETTING: 'تنظیمات دلخواه خود را انتخاب نمایید:',
+  STATSD: 'نمودار آمار',
 };
