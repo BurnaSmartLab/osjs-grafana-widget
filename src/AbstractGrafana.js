@@ -7,4 +7,8 @@ export default class AbstractGrafana {
   printChart() {
     throw new Error('Abstract Method has no implementation');
   }
+
+  startPoll() {
+    throw new Error('Abstract Method has no implementation')
+  }
 }
