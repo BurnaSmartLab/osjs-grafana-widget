@@ -1,13 +1,17 @@
-import {Widget} from '@osjs/widgets';
+import { Widget } from '@osjs/widgets';
+
 import * as translations from './locales.js';
 import widgetItem from './src/widgetItems';
+
+import { h, app } from 'hyperapp';
+import { TextField, Button, BoxContainer, Label, Box, SelectField, Image } from '@osjs/gui';
+
+import './customStyles.css';
 
 export default class GrafanaWidget extends Widget {
   constructor(core, options) {
     super(core, options, {
       canvas: false,
-      // fbs:1,
-      // Our default dimension
       dimension: {
         width: 700,
         height: 300
@@ -18,9 +22,9 @@ export default class GrafanaWidget extends Widget {
       timeRange: '300000',
       timeGroupBy: '1000',
       aggregateFunction: 'integral',
-      refresh: 'off',
+      refreshTime: 'off',
       widgetType: null,
-      widgetOptions: {},
+      widgetOptions: {},  // object properties of each widget class that must be saved
 
     });
     this.$mycontainer = document.createElement('div');
@@ -28,36 +32,21 @@ export default class GrafanaWidget extends Widget {
     this.$element.appendChild(this.$mycontainer);
     this._interval = null;
     this.chart = null;
-    this.chartSize = 0;
     this.widget = null;
   }
   init() {
-    // eslint-disable-next-line no-unused-vars
     if (this.options.widgetType === null) {
-      const {translate: _, translatable} = this.core.make('osjs/locale');
-      const __ = translatable(translations);
-      this.core.make('osjs/dialog', 'choice', {
-        title: __('TTL_SETTING'),
-        message: __('MSG_SETTING'),
-        value: this.options.widgetType,
-        choices: Object.assign({}, ...Object.keys(widgetItem).map(k => ({[k]: __(widgetItem[k].name)}))),
-      }, (btn, value) => {
-        if (btn === 'ok') {
-          if (value === 'statsd') {
-            this.options.widgetType = value;
-            this.widget = widgetItem.statsd.object;
-          }
-          this.saveSettings();
-          super.init();
-        }
-      });
-    }else {
-
+      this.createSettingDialog();
+    } else {
+      this.generateWidget();
+      this.saveSettings();
       super.init();
     }
   }
+
   // When widget is destructed
   onDestroy() {
+    this.chart.data = null;
     this.chart.dispose();
     this.stopPoll();
   }
@@ -77,8 +66,8 @@ export default class GrafanaWidget extends Widget {
 
   saveSettings() {
     // debugger;
-    if (this.options.refresh !== 'off') {
-      this.startPoll();
+    if (this.options.refreshTime !== 'off') {
+      this.widget.startPoll(this);
     } else {
       this.stopPoll();
     }
@@ -88,220 +77,197 @@ export default class GrafanaWidget extends Widget {
   // A custom set of menu entries
   getContextMenu() {
     // eslint-disable-next-line no-unused-vars
-    const {translatable} = this.core.make('osjs/locale');
+    const { translatable } = this.core.make('osjs/locale');
     const __ = translatable(translations);
     return [{
-      label: __('LBL_SET_REFRESH'),
-      onclick: () => this.createRefreshDialog()
-    }, {
-      label: __('LBL_SET_MEASURMENT'),
-      onclick: () => this.createMeasurmentDialog()
-    }, {
-      label: __('LBL_SET_TIME_RANGE'),
-      onclick: () => this.createTimeRangeDialog()
-    }, {
-      label: __('LBL_SET_TIME_GROUP_BY'),
-      onclick: () => this.createTimeGroupByDialog()
-    }, {
-      label: __('LBL_SET_AGGREGATE_FUNCTION'),
-      onclick: () => this.createAggregateFunctionDialog()
-    }];
-  }
-
-  createRefreshDialog() {
-    // eslint-disable-next-line no-unused-vars
-    const {translate: _, translatable} = this.core.make('osjs/locale');
-    const __ = translatable(translations);
-    this.core.make('osjs/dialog', 'choice', {
-      title: __('TTL_REFRESH'),
-      message: __('MSG_REFRESH'),
-      value: this.options.refresh,
-      choices: {
-        'off': __('MSG_Off'),
-        '5000': '5s',
-        '10000': '10s',
-        '15000': '15s',
-        '30000': '30s',
-        '36000000': '1h',
-        '72000000': '2h',
-        '86400000': '1d'
-      },
-    }, (btn, value) => {
-      if (btn === 'ok') {
-        this.options.refresh = value;
-        if (this.options.refresh !== 'off') {
-          this.startPoll();
-        } else {
-          this.stopPoll();
-        }
-        this.saveSettings();
-      }
-    });
-  }
-
-  createMeasurmentDialog() {
-    // eslint-disable-next-line no-unused-vars
-    const {translate: _, translatable} = this.core.make('osjs/locale');
-    const __ = translatable(translations);
-    this.core.make('osjs/dialog', 'choice', {
-      title: __('TTL_MEASURMENT'),
-      message: __('MSG_MEASURMENT'),
-      value: this.options.measurment,
-      // TODO: create this list via grafana service
-      choices: {
-        'netdata.system.cpu.system': 'netdata.system.cpu.system',
-        'netdata.statsd_timer_swift.object_server.put.timing.events': 'netdata.statsd_timer_swift.object_server.put.timing.events'
-      },
-    }, (btn, value) => {
-      if (btn === 'ok') {
-        this.options.measurment = value;
-        this.saveSettings();
-        this.updateChartData();
-      }
-    });
-  }
-
-  createTimeRangeDialog() {
-    // eslint-disable-next-line no-unused-vars
-    const {translate: _, translatable} = this.core.make('osjs/locale');
-    const __ = translatable(translations);
-    this.core.make('osjs/dialog', 'choice', {
-      title: __('TTL_TIME_RANGE'),
-      message: __('MSG_TIME_RANGE'),
-      value: this.options.timeRange,
-      choices: {
-        '300000': 'Last 5 minutes',
-        '900000': 'Last 15 minutes',
-        '1800000': 'Last 30 minutes',
-        '3600000': 'Last 1 hour',
-        '10800000': 'Last 3 hours',
-        '21600000': 'Last 6 hours',
-        '43200000': 'Last 12 hours',
-        '86400000': 'Last 24 hours',
-        '172800000': 'Last 2 days',
-        '604800000': 'Last 7 days',
-        // '2592000000000': 'Last 30 days',
-      },
-    }, (btn, value) => {
-      if (btn === 'ok') {
-        this.options.timeRange = value;
-        if ((value >= 86400000) && (value < 604800000) && (this.options.timeGroupBy < 10000)) {
-          this.options.timeGroupBy = '60000';
-          console.log(this.options.timeGroupBy);
-        } else if ((value >= 604800000) && (this.options.timeGroupBy < 300000)) {
-          this.options.timeGroupBy = '300000';
-          console.log(this.options.timeGroupBy);
-        }
-        this.saveSettings();
-        this.updateChartData();
-      }
-    });
-  }
-
-  createTimeGroupByDialog() {
-    let choices;
-    if ((this.options.timeRange >= 86400000) && (this.options.timeRange < 604800000)) {
-      choices = {
-        '60000': '1m',
-        '300000': '5m',
-        '600000': '10m',
-        '900000': '15m',
-        '36000000': '1h'
-      };
-    } else if (this.options.timeRange >= 86400000) {
-      choices = {
-        '300000': '5m',
-        '600000': '10m',
-        '900000': '15m',
-        '36000000': '1h'
-      };
-    } else {
-      choices = {
-        '1000': '1s',
-        '10000': '10s',
-        '60000': '1m',
-        '300000': '5m',
-        '600000': '10m',
-        '900000': '15m',
-        '36000000': '1h'
-      };
-    }
-    // eslint-disable-next-line no-unused-vars
-    const {translatable} = this.core.make('osjs/locale');
-    const __ = translatable(translations);
-    this.core.make('osjs/dialog', 'choice', {
-      title: __('TTL_TIME_GROUP_BY'),
-      message: __('MSG_TIME_GROUP_BY'),
-      value: this.options.timeGroupBy,
-      choices
-    }, (btn, value) => {
-      if (btn === 'ok') {
-        this.options.timeGroupBy = value;
-        this.saveSettings();
-        this.updateChartData();
-      }
-    });
-  }
-
-  createAggregateFunctionDialog() {
-    // eslint-disable-next-line no-unused-vars
-    const {translate: _, translatable} = this.core.make('osjs/locale');
-    const __ = translatable(translations);
-    this.core.make('osjs/dialog', 'choice', {
-      title: __('TTL_AGGREGATE_FUNCTION'),
-      message: __('MSG_AGGREGATE_FUNCTION'),
-      value: this.options.aggregateFunction,
-      choices: {
-        'count': 'Count',
-        'distinct': 'Distinct',
-        'integral': 'Integral',
-        'mean': 'Mean',
-        'median': 'Median',
-        'mode': 'Mode',
-        'sum': 'Sum'
-      },
-    }, (btn, value) => {
-      if (btn === 'ok') {
-        this.options.aggregateFunction = value;
-        this.saveSettings();
-        this.updateChartData();
-      }
-    });
+      label: __('LBL_SET_SETTING'),
+      onclick: () => this.createSettingDialog()
+    }]
   }
 
   stopPoll() {
     this._interval = clearInterval(this._interval);
   }
 
-  startPoll() {
-    this.stopPoll();
-    if (this.options.refresh !== 'off') {
-      this._interval = setInterval(async () => {
-        let chartData = [];
-        let timeRange = this.options.refresh < 20000 ? 20000 : this.options.refresh;
-        let url = `/grafana/api/datasources/proxy/1/query?db=opentsdb&q=SELECT ${this.options.aggregateFunction}("value") FROM "${this.options.measurment}" WHERE time >= now() - ${timeRange}ms GROUP BY time(${this.options.timeGroupBy}ms) fill(null)&epoch=ms`;
-        let response = await fetch(url);
-        if (response.ok) {
-          let data = await response.json();
-          chartData = data.results[0].series[0].values;
-          console.log(chartData.length);
-          chartData.map(arr => {
-            arr.date = arr[0];
-            arr.events = arr[1];
-            delete arr[0];
-            delete arr[1];
-          });
-        } else {
-          alert('HTTP-Error: ' + response.status);
-        }
-        this.chart.addData(
-          chartData,
-          1
-        );
-        console.log(this.chartSize);
-        this.chartSize = chartData.length;
-        chartData = null;
-      }, this.options.refresh);
+  generateWidget() {
+    if (this.options.widgetType === 'Gauge-Chart') {
+      this.widget = new widgetItem.gauge.object(this.options.widgetOptions)
+    }
+    else if (this.options.widgetType === 'XY-Chart') {
+      this.widget = new widgetItem.statsd.object(this.options.widgetOptions)
     }
   }
+
+  createSettingDialog() {
+    // eslint-disable-next-line no-unused-vars
+    const { translate: _, translatable } = this.core.make('osjs/locale');
+    const __ = translatable(translations);
+    const callbackRender = ($content, dialogWindow, dialog) => {
+      //state
+      dialog.app = app({
+        widgetTypeValue: this.options.widgetType,
+        measurementValue: this.options.measurment,
+        timeRangeValue: this.options.timeRange,
+        refreshTimeValue: this.options.refreshTime,
+        groupByValue: this.options.timeGroupBy,
+        aggregateFuncValue: this.options.aggregateFunction
+      }, {
+        //actions
+        onMeasurementChange: measurementValue => state => ({ measurementValue }),
+        onTimeRangeChange: timeRangeValue => state => ({ timeRangeValue }),
+        onRefreshTimeChange: refreshTimeValue => state => ({ refreshTimeValue }),
+        onGroupByChange: groupByValue => state => ({ groupByValue }),
+        onAggregateFuncChange: aggregateFuncValue => state => ({ aggregateFuncValue }),
+        getValues: () => state => state,
+        onWidgetTypeChange: widgetTypeValue => {
+          this.options.widgetType = widgetTypeValue;
+          this.generateWidget();
+          let div = document.getElementsByClassName('hidden-divs');git
+          if (widgetTypeValue === 'Gauge-Chart') {
+            div[0].style.display = 'inline';
+            div[1].style.display = 'none';
+            this.widget.createSettingDialog(this);
+          } else if (widgetTypeValue === 'XY-Chart') {
+            div[1].style.display = 'inline';
+            div[0].style.display = 'none';
+          }
+          return ({ widgetTypeValue });
+        },
+      }, (state, actions) => {
+        //view
+        return dialog.createView([
+          h(Box, {}, [
+            // Drop Down
+            h(Label, {}, 'Widget type:  '),
+            h(SelectField, {
+              choices: ['Gauge-Chart', 'XY-Chart'],
+              value: state.widgetTypeValue,
+              onchange: (ev, value) => actions.onWidgetTypeChange(value)
+            }),
+          ]),
+          // h('div', {
+          //   class: 'grid-container'
+          // }, [
+          //   h(Label, {}, 'Widget type:  '),
+          //   h(Image, {
+          //     src :'../gauge.png',
+          //     alt:'Gauge'
+          //   }),
+          //   h(Image, {
+          //     src :'/home/shadi/OS.js/src/packages/wigets/statsd.png',
+          //     alt :'Graph'
+          //   }),
+          // ]),
+          h('div', {
+            class: 'grid-container2'
+          }, [
+            // Drop Down
+            h(Label, {}, 'Measurement:  '),
+            h(SelectField, {
+              choices: {
+                'netdata.system.cpu.system': 'netdata.system.cpu.system',
+                'netdata.statsd_timer_swift.object_server.put.timing.events': 'netdata.statsd_timer_swift.object_server.put.timing.events',
+                'netdata.system.ram.free': 'netdata.system.ram.free'
+              },
+              value: state.measurementValue,
+              onchange: (ev, value) => actions.onMeasurementChange(value)
+            }),
+          ]),
+          h('div', {
+            class: 'grid-container4'
+          }, [
+            h(Label, {}, 'Time Range:  '),
+            h(SelectField, {
+              choices: {
+                '300000': 'Last 5 minutes',
+                '900000': 'Last 15 minutes',
+                '1800000': 'Last 30 minutes',
+                '3600000': 'Last 1 hour',
+                '10800000': 'Last 3 hours',
+                '21600000': 'Last 6 hours',
+                '43200000': 'Last 12 hours',
+                '86400000': 'Last 24 hours',
+                '172800000': 'Last 2 days',
+                '604800000': 'Last 7 days',
+              },
+              value: state.timeRangeValue,
+              onchange: (ev, value) => actions.onTimeRangeChange(value)
+            }),
+            h(Label, {}, 'GroupBy:  '),
+            h(SelectField, {
+              choices: {
+                '1000': '1s',
+                '10000': '10s',
+                '60000': '1m',
+                '300000': '5m',
+                '600000': '10m',
+                '900000': '15m',
+                '36000000': '1h'
+              },
+              value: state.groupByValue,
+              onchange: (ev, value) => actions.onGroupByChange(value)
+            }),
+            h(Label, {}, 'Refresh Time:  '),
+            h(SelectField, {
+              choices: {
+                'off': __('MSG_Off'),
+                '5000': '5s',
+                '10000': '10s',
+                '15000': '15s',
+                '30000': '30s',
+                '36000000': '1h',
+                '72000000': '2h',
+                '86400000': '1d'
+              },
+              value: state.refreshTimeValue,
+              onchange: (ev, value) => actions.onRefreshTimeChange(value)
+            }),
+            h(Label, {}, 'Aggregate Function:  '),
+            h(SelectField, {
+              choices: {
+                'count': 'Count',
+                'distinct': 'Distinct',
+                'integral': 'Integral',
+                'mean': 'Mean',
+                'median': 'Median',
+                'mode': 'Mode',
+                'sum': 'Sum'
+              },
+              value: state.aggregateFuncValue,
+              onchange: (ev, value) => actions.onAggregateFuncChange(value)
+            }),
+          ]),
+          h('div', { class: 'hidden-divs' }, 'gauge div element'),
+          h('div', { class: 'hidden-divs' }, 'xy div element'),
+        ]);
+      }, $content);
+    };
+
+    // Values are passed down to the 'options' object
+    const callbackValue = dialog => dialog.app.getValues();
+
+    const callbackButton = (button, value) => {
+      if (button === 'ok') {
+        this.options.measurment = value.measurementValue;
+        this.options.timeRange = value.timeRangeValue;
+        this.options.timeGroupBy = value.groupByValue;
+        this.options.refreshTime = value.refreshTimeValue;
+        this.options.aggregateFunction = value.aggregateFuncValue;
+        this.render();
+        this.saveSettings();
+        super.init();
+      }
+    };
+    const options = {
+      buttons: ['ok', 'cancel'],
+      window: {
+        title: __('TTL_SETTING'),
+        message: __('MSG_SETTING'),
+        dimension: { width: 700, height: 400 }
+      }
+    };
+    this.core.make('osjs/dialogs').create(options, callbackValue, callbackButton).render(callbackRender);
+  }
+
+
 }

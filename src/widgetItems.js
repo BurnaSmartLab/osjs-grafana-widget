@@ -1,8 +1,13 @@
-import StatsdtWidget from './items/statsd';
+import StatsdWidget from './items/statsd';
+import GaugeWidget from './items/gauge';
 const widgetItem = {
   statsd:{
-    object: new StatsdtWidget(),
+    object: StatsdWidget,
     name: 'STATSD'
+  },
+  gauge:{
+    object: GaugeWidget,
+    name: 'GAUGE'
   }
 };
 export default widgetItem;

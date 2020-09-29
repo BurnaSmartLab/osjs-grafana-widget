@@ -4,6 +4,10 @@ import am4themes_animated from '@amcharts/amcharts4/themes/animated';
 import AbstractGrafana from '../AbstractGrafana';
 
 export default class StatsdtWidget extends AbstractGrafana {
+  constructor(widgetOptions) {
+    // custom widget option could be added here.
+    super();
+  }
   // Every rendering tick (or just once if no canvas)
   async printChart(grafana) {
     /* Chart code */
