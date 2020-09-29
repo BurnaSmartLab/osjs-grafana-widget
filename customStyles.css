@@ -1,0 +1,23 @@
+
+.grid-container4 {
+    display: grid;
+    grid-template-columns:120px 150px 120px 150px;
+    padding: 10px;
+    grid-gap: 10px;
+  }
+  .grid-container2 {
+    display: grid;
+    grid-template-columns:120px 400px;
+    padding: 10px;
+    grid-gap: 10px;
+  }
+.hidden-divs{
+    /* visibility: hidden; */
+    display: none;
+    border: 5px outset red;
+    background-color: lightblue;    
+    text-align: center;
+}
+  
+
+
