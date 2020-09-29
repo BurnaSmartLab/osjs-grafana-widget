@@ -122,7 +122,7 @@ export default class GrafanaWidget extends Widget {
         onWidgetTypeChange: widgetTypeValue => {
           this.options.widgetType = widgetTypeValue;
           this.generateWidget();
-          let div = document.getElementsByClassName('hidden-divs');git
+          let div = document.getElementsByClassName('hidden-divs');
           if (widgetTypeValue === 'Gauge-Chart') {
             div[0].style.display = 'inline';
             div[1].style.display = 'none';
