@@ -3,10 +3,11 @@ import * as am4charts from '@amcharts/amcharts4/charts';
 import am4themes_animated from '@amcharts/amcharts4/themes/animated';
 import AbstractGrafana from '../AbstractGrafana';
 
-export default class StatsdtWidget extends AbstractGrafana {
+export default class StatsdWidget extends AbstractGrafana {
   constructor(widgetOptions) {
     // custom widget option could be added here.
     super();
+    this.chartSize = 0;
   }
   // Every rendering tick (or just once if no canvas)
   async printChart(grafana) {
@@ -57,12 +58,13 @@ export default class StatsdtWidget extends AbstractGrafana {
 
     dateAxis.interpolationDuration = 500;
     dateAxis.rangeChangeDuration = 500;
-    
+
     if (grafana.options.refreshTime !== 'off') {
       this.startPoll(grafana);
     }else {
       grafana.stopPoll();
     }
+
   }
   async updateChartData(grafana) {
     let chartData = [];
@@ -78,19 +80,19 @@ export default class StatsdtWidget extends AbstractGrafana {
         delete arr[0];
         delete arr[1];
       });
-      grafana.chartSize = chartData.length;
+      this.chartSize = chartData.length;
       grafana.chart.data = chartData;
     }else {
       alert('HTTP-Error: ' + response.status);
     }
   }
   startPoll(grafana) {
-    this.stopPoll();
-    if (this.options.refresh !== 'off') {
-      this._interval = setInterval(async () => {
+    grafana.stopPoll();
+    if (grafana.options.refreshTime !== 'off') {
+      grafana._interval = setInterval(async () => {
         let chartData = [];
-        let timeRange = this.options.refresh < 20000 ? 20000 : this.options.refresh;
-        let url = `/grafana/api/datasources/proxy/1/query?db=opentsdb&q=SELECT ${this.options.aggregateFunction}("value") FROM "${this.options.measurment}" WHERE time >= now() - ${timeRange}ms GROUP BY time(${this.options.timeGroupBy}ms) fill(null)&epoch=ms`;
+        let timeRange = grafana.options.refreshTime < 20000 ? 20000 : grafana.options.refreshTime;
+        let url = `/grafana/api/datasources/proxy/1/query?db=opentsdb&q=SELECT ${grafana.options.aggregateFunction}("value") FROM "${grafana.options.measurment}" WHERE time >= now() - ${timeRange}ms GROUP BY time(${grafana.options.timeGroupBy}ms) fill(null)&epoch=ms`;
         let response = await fetch(url);
         if (response.ok) {
           let data = await response.json();
@@ -105,14 +107,13 @@ export default class StatsdtWidget extends AbstractGrafana {
         } else {
           alert('HTTP-Error: ' + response.status);
         }
-        this.chart.addData(
+        grafana.chart.addData(
           chartData,
           1
         );
-        console.log(this.chartSize);
         this.chartSize = chartData.length;
         chartData = null;
-      }, this.options.refresh);
+      }, grafana.options.refreshTime);
     }
   }
 }
