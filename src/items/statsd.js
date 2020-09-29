@@ -57,9 +57,9 @@ export default class StatsdtWidget extends AbstractGrafana {
 
     dateAxis.interpolationDuration = 500;
     dateAxis.rangeChangeDuration = 500;
-
-    if (grafana.options.refresh !== 'off') {
-      grafana.startPoll();
+    
+    if (grafana.options.refreshTime !== 'off') {
+      this.startPoll(grafana);
     }else {
       grafana.stopPoll();
     }
