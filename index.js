@@ -1,13 +1,15 @@
 import {Widget} from '@osjs/widgets';
-
 import * as translations from './locales.js';
 import widgetItem from './src/widgetItems';
 
 import {h, app} from 'hyperapp';
-import {TextField, Button, BoxContainer, Label, Box, SelectField, Image} from '@osjs/gui';
-
+import {Label, Box, SelectField} from '@osjs/gui';
 import './customStyles.css';
+import $ from 'jquery';
+// import 'select2';
 
+import './node_modules/select2/dist/css/select2.min.css';
+import './node_modules/select2/dist/js/select2.min';
 export default class GrafanaWidget extends Widget {
   constructor(core, options) {
     super(core, options, {
@@ -97,7 +99,7 @@ export default class GrafanaWidget extends Widget {
     }
   }
 
-  createSettingDialog() {
+  async createSettingDialog() {
     // eslint-disable-next-line no-unused-vars
     const {translate: _, translatable} = this.core.make('osjs/locale');
     const __ = translatable(translations);
@@ -117,6 +119,34 @@ export default class GrafanaWidget extends Widget {
         onRefreshTimeChange: refreshTimeValue => state => ({refreshTimeValue}),
         onGroupByChange: groupByValue => state => ({groupByValue}),
         onAggregateFuncChange: aggregateFuncValue => state => ({aggregateFuncValue}),
+        createSelect2: el => {
+          $(el).select2({
+            ajax: {
+              url: '/grafana/api/datasources/proxy/1/query',
+              dataType: 'json',
+              data: (params) => ({
+                db: 'opentsdb',
+                q: `SHOW MEASUREMENTS WITH MEASUREMENT =~ /${typeof params.term !== 'undefined' ? params.term : ''}/ LIMIT 100`,
+                epoch: 'ms'
+              }),
+              processResults: data => {
+                if (typeof data.results[0].series !== 'undefined') {
+                  let measurments = data.results[0].series[0].values;
+                  measurments.map(arr => {
+                    arr.id = arr[0];
+                    arr.text = arr[0];
+                    delete arr[0];
+                  });
+                  return {
+                    results: measurments
+                  };
+                }
+                return {results: []};
+              }
+            },
+          });
+          $('b[role="presentation"]').hide();
+        },
         getValues: () => state => state,
         onWidgetTypeChange: widgetTypeValue => {
           this.options.widgetType = widgetTypeValue;
@@ -163,12 +193,9 @@ export default class GrafanaWidget extends Widget {
             // Drop Down
             h(Label, {}, 'Measurement:  '),
             h(SelectField, {
-              choices: {
-                'netdata.system.cpu.system': 'netdata.system.cpu.system',
-                'netdata.statsd_timer_swift.object_server.put.timing.events': 'netdata.statsd_timer_swift.object_server.put.timing.events',
-                'netdata.system.ram.free': 'netdata.system.ram.free'
-              },
+              choices:{},
               value: state.measurementValue,
+              oncreate: el => actions.createSelect2(el),
               onchange: (ev, value) => actions.onMeasurementChange(value)
             }),
           ]),
