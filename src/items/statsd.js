@@ -116,4 +116,10 @@ export default class StatsdWidget extends AbstractGrafana {
       }, grafana.options.refreshTime);
     }
   }
+
+  showAdvancedSetting(grafana){
+  return{};
+}
+saveWidgetOptions(widgetOptions, advSetting){
+}
 }
