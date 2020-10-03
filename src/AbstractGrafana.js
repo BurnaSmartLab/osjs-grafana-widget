@@ -8,7 +8,15 @@ export default class AbstractGrafana {
     throw new Error('Abstract Method has no implementation');
   }
 
-  startPoll() {
+  startPoll(){
+    throw new Error('Abstract Method has no implementation')
+  }
+
+  showAdvancedSetting() {
+    throw new Error('Abstract Method has no implementation');
+  }
+
+  saveWidgetOptions(){
     throw new Error('Abstract Method has no implementation')
   }
 }

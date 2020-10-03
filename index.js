@@ -1,15 +1,13 @@
-import {Widget} from '@osjs/widgets';
+import { Widget } from '@osjs/widgets';
+
 import * as translations from './locales.js';
 import widgetItem from './src/widgetItems';
 
-import {h, app} from 'hyperapp';
-import {Label, Box, SelectField} from '@osjs/gui';
-import './customStyles.css';
-import $ from 'jquery';
-// import 'select2';
+import { h, app } from 'hyperapp';
+import { TextField, Button, BoxContainer, Label, Box, SelectField, Image } from '@osjs/gui';
 
-import './node_modules/select2/dist/css/select2.min.css';
-import './node_modules/select2/dist/js/select2.min';
+import './customStyles.css';
+
 export default class GrafanaWidget extends Widget {
   constructor(core, options) {
     super(core, options, {
@@ -79,12 +77,12 @@ export default class GrafanaWidget extends Widget {
   // A custom set of menu entries
   getContextMenu() {
     // eslint-disable-next-line no-unused-vars
-    const {translatable} = this.core.make('osjs/locale');
+    const { translatable } = this.core.make('osjs/locale');
     const __ = translatable(translations);
     return [{
       label: __('LBL_SET_SETTING'),
       onclick: () => this.createSettingDialog()
-    }];
+    }]
   }
 
   stopPoll() {
@@ -92,110 +90,102 @@ export default class GrafanaWidget extends Widget {
   }
 
   generateWidget() {
-    if (this.options.widgetType === 'Gauge-Chart') {
-      this.widget = new widgetItem.gauge.object(this.options.widgetOptions);
-    } else if (this.options.widgetType === 'XY-Chart') {
-      this.widget = new widgetItem.statsd.object(this.options.widgetOptions);
+    for (const key in widgetItem) {
+      if (key === this.options.widgetType) {
+        this.widget = new widgetItem[key].object(this.options.widgetOptions);
+      }
     }
   }
 
-  async createSettingDialog() {
+  createSettingDialog() {
     // eslint-disable-next-line no-unused-vars
-    const {translate: _, translatable} = this.core.make('osjs/locale');
+    const { translate: _, translatable } = this.core.make('osjs/locale');
     const __ = translatable(translations);
+    let advancedSetting = {};
+
     const callbackRender = ($content, dialogWindow, dialog) => {
-      // state
+      //state
       dialog.app = app({
         widgetTypeValue: this.options.widgetType,
         measurementValue: this.options.measurment,
         timeRangeValue: this.options.timeRange,
         refreshTimeValue: this.options.refreshTime,
         groupByValue: this.options.timeGroupBy,
-        aggregateFuncValue: this.options.aggregateFunction
+        aggregateFuncValue: this.options.aggregateFunction,
+        widgetOptionsValue: this.options.widgetOptions
       }, {
-        // actions
-        onMeasurementChange: measurementValue => state => ({measurementValue}),
-        onTimeRangeChange: timeRangeValue => state => ({timeRangeValue}),
-        onRefreshTimeChange: refreshTimeValue => state => ({refreshTimeValue}),
-        onGroupByChange: groupByValue => state => ({groupByValue}),
-        onAggregateFuncChange: aggregateFuncValue => state => ({aggregateFuncValue}),
-        createSelect2: el => {
-          $(el).select2({
-            ajax: {
-              url: '/grafana/api/datasources/proxy/1/query',
-              dataType: 'json',
-              data: (params) => ({
-                db: 'opentsdb',
-                q: `SHOW MEASUREMENTS WITH MEASUREMENT =~ /${typeof params.term !== 'undefined' ? params.term : ''}/ LIMIT 100`,
-                epoch: 'ms'
-              }),
-              processResults: data => {
-                if (typeof data.results[0].series !== 'undefined') {
-                  let measurments = data.results[0].series[0].values;
-                  measurments.map(arr => {
-                    arr.id = arr[0];
-                    arr.text = arr[0];
-                    delete arr[0];
-                  });
-                  return {
-                    results: measurments
-                  };
-                }
-                return {results: []};
-              }
-            },
-          });
-          $('b[role="presentation"]').hide();
-        },
+        //actions
+        onMeasurementChange: measurementValue => state => ({ measurementValue }),
+        onTimeRangeChange: timeRangeValue => state => ({ timeRangeValue }),
+        onRefreshTimeChange: refreshTimeValue => state => ({ refreshTimeValue }),
+        onGroupByChange: groupByValue => state => ({ groupByValue }),
+        onAggregateFuncChange: aggregateFuncValue => state => ({ aggregateFuncValue }),
         getValues: () => state => state,
-        onWidgetTypeChange: widgetTypeValue => {
+
+        onWidgetTypeChange: (widgetTypeValue) => {
           this.options.widgetType = widgetTypeValue;
+          // let tempWidget = null;
+          // for (const key in widgetItem) {
+          //   if (key === widgetTypeValue) {
+          //     tempWidget = new widgetItem[key].object(this.options.widgetOptions);
+          //   }
+          // }
           this.generateWidget();
-          let div = document.getElementsByClassName('hidden-divs');
-          if (widgetTypeValue === 'Gauge-Chart') {
-            div[0].style.display = 'inline';
-            div[1].style.display = 'none';
-            this.widget.createSettingDialog(this);
-          } else if (widgetTypeValue === 'XY-Chart') {
-            div[1].style.display = 'inline';
-            div[0].style.display = 'none';
-          }
-          return ({widgetTypeValue});
+          let div = document.getElementsByClassName('hidden-div');
+          div[0].style.display = 'inline';
+          advancedSetting = this.widget.showAdvancedSetting(this);
+          app(advancedSetting.state, advancedSetting.actions, advancedSetting.view, div[0]);
+          return ({ widgetTypeValue });
         },
+        startDialog: (widgetTypeValue) => (state) => {
+          if (widgetTypeValue !== null) {
+            let div = document.getElementsByClassName('hidden-div');
+            div[0].style.display = 'inline';
+            advancedSetting = this.widget.showAdvancedSetting(this);
+            app(advancedSetting.state, advancedSetting.actions, advancedSetting.view, div[0]);
+          }
+        }
+
       }, (state, actions) => {
-        // view
+        //view
         return dialog.createView([
-          h(Box, {}, [
-            // Drop Down
+          h('div', { 
+            class: 'outerBox',
+          }, [
+          h(Box, {
+            oncreate: () => actions.startDialog(this.options.widgetType)
+          }, [
             h(Label, {}, 'Widget type:  '),
             h(SelectField, {
-              choices: ['Gauge-Chart', 'XY-Chart'],
+              choices: Object.assign({}, ...Object.keys(widgetItem).map(k => ({ [k]: __(widgetItem[k].name) }))),
               value: state.widgetTypeValue,
               onchange: (ev, value) => actions.onWidgetTypeChange(value)
-            }),
+            })
           ]),
           // h('div', {
           //   class: 'grid-container'
           // }, [
           //   h(Label, {}, 'Widget type:  '),
           //   h(Image, {
-          //     src :'../gauge.png',
+          //     src :'gauge-chart.png',
           //     alt:'Gauge'
           //   }),
           //   h(Image, {
-          //     src :'/home/shadi/OS.js/src/packages/wigets/statsd.png',
+          //     src :'./XY-chart.png',
           //     alt :'Graph'
           //   }),
           // ]),
           h('div', {
             class: 'grid-container2'
           }, [
-            // Drop Down
             h(Label, {}, 'Measurement:  '),
             h(SelectField, {
-              choices:{},
+              choices: {
+                'netdata.system.cpu.system': 'netdata.system.cpu.system',
+                'netdata.statsd_timer_swift.object_server.put.timing.events': 'netdata.statsd_timer_swift.object_server.put.timing.events',
+                'netdata.system.ram.free': 'netdata.system.ram.free'
+              },
               value: state.measurementValue,
-              oncreate: el => actions.createSelect2(el),
               onchange: (ev, value) => actions.onMeasurementChange(value)
             }),
           ]),
@@ -263,8 +253,8 @@ export default class GrafanaWidget extends Widget {
               onchange: (ev, value) => actions.onAggregateFuncChange(value)
             }),
           ]),
-          h('div', {class: 'hidden-divs'}, 'gauge div element'),
-          h('div', {class: 'hidden-divs'}, 'xy div element'),
+          h('div', { class: 'hidden-div' }),
+        ])
         ]);
       }, $content);
     };
@@ -274,14 +264,19 @@ export default class GrafanaWidget extends Widget {
 
     const callbackButton = (button, value) => {
       if (button === 'ok') {
+        console.log('I AM IN OK');
+        console.log(value.widgetOptionsValue);
         this.options.measurment = value.measurementValue;
         this.options.timeRange = value.timeRangeValue;
         this.options.timeGroupBy = value.groupByValue;
         this.options.refreshTime = value.refreshTimeValue;
         this.options.aggregateFunction = value.aggregateFuncValue;
-        this.render();
+        //this.generateWidget();
+        console.log(advancedSetting.state);
+        this.widget.saveWidgetOptions(this.options.widgetOptions, advancedSetting.state);
         this.saveSettings();
-        super.init();
+        //this.render();
+        this.init();
       }
     };
     const options = {
@@ -289,11 +284,14 @@ export default class GrafanaWidget extends Widget {
       window: {
         title: __('TTL_SETTING'),
         message: __('MSG_SETTING'),
-        dimension: {width: 700, height: 400}
+        dimension: { width: 700, height: 800 },
+        //resizeFit:document.getElementsByClassName('outerBox')
       }
     };
     this.core.make('osjs/dialogs').create(options, callbackValue, callbackButton).render(callbackRender);
   }
+
+
 
 
 }

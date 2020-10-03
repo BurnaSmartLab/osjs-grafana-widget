@@ -6,25 +6,26 @@ import AbstractGrafana from '../AbstractGrafana';
 import { h, app } from 'hyperapp';
 import { TextField, Button, BoxContainer, Label, Box, SelectField, Image } from '@osjs/gui';
 
+import '../../customStyles.css';
+
 export default class GaugeWidget extends AbstractGrafana {
-    constructor(widgetOptions) {
-      super();
-      this.widgetHand = null;
-      //custom widget option could be added here.
-      if (!('gauge' in widgetOptions)) {
-          let gaugeValue = {
-              gradeThresholds: [{
-                  title: 'status',
-                  color: '#54b947',
-                  lowScore: 0,
-                  highScore: 100
-              }],
-              minRange: 0,
-              maxRange: 100,
-          };
-          widgetOptions.gauge = gaugeValue;
-      }
+  constructor(widgetOptions) {
+    super();
+    this.widgetHand = null;
+    //custom widget option could be added here.
+    if (!('gauge' in widgetOptions)) {
+      widgetOptions.gauge = {
+        gradeThresholds: [{
+          title: 'status',
+          color: '#54b947',
+          lowScore: 0,
+          highScore: 100
+        }],
+        minRange: 0,
+        maxRange: 100,
+      };
     }
+  }
   // Every rendering tick (or just once if no canvas)
   async printChart(grafana) {
     console.log('I AM IN PRINTCHART');
@@ -51,7 +52,7 @@ export default class GaugeWidget extends AbstractGrafana {
     grafana.chart = am4core.create(grafana.$mycontainer, am4charts.GaugeChart);
 
     let chartMin = grafana.options.widgetOptions.gauge.minRange;
-    let chartMax =  grafana.options.widgetOptions.gauge.maxRange;
+    let chartMax = grafana.options.widgetOptions.gauge.maxRange;
 
 
     let data = {
@@ -195,16 +196,15 @@ export default class GaugeWidget extends AbstractGrafana {
       }
       return null;
     }
-   
+
     if (grafana.options.refreshTime !== 'off') {
       this.startPoll(grafana);
-    }else {
+    } else {
       grafana.stopPoll();
     }
   }
 
   startPoll(grafana) {
-    console.log('I AM IN STARTPOLL');
     grafana.stopPoll();
     grafana._interval = setInterval(async () => {
       let calcAvgUpdated = 0;
@@ -229,164 +229,148 @@ export default class GaugeWidget extends AbstractGrafana {
     }, grafana.options.refreshTime);
   }
 
-  createSettingDialog(grafana) {
-    const {translatable} = grafana.core.make('osjs/locale');
-    const __ = translatable(grafana.translations);
-    const callbackRender = ($content, dialogWindow, dialog) => {
-      let arr = [];   // used for displaying previously set thresholds by opening dialog
-      grafana.options.widgetOptions.gauge.gradeThresholds.map((item) => {
-        arr.push(item);
-      });
-      let suggestedThre = arr[arr.length - 1].lowScore;  // used for suggesting threshold value based on last set threshold on dialog
-      dialog.app = app({
-        min: grafana.options.widgetOptions.gauge.minRange,
-        max: grafana.options.widgetOptions.gauge.maxRange,
-        thresholds: arr,  // containing threshold(low score and high score), title and its color
-      }, {
-        setMinText: min => ({thresholds}) => {
-          thresholds[0].lowScore = min;
-          suggestedThre = parseInt(min);
-          return ({min});
-        },
-        setMaxText: max => state => ({max}),
-        getValues: () => state => state,
-        setThreshold: ({index, value}) => ({thresholds, min}) => {
-          if(index === 0) {
-            thresholds[index].lowScore = min;
-          }else {
-            thresholds[index].lowScore = value;
-            suggestedThre = parseInt(value);
-          }
-          return {thresholds};
-        },
-        setTitle: ({index, value}) => ({thresholds}) => {
-          thresholds[index].title = value;
-          return {thresholds};
-        },
-        setColor: ({index, value}) => ({thresholds}) => {
-          thresholds[index].color = value;
-          return {thresholds};
-        },
-        removeField: (index) => ({thresholds}) => {
-          if(index !== 0) {   // first threshold (min) is essentially needed and can not be removed
-            thresholds.splice(index, 1);
-            suggestedThre = thresholds[thresholds.length - 1].lowScore;
-            return {thresholds};
-          }
-        },
-        addField: () => ({thresholds, min}) => {
-          suggestedThre += 10;
-          let suggestedColor = '#' + (Math.random() * 0xfffff * 1000000).toString(16).slice(0, 6);
-          let obj = {
-            title: '',
-            lowScore: suggestedThre,
-            highScore:'',
-            color:suggestedColor
-          };
-          thresholds.push(obj);
-          return {thresholds};
+  showAdvancedSetting(grafana) {
+    let arr = [];   // used for displaying previously set thresholds by opening dialog
+    grafana.options.widgetOptions.gauge.gradeThresholds.map((item) => {
+      arr.push(item);
+    });
+    let suggestedThre = arr[arr.length - 1].lowScore;  // used for suggesting threshold value based on last set threshold on dialog
+    const state = {
+      minRange: grafana.options.widgetOptions.gauge.minRange,
+      maxRange: grafana.options.widgetOptions.gauge.maxRange,
+      gradeThresholds: arr,  // containing threshold(low score and high score), title and its color
+    };
+    const actions = {
+      setMinText: minRange => ({ gradeThresholds }) => {
+        gradeThresholds[0].lowScore = minRange;
+        suggestedThre = parseInt(minRange);
+        return ({ minRange });
+      },
+      setMaxText: maxRange => state => ({maxRange}),
+      getValues: () => state => state,
+      setThreshold: ({ index, value }) => ({ gradeThresholds, minRange }) => {
+        if (index === 0) {
+          gradeThresholds[index].lowScore = minRange;
+        } else {
+          gradeThresholds[index].lowScore = value;
+          suggestedThre = parseInt(value);
         }
-      }, (state, actions) => {
-        return dialog.createView([
-          h(BoxContainer, {}, [
-            h(Label, {}, 'Min Range:  '),
+        return { gradeThresholds };
+      },
+      setTitle: ({ index, value }) => ({ gradeThresholds }) => {
+        gradeThresholds[index].title = value;
+        return { gradeThresholds };
+      },
+      setColor: ({ index, value }) => ({ gradeThresholds }) => {
+        gradeThresholds[index].color = value;
+        return { gradeThresholds };
+      },
+      removeField: (index) => ({ gradeThresholds }) => {
+        if (index !== 0) {   // first threshold (min) is essentially needed and can not be removed
+          gradeThresholds.splice(index, 1);
+          suggestedThre = gradeThresholds[gradeThresholds.length - 1].lowScore;
+          return { gradeThresholds };
+        }
+      },
+      addField: () => ({ gradeThresholds, minRange }) => {
+        suggestedThre += 10;
+        gradeThresholds.push({
+          title: '',
+          lowScore: suggestedThre,
+          highScore: '',
+          color: '#' + (Math.random() * 0xfffff * 1000000).toString(16).slice(0, 6)
+        });
+        return { gradeThresholds };
+      }
+    };
+
+    const view = (state, actions) => (
+      h(Box, {},[
+        h(Label, {}, 'Gauge Advanced Settings:  '),
+        h('div', {
+          class: 'grid-container4'
+        }, [
+        h(Label, {}, 'Min Range:  '),
+        h(TextField, {
+          value: state.minRange,
+          oninput: (ev, value) => actions.setMinText(value),
+        }),
+        h(Label, {}, 'Max Range:  '),
+        h(TextField, {
+          value: state.maxRange,
+          oninput: (ev, value) => actions.setMaxText(value)
+        }),
+      ]),
+      h(Box, { grow: 1, shrink: 1 }, [
+        state.gradeThresholds.map((name, index) => {
+          return h(BoxContainer, {}, [
             h(TextField, {
-              value: state.min,
-              oninput: (ev, value) => actions.setMinText(value),
+              box: { grow: 1, shrink: 1 },
+              placeholder: 'threshold',
+              oninput: (ev, value) => actions.setThreshold({ index, value }),
+              value: state.gradeThresholds[index].lowScore
             }),
-          ]),
-          h(BoxContainer, {}, [
-            h(Label, {}, 'Max Range:  '),
             h(TextField, {
-              value: state.max,
-              oninput: (ev, value) => actions.setMaxText(value)
+              box: { grow: 1, shrink: 1 },
+              placeholder: 'title',
+              oninput: (ev, value) => actions.setTitle({ index, value }),
+              value: state.gradeThresholds[index].title
             }),
-          ]),
-          h(Box, {grow: 1, shrink: 1}, [
-            state.thresholds.map((name, index) => {
-              return h(BoxContainer, {}, [
-                h(TextField, {
-                  box: {grow: 1, shrink: 1},
-                  placeholder: 'threshold',
-                  oninput: (ev, value) => actions.setThreshold({index, value}),
-                  value: state.thresholds[index].lowScore
-                }),
-                h(TextField, {
-                  box: {grow: 1, shrink: 1},
-                  placeholder: 'title',
-                  oninput: (ev, value) => actions.setTitle({index, value}),
-                  value: state.thresholds[index].title
-                }),
-                h(TextField, {
-                  box: {grow: 1, shrink: 1},
-                  placeholder: 'color',
-                  oninput: (ev, value) => actions.setColor({index, value}),
-                  value: state.thresholds[index].color
-                }),
-                h(Button, {
-                  onclick: () =>  grafana.core.make('osjs/dialog', 'color', {
-                    color: state.thresholds[index].color
-                  }, (btn, value) => {
-                    if (btn === 'ok') {
-                      let hexCode = value.hex;
-                      actions.setColor({index, hexCode});
-                      state.thresholds[index].color = hexCode;
-                    }
-                  })
-                }, 'Set Color'),
-                h(Button, {
-                  onclick: () => actions.removeField(index)
-                }, 'Remove')
-              ]);
+            h(TextField, {
+              box: { grow: 1, shrink: 1 },
+              placeholder: 'color',
+              oninput: (ev, value) => actions.setColor({ index, value }),
+              value: state.gradeThresholds[index].color
             }),
             h(Button, {
-              onclick: () => actions.addField()
-            }, 'Add Threshold')
-          ])
-        ]);
-      }, $content);
-    };
+              onclick: () => grafana.core.make('osjs/dialog', 'color', {
+                color: state.gradeThresholds[index].color
+              }, (btn, value) => {
+                if (btn === 'ok') {
+                  let hexCode = value.hex;
+                  actions.setColor({ index, hexCode });
+                  state.gradeThresholds[index].color = hexCode;
+                }
+              })
+            }, 'Set Color'),
+            h(Button, {
+              onclick: () => actions.removeField(index)
+            }, 'Remove')
+          ]);
+        }),
+        h(Button, {
+          onclick: () => actions.addField()
+        }, 'Add Threshold')
+      ])
+    ])
+    );
+    return {state, actions, view};
+  }
 
-    // Values are passed down to the 'options' object
-    const callbackValue = dialog => dialog.app.getValues();
-
-    const callbackButton = (button, value) => {
-      if (button === 'ok') {
-        grafana.options.widgetOptions.gauge.minRange = parseInt(value.min);
-        grafana.options.widgetOptions.gauge.maxRange = parseInt(value.max);
-        grafana.options.widgetOptions.gauge.gradeThresholds = [];  // delete the previous set thresholds
-        value.thresholds.sort((a, b) => (a.lowScore > b.lowScore) ? 1 : (b.lowScore > a.lowScore) ? -1 : 0);  // sort based on lowscore
-        value.thresholds = value.thresholds.filter(item => item.lowScore !== '' && !isNaN(item.lowScore));  // remove objects with undefined threshold
-        for (let i = value.thresholds.length - 1; i >= 0; i--) {
-          if(i === value.thresholds.length - 1) {
-            grafana.options.widgetOptions.gauge.gradeThresholds.unshift({
-              title: value.thresholds[i].title,
-              color: value.thresholds[i].color,
-              lowScore: parseInt(value.thresholds[i].lowScore),
-              highScore: parseInt(value.max)
-            });
-          } else {
-            grafana.options.widgetOptions.gauge.gradeThresholds.unshift({
-              title: value.thresholds[i].title,
-              color: value.thresholds[i].color,
-              lowScore: parseInt(value.thresholds[i].lowScore),
-              highScore:parseInt(value.thresholds[i + 1].lowScore)
-            });
-          }
-        }
-        grafana.render();
-        frafana.saveSettings();
+  saveWidgetOptions(widgetOptions, advSetting){
+    console.log(widgetOptions);
+    widgetOptions.gauge.minRange = parseInt(advSetting.minRange);
+    widgetOptions.gauge.maxRange = parseInt(advSetting.maxRange);
+    widgetOptions.gauge.gradeThresholds = [];  // delete the previous set thresholds
+    advSetting.gradeThresholds.sort((a, b) => (a.lowScore > b.lowScore) ? 1 : (b.lowScore > a.lowScore) ? -1 : 0);  // sort based on lowscore
+    advSetting.gradeThresholds = advSetting.gradeThresholds.filter(item => item.lowScore !== '' && !isNaN(item.lowScore));  // remove objects with undefined threshold
+    for (let i = advSetting.gradeThresholds.length - 1; i >= 0; i--) {
+      if (i === advSetting.gradeThresholds.length - 1) {
+        widgetOptions.gauge.gradeThresholds.unshift({
+          title: advSetting.gradeThresholds[i].title,
+          color: advSetting.gradeThresholds[i].color,
+          lowScore: parseInt(advSetting.gradeThresholds[i].lowScore),
+          highScore: parseInt(advSetting.maxRange)
+        });
+      } else {
+        widgetOptions.gauge.gradeThresholds.unshift({
+          title: advSetting.gradeThresholds[i].title,
+          color: advSetting.gradeThresholds[i].color,
+          lowScore: parseInt(advSetting.gradeThresholds[i].lowScore),
+          highScore: parseInt(advSetting.gradeThresholds[i + 1].lowScore)
+        });
       }
-    };
-    const options = {
-      buttons: ['ok', 'cancel'],
-      window: {
-        title: __('TTL_SETTING'),
-        message: __('MSG_SETTING'),
-        dimension: {width: 700, height: 400}
-      }
-    };
-    grafana.core.make('osjs/dialogs').create(options, callbackValue, callbackButton).render(callbackRender);
+    }
   }
 
 }
