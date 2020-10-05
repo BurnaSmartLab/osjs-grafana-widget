@@ -28,6 +28,7 @@ export default class GaugeWidget extends AbstractGrafana {
   }
   // Every rendering tick (or just once if no canvas)
   async printChart(grafana) {
+    am4core.options.autoSetClassName = true
     console.log('I AM IN PRINTCHART');
     let calcAvg = 0;
     let chartData = [];
@@ -50,6 +51,7 @@ export default class GaugeWidget extends AbstractGrafana {
 
     am4core.useTheme(am4themes_animated);
     grafana.chart = am4core.create(grafana.$mycontainer, am4charts.GaugeChart);
+    //grafana.chart.responsive.enabled = true;
 
     let chartMin = grafana.options.widgetOptions.gauge.minRange;
     let chartMax = grafana.options.widgetOptions.gauge.maxRange;
@@ -66,7 +68,7 @@ export default class GaugeWidget extends AbstractGrafana {
 
     // create chart
     grafana.chart.hiddenState.properties.opacity = 0;
-    grafana.chart.fontSize = 11;
+    grafana.chart.fontSize = '100%';
     grafana.chart.innerRadius = am4core.percent(80);
     grafana.chart.resizable = true;
 
@@ -87,7 +89,7 @@ export default class GaugeWidget extends AbstractGrafana {
     axis.renderer.ticks.template.length = 5;
     axis.renderer.grid.template.disabled = true;
     axis.renderer.labels.template.radius = am4core.percent(15);
-    axis.renderer.labels.template.fontSize = '0.9em';
+    axis.renderer.labels.template.fontSize = '1em';
 
     /**
      * Axis for ranges
@@ -241,9 +243,10 @@ export default class GaugeWidget extends AbstractGrafana {
       gradeThresholds: arr,  // containing threshold(low score and high score), title and its color
     };
     const actions = {
-      setMinText: minRange => ({ gradeThresholds }) => {
+      setMinText: minRange => ({ gradeThresholds}) => {
         gradeThresholds[0].lowScore = minRange;
         suggestedThre = parseInt(minRange);
+        state.minRange = minRange;
         return ({ minRange });
       },
       setMaxText: maxRange => state => ({maxRange}),
@@ -348,7 +351,7 @@ export default class GaugeWidget extends AbstractGrafana {
   }
 
   saveWidgetOptions(widgetOptions, advSetting){
-    console.log(widgetOptions);
+    //console.log(widgetOptions);
     widgetOptions.gauge.minRange = parseInt(advSetting.minRange);
     widgetOptions.gauge.maxRange = parseInt(advSetting.maxRange);
     widgetOptions.gauge.gradeThresholds = [];  // delete the previous set thresholds

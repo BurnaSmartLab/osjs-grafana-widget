@@ -17,7 +17,7 @@ export default class GrafanaWidget extends Widget {
     super(core, options, {
       canvas: false,
       dimension: {
-        width: 700,
+        width: 500,
         height: 300
       }
     }, {
@@ -32,7 +32,7 @@ export default class GrafanaWidget extends Widget {
 
     });
     this.$mycontainer = document.createElement('div');
-    this.$mycontainer.setAttribute('style', 'height:100%; width: 100%');
+    this.$mycontainer.setAttribute('style', 'height:100%; width: 100%;');
     this.$element.appendChild(this.$mycontainer);
     this._interval = null;
     this.chart = null;
@@ -57,6 +57,7 @@ export default class GrafanaWidget extends Widget {
 
   // When widget was resized
   onResize() {
+    this.$mycontainer.style.fontSize = parseInt(this.$mycontainer.parentElement.style.width) * 0.02 +'px';
   }
 
   // When widget was moved
@@ -116,7 +117,7 @@ export default class GrafanaWidget extends Widget {
         refreshTimeValue: this.options.refreshTime,
         groupByValue: this.options.timeGroupBy,
         aggregateFuncValue: this.options.aggregateFunction,
-        widgetOptionsValue: this.options.widgetOptions
+        //widgetOptionsValue: this.options.widgetOptions
       }, {
         // actions
         onMeasurementChange: measurementValue => state => ({measurementValue}),
@@ -156,12 +157,6 @@ export default class GrafanaWidget extends Widget {
 
         onWidgetTypeChange: (widgetTypeValue) => {
           this.options.widgetType = widgetTypeValue;
-          // let tempWidget = null;
-          // for (const key in widgetItem) {
-          //   if (key === widgetTypeValue) {
-          //     tempWidget = new widgetItem[key].object(this.options.widgetOptions);
-          //   }
-          // }
           this.generateWidget();
           let div = document.getElementsByClassName('hidden-div');
           div[0].style.display = 'inline';
@@ -293,16 +288,19 @@ export default class GrafanaWidget extends Widget {
 
     const callbackButton = (button, value) => {
       if (button === 'ok') {
-        console.log('I AM IN OK');
-        console.log(value.widgetOptionsValue);
+        //console.log(value.widgetOptionsValue);
         this.options.measurment = value.measurementValue;
         this.options.timeRange = value.timeRangeValue;
         this.options.timeGroupBy = value.groupByValue;
         this.options.refreshTime = value.refreshTimeValue;
-        this.options.aggregateFunction = value.aggregateFuncValue;
-        // this.generateWidget();
+        this.options.aggregateFunction = value.aggregateFuncValue; 
+        //this.generateWidget();
+        console.log('OK -> advanced state');
         console.log(advancedSetting.state);
+        console.log('OK -> widget options ');
+        console.log(this.options.widgetOptions);
         this.widget.saveWidgetOptions(this.options.widgetOptions, advancedSetting.state);
+        console.log(this.options.widgetOptions);
         this.saveSettings();
         // this.render();
         this.init();
