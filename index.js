@@ -288,21 +288,13 @@ export default class GrafanaWidget extends Widget {
 
     const callbackButton = (button, value) => {
       if (button === 'ok') {
-        //console.log(value.widgetOptionsValue);
         this.options.measurment = value.measurementValue;
         this.options.timeRange = value.timeRangeValue;
         this.options.timeGroupBy = value.groupByValue;
         this.options.refreshTime = value.refreshTimeValue;
         this.options.aggregateFunction = value.aggregateFuncValue; 
-        //this.generateWidget();
-        console.log('OK -> advanced state');
-        console.log(advancedSetting.state);
-        console.log('OK -> widget options ');
-        console.log(this.options.widgetOptions);
         this.widget.saveWidgetOptions(this.options.widgetOptions, advancedSetting.state);
-        console.log(this.options.widgetOptions);
         this.saveSettings();
-        // this.render();
         this.init();
       }
     };
@@ -312,7 +304,6 @@ export default class GrafanaWidget extends Widget {
         title: __('TTL_SETTING'),
         message: __('MSG_SETTING'),
         dimension: {width: 700, height: 800},
-        // resizeFit:document.getElementsByClassName('outerBox')
       }
     };
     this.core.make('osjs/dialogs').create(options, callbackValue, callbackButton).render(callbackRender);

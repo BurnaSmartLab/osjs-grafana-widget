@@ -29,7 +29,6 @@ export default class GaugeWidget extends AbstractGrafana {
   // Every rendering tick (or just once if no canvas)
   async printChart(grafana) {
     am4core.options.autoSetClassName = true
-    console.log('I AM IN PRINTCHART');
     let calcAvg = 0;
     let chartData = [];
     let url = `/grafana/api/datasources/proxy/1/query?db=opentsdb&q=SELECT ${grafana.options.aggregateFunction}("value") FROM "${grafana.options.measurment}" WHERE time >= now() - ${grafana.options.timeRange}ms GROUP BY time(${grafana.options.timeGroupBy}ms) fill(null)&epoch=ms`;
@@ -51,7 +50,6 @@ export default class GaugeWidget extends AbstractGrafana {
 
     am4core.useTheme(am4themes_animated);
     grafana.chart = am4core.create(grafana.$mycontainer, am4charts.GaugeChart);
-    //grafana.chart.responsive.enabled = true;
 
     let chartMin = grafana.options.widgetOptions.gauge.minRange;
     let chartMax = grafana.options.widgetOptions.gauge.maxRange;
@@ -351,7 +349,6 @@ export default class GaugeWidget extends AbstractGrafana {
   }
 
   saveWidgetOptions(widgetOptions, advSetting){
-    //console.log(widgetOptions);
     widgetOptions.gauge.minRange = parseInt(advSetting.minRange);
     widgetOptions.gauge.maxRange = parseInt(advSetting.maxRange);
     widgetOptions.gauge.gradeThresholds = [];  // delete the previous set thresholds
