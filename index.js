@@ -4,13 +4,17 @@ import * as translations from './locales.js';
 import widgetItem from './src/widgetItems';
 
 import {h, app} from 'hyperapp';
+// import {renderToString} from 'hyperapp-render';
 import {Label, Box, SelectField} from '@osjs/gui';
 
 import $ from 'jquery';
-import './customStyles.css';
+// import Splide from '@splidejs/splide';
 
+// import '@splidejs/splide/dist/css/splide.min.css';
+// import '@splidejs/splide/dist/css/themes/splide-sea-green.min.css';
 import './node_modules/select2/dist/css/select2.min.css';
 import './node_modules/select2/dist/js/select2.min';
+import './customStyles.css';
 
 export default class GrafanaWidget extends Widget {
   constructor(core, options) {
@@ -136,25 +140,119 @@ export default class GrafanaWidget extends Widget {
               }),
               processResults: data => {
                 if (typeof data.results[0].series !== 'undefined') {
-                  let measurments = data.results[0].series[0].values;
-                  measurments.map(arr => {
+                  let measurements = data.results[0].series[0].values;
+                  measurements.map(arr => {
                     arr.id = arr[0];
                     arr.text = arr[0];
+                    arr.selected = (arr[0] === this.options.measurment) ? true : false;
                     delete arr[0];
                   });
+                  console.log(measurements);
                   return {
-                    results: measurments
+                    results: measurements
                   };
                 }
                 return {results: []};
               }
             },
           });
+          let measurementSelect = $(el);
+          $.ajax({
+            type: 'GET',
+            url: `/grafana/api/datasources/proxy/1/query?db=opentsdb&q=SHOW MEASUREMENTS WITH MEASUREMENT =~ /${typeof this.options.measurment !== 'undefined' ? this.options.measurment : ''}/&epoch=ms `,
+          }).then((data)  => {
+            // create the option and append to Select2
+            let option = new Option(data.results[0].series[0].values[0], data.results[0].series[0].values[0], true, true);
+            measurementSelect.append(option).trigger('change');
+
+            // manually trigger the `select2:select` event
+            measurementSelect.trigger({
+              type: 'select2:select',
+              params: {
+                data: data
+              }
+            });
+          });
           $('b[role="presentation"]').hide();
         },
+        createSlider: el => (state, actions) => {
+          let view = [];
+          for (let item in widgetItem) {
+            const slide = (state, actions) => (h('div', {
+              class: 'column',
+              onclick: () => actions.onWidgetTypeChange(item)
+            }, h('div', {
+              class: 'container',
+            }, [h('img', {
+              src: './gauge-Chart.png',
+              alt: item,
+              style: 'width: 100%'
+            }, {}),
+            h('div', {
+              class:'cursor overlay',
+              'data-value': item,
+              oncreate: el => actions.setActiveClassSlide(el),
+              onclick: el => actions.addActiveClass(el)
+            }, item)])));
+            view.push(slide);
+          }
+          const row = (state, actions) => (h('div', {class: 'row'}, view));
+          console.log(el);
+          app(state, actions, row, el);
+        },
+        setActiveClassSlide: (el) => {
+          if (el.innerText === this.options.widgetType) {
+            el.className += ' active';
+          }
+        },
+        addActiveClass: el => {
+          let dots = document.getElementsByClassName('cursor');
+          for (let i = 0; i < dots.length; i++) {
+            dots[i].className = dots[i].className.replace(' active', '');
+          }
+          console.log(el);
+          el.currentTarget.className += ' active';
+        },
+        // createSplide: el => (state, actions) => {
+        //   const splide = new Splide(el, {
+        //     type: 'slide',
+        //     perPage: 3,
+        //     fixedWidth: '12rem',
+        //     fixedHeight: '5rem',
+        //     // padding:5,
+        //     gap: 5,
+        //     // focus: 0,
+        //     pagination: false,
+        //     lazyLoad: true,
+        //     cover:true,
+        //     keyboard: true,
+        //     // direction: "rtl",
+        //   }).mount();
+        //   let view = [];
+        //   for (let item in widgetItem) {
+        //     const dom = (item, state, actions) => h('li', {
+        //           class: 'splide__slide'
+        //         },
+        //         h('div', {
+        //               class: 'splide__slide__container',
+        //               onclick: (item) => actions.onWidgetTypeChange(item)
+        //             },
+        //             h('img', {
+        //               alt: item,
+        //               src: './gauge-Chart.png'
+        //             })));
+        //     console.log(dom);
+        //     splide.add(renderToString(dom(state, actions)));
+        //     console.log(item);
+        //     app(state, actions, dom, el.childNodes[1].childNodes[0]);
+        //   }
+        //   return {state, actions};
+        //   // console.log(view);
+        // },
         getValues: () => state => state,
 
         onWidgetTypeChange: (widgetTypeValue) => {
+          console.log(widgetTypeValue);
           this.options.widgetType = widgetTypeValue;
           // let tempWidget = null;
           // for (const key in widgetItem) {
@@ -162,9 +260,9 @@ export default class GrafanaWidget extends Widget {
           //     tempWidget = new widgetItem[key].object(this.options.widgetOptions);
           //   }
           // }
-          this.generateWidget();
           let div = document.getElementsByClassName('hidden-div');
           div[0].style.display = 'inline';
+          this.generateWidget();
           advancedSetting = this.widget.showAdvancedSetting(this);
           app(advancedSetting.state, advancedSetting.actions, advancedSetting.view, div[0]);
           return ({widgetTypeValue});
@@ -187,12 +285,25 @@ export default class GrafanaWidget extends Widget {
             h(Box, {
               oncreate: () => actions.startDialog(this.options.widgetType)
             }, [
-              h(Label, {}, 'Widget type:  '),
-              h(SelectField, {
-                choices: Object.assign({}, ...Object.keys(widgetItem).map(k => ({[k]: __(widgetItem[k].name)}))),
-                value: state.widgetTypeValue,
-                onchange: (ev, value) => actions.onWidgetTypeChange(value)
-              })
+              h(Label, {}, 'Widget type: '),
+              // custom slider
+              h('div', {
+                class: 'slider',
+                oncreate: (el) => actions.createSlider(el)}, ''),
+              // splideeeee
+              // h('div', {
+              //       class: 'splide',
+              //       oncreate: (el) => actions.createSplide(el),
+              //       // onchange: (ev, value) => actions.onWidgetTypeChange(value)
+              //     },
+              //     h('div', {class: 'splide__track'},
+              //         h('ul', {class:'splide__list'}))
+              // ),
+              // h(SelectField, {
+              //   choices: Object.assign({}, ...Object.keys(widgetItem).map(k => ({[k]: __(widgetItem[k].name)}))),
+              //   value: state.widgetTypeValue,
+              //   onchange: (ev, value) => actions.onWidgetTypeChange(value)
+              // })
             ]),
             // h('div', {
             //   class: 'grid-container'
@@ -213,8 +324,8 @@ export default class GrafanaWidget extends Widget {
               h(Label, {}, 'Measurement:  '),
               h(SelectField, {
                 choices: {},
+                //value: state.measurementValue,
                 oncreate: el => actions.createSelect2(el),
-                value: state.measurementValue,
                 onchange: (ev, value) => actions.onMeasurementChange(value)
               }),
             ]),
@@ -290,18 +401,16 @@ export default class GrafanaWidget extends Widget {
 
     // Values are passed down to the 'options' object
     const callbackValue = dialog => dialog.app.getValues();
-
     const callbackButton = (button, value) => {
       if (button === 'ok') {
-        console.log('I AM IN OK');
-        console.log(value.widgetOptionsValue);
+        console.log('hooooorrraaa');
         this.options.measurment = value.measurementValue;
         this.options.timeRange = value.timeRangeValue;
         this.options.timeGroupBy = value.groupByValue;
         this.options.refreshTime = value.refreshTimeValue;
         this.options.aggregateFunction = value.aggregateFuncValue;
         // this.generateWidget();
-        console.log(advancedSetting.state);
+        console.log(this.options.widgetOptions);
         this.widget.saveWidgetOptions(this.options.widgetOptions, advancedSetting.state);
         this.saveSettings();
         // this.render();
