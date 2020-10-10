@@ -3,8 +3,8 @@ import * as am4charts from '@amcharts/amcharts4/charts';
 import am4themes_animated from '@amcharts/amcharts4/themes/animated';
 import AbstractGrafana from '../AbstractGrafana';
 
-import { h, app } from 'hyperapp';
-import { TextField, Button, BoxContainer, Label, Box, SelectField, Image } from '@osjs/gui';
+import { h } from 'hyperapp';
+import { TextField, Button, BoxContainer, Label, Box} from '@osjs/gui';
 
 import '../../customStyles.css';
 
@@ -28,7 +28,7 @@ export default class GaugeWidget extends AbstractGrafana {
   }
   // Every rendering tick (or just once if no canvas)
   async printChart(grafana) {
-    am4core.options.autoSetClassName = true
+    console.log(grafana.$mycontainer);
     let calcAvg = 0;
     let chartData = [];
     let url = `/grafana/api/datasources/proxy/1/query?db=opentsdb&q=SELECT ${grafana.options.aggregateFunction}("value") FROM "${grafana.options.measurment}" WHERE time >= now() - ${grafana.options.timeRange}ms GROUP BY time(${grafana.options.timeGroupBy}ms) fill(null)&epoch=ms`;
@@ -36,6 +36,7 @@ export default class GaugeWidget extends AbstractGrafana {
     if (response.ok) {
       let data = await response.json();
       chartData = data.results[0].series[0].values;
+      console.log(chartData);
       let sum = 0, count = 0;
       for (let elem of chartData) {
         if (elem[1] !== null) {
@@ -286,7 +287,9 @@ export default class GaugeWidget extends AbstractGrafana {
     };
 
     const view = (state, actions) => (
-      h(Box, {},[
+      h(Box, {
+        class: 'outer'
+      },[
         h(Label, {}, 'Gauge Advanced Settings:  '),
         h('div', {
           class: 'grid-container4'
@@ -371,6 +374,11 @@ export default class GaugeWidget extends AbstractGrafana {
         });
       }
     }
+  }
+
+  destroy(grafana){
+    grafana.chart.data = null;
+    grafana.chart.dispose();
   }
 
 }

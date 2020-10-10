@@ -2,6 +2,7 @@ import {Widget} from '@osjs/widgets';
 
 import * as translations from './locales.js';
 import widgetItem from './src/widgetItems';
+import dialogChoices from './dialogChoices'
 
 import {h, app} from 'hyperapp';
 import {Label, Box, SelectField} from '@osjs/gui';
@@ -31,8 +32,10 @@ export default class GrafanaWidget extends Widget {
       widgetOptions: {},  // object properties of each widget class that must be saved
 
     });
+
     this.$mycontainer = document.createElement('div');
     this.$mycontainer.setAttribute('style', 'height:100%; width: 100%;');
+    this.$mycontainer.setAttribute('id', 'mydiv');
     this.$element.appendChild(this.$mycontainer);
     this._interval = null;
     this.chart = null;
@@ -50,8 +53,7 @@ export default class GrafanaWidget extends Widget {
 
   // When widget is destructed
   onDestroy() {
-    this.chart.data = null;
-    this.chart.dispose();
+    this.widget.destroy(this);
     this.stopPoll();
   }
 
@@ -117,7 +119,6 @@ export default class GrafanaWidget extends Widget {
         refreshTimeValue: this.options.refreshTime,
         groupByValue: this.options.timeGroupBy,
         aggregateFuncValue: this.options.aggregateFunction,
-        //widgetOptionsValue: this.options.widgetOptions
       }, {
         // actions
         onMeasurementChange: measurementValue => state => ({measurementValue}),
@@ -189,19 +190,6 @@ export default class GrafanaWidget extends Widget {
                 onchange: (ev, value) => actions.onWidgetTypeChange(value)
               })
             ]),
-            // h('div', {
-            //   class: 'grid-container'
-            // }, [
-            //   h(Label, {}, 'Widget type:  '),
-            //   h(Image, {
-            //     src :'gauge-chart.png',
-            //     alt:'Gauge'
-            //   }),
-            //   h(Image, {
-            //     src :'./XY-chart.png',
-            //     alt :'Graph'
-            //   }),
-            // ]),
             h('div', {
               class: 'grid-container2'
             }, [
@@ -218,61 +206,25 @@ export default class GrafanaWidget extends Widget {
             }, [
               h(Label, {}, 'Time Range:  '),
               h(SelectField, {
-                choices: {
-                  '300000': 'Last 5 minutes',
-                  '900000': 'Last 15 minutes',
-                  '1800000': 'Last 30 minutes',
-                  '3600000': 'Last 1 hour',
-                  '10800000': 'Last 3 hours',
-                  '21600000': 'Last 6 hours',
-                  '43200000': 'Last 12 hours',
-                  '86400000': 'Last 24 hours',
-                  '172800000': 'Last 2 days',
-                  '604800000': 'Last 7 days',
-                },
+                choices: Object.assign({}, ...Object.keys(dialogChoices.TimeRange).map( k =>  ({[k]: __(dialogChoices.TimeRange[k])}) )),
                 value: state.timeRangeValue,
                 onchange: (ev, value) => actions.onTimeRangeChange(value)
               }),
               h(Label, {}, 'GroupBy:  '),
               h(SelectField, {
-                choices: {
-                  '1000': '1s',
-                  '10000': '10s',
-                  '60000': '1m',
-                  '300000': '5m',
-                  '600000': '10m',
-                  '900000': '15m',
-                  '36000000': '1h'
-                },
+                choices: Object.assign({}, ...Object.keys(dialogChoices.GroupBy).map( k =>  ({[k]: __(dialogChoices.GroupBy[k])}) )),
                 value: state.groupByValue,
                 onchange: (ev, value) => actions.onGroupByChange(value)
               }),
               h(Label, {}, 'Refresh Time:  '),
               h(SelectField, {
-                choices: {
-                  'off': __('MSG_Off'),
-                  '5000': '5s',
-                  '10000': '10s',
-                  '15000': '15s',
-                  '30000': '30s',
-                  '36000000': '1h',
-                  '72000000': '2h',
-                  '86400000': '1d'
-                },
+                choices: Object.assign({}, ...Object.keys(dialogChoices.RefreshTime).map( k =>  ({[k]: __(dialogChoices.RefreshTime[k])}) )),
                 value: state.refreshTimeValue,
                 onchange: (ev, value) => actions.onRefreshTimeChange(value)
               }),
               h(Label, {}, 'Aggregate Function:  '),
               h(SelectField, {
-                choices: {
-                  'count': 'Count',
-                  'distinct': 'Distinct',
-                  'integral': 'Integral',
-                  'mean': 'Mean',
-                  'median': 'Median',
-                  'mode': 'Mode',
-                  'sum': 'Sum'
-                },
+                choices: Object.assign({}, ...Object.keys(dialogChoices.AggregateFunction).map( k =>  ({[k]: __(dialogChoices.AggregateFunction[k])}) )),
                 value: state.aggregateFuncValue,
                 onchange: (ev, value) => actions.onAggregateFuncChange(value)
               }),
@@ -306,7 +258,10 @@ export default class GrafanaWidget extends Widget {
         dimension: {width: 700, height: 800},
       }
     };
-    this.core.make('osjs/dialogs').create(options, callbackValue, callbackButton).render(callbackRender);
+    this.core
+        .make('osjs/dialogs')
+        .create(options, callbackValue, callbackButton)
+        .render(callbackRender);
   }
 
 

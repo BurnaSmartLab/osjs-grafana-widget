@@ -19,4 +19,8 @@ export default class AbstractGrafana {
   saveWidgetOptions(){
     throw new Error('Abstract Method has no implementation')
   }
+
+  destroy(){
+    throw new Error('Abstract Method has no implementation')
+  }
 }

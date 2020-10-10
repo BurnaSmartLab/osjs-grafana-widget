@@ -46,13 +46,12 @@ export default class BarWidget extends AbstractGrafana {
             parseDate = d3.timeFormat("%H:%M");
             tickCount = 5;
         }
-
-
         for (let i = 0; i < tickCount; i++) {
             tickValues[i] = startValue;
             startValue += Math.round(data.length / tickCount);
         }
 
+        
         let yAxis = g => g
             .attr("transform", `translate(${margin.left},0)`)
             .call(d3.axisLeft(y).ticks(5, data.format))
@@ -74,6 +73,8 @@ export default class BarWidget extends AbstractGrafana {
         grafana.chart = d3.select(grafana.$mycontainer)
             .append('svg')
             .attr("viewBox", [0, 0, width, height])
+            .style("width", '100%')
+            .style("height", '100%');
 
         grafana.chart.append("g")
             .attr("fill", color)
@@ -142,6 +143,9 @@ export default class BarWidget extends AbstractGrafana {
 
     saveWidgetOptions(widgetOptions, advSetting) {
     }
+
+    destroy(grafana){
+      }
 
 
 }
