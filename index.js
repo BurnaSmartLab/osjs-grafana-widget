@@ -177,27 +177,35 @@ export default class GrafanaWidget extends Widget {
         },
         createSlider: el => (state, actions) => {
           let view = [];
-          for (let item in widgetItem) {
+          for (const item in widgetItem) {
             const slide = (state, actions) => (h('div', {
               class: 'column',
               onclick: () => actions.onWidgetTypeChange(item)
             }, h('div', {
               class: 'container',
             }, [h('img', {
-              src: './gauge-Chart.png',
-              alt: item,
+              src: widgetItem[item].image,
+              alt: widgetItem[item].image,
               style: 'width: 100%'
             }, {}),
             h('div', {
               class:'cursor overlay',
-              'data-value': item,
               oncreate: el => actions.setActiveClassSlide(el),
               onclick: el => actions.addActiveClass(el)
             }, item)])));
             view.push(slide);
           }
+          // adding prev and next
+          // const prev = h('a', {
+          //   class: 'prev',
+          //   onclick: console.log('prev')
+          // }, '❮');
+          // const next = h('a', {
+          //   class: 'next',
+          //   onclick: console.log('next')
+          // }, '❯');
+          // view.push(prev, next);
           const row = (state, actions) => (h('div', {class: 'row'}, view));
-          console.log(el);
           app(state, actions, row, el);
         },
         setActiveClassSlide: (el) => {
@@ -289,7 +297,17 @@ export default class GrafanaWidget extends Widget {
               // custom slider
               h('div', {
                 class: 'slider',
-                oncreate: (el) => actions.createSlider(el)}, ''),
+                oncreate: (el) => actions.createSlider(el)
+              }, [
+                // h('a', {
+                //   class: 'prev',
+                //   onclick: () => actions.pluseSlide(-1)
+                // }, '❮'),
+                // h('a', {
+                //   class: 'next',
+                //   onclick: () => actions.pluseSlide(1)
+                // }, '❯')
+              ]),
               // splideeeee
               // h('div', {
               //       class: 'splide',
@@ -324,7 +342,7 @@ export default class GrafanaWidget extends Widget {
               h(Label, {}, 'Measurement:  '),
               h(SelectField, {
                 choices: {},
-                //value: state.measurementValue,
+                value: state.measurementValue,
                 oncreate: el => actions.createSelect2(el),
                 onchange: (ev, value) => actions.onMeasurementChange(value)
               }),
