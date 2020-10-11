@@ -32,6 +32,7 @@ body {
 .column {
   float: left;
   width: 25%;
+  /*height: 65px;*/
   padding: 10px;
 }
 
@@ -64,8 +65,8 @@ body {
 /* Container needed to position the overlay. Adjust the width as needed */
 .container {
   position: relative;
-  /* width: 50%; */
   max-width: 300px;
+  /*max-height: 60px;*/
 }
 /* The overlay effect - lays on top of the container and over the image */
 .overlay {
