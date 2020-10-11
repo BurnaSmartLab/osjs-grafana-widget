@@ -17,7 +17,8 @@ const widgetItem = {
   },
   barChart:{
     object: BarWidget,
-    name: 'BARCHART'
+    name: 'BARCHART',
+    image: statsdImage
   }
 };
 export default widgetItem;
