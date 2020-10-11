@@ -3,8 +3,8 @@ import * as am4charts from '@amcharts/amcharts4/charts';
 import am4themes_animated from '@amcharts/amcharts4/themes/animated';
 import AbstractGrafana from '../AbstractGrafana';
 
-import { h, app } from 'hyperapp';
-import { TextField, Button, BoxContainer, Label, Box, SelectField, Image } from '@osjs/gui';
+import {h, app} from 'hyperapp';
+import {TextField, Button, BoxContainer, Label, Box, SelectField, Image} from '@osjs/gui';
 
 import '../../customStyles.css';
 
@@ -12,7 +12,7 @@ export default class GaugeWidget extends AbstractGrafana {
   constructor(widgetOptions) {
     super();
     this.widgetHand = null;
-    //custom widget option could be added here.
+    // custom widget option could be added here.
     if (!('gauge' in widgetOptions)) {
       widgetOptions.gauge = {
         gradeThresholds: [{
@@ -241,38 +241,43 @@ export default class GaugeWidget extends AbstractGrafana {
       gradeThresholds: arr,  // containing threshold(low score and high score), title and its color
     };
     const actions = {
-      setMinText: minRange => ({ gradeThresholds }) => {
+      setMinText: minRange => ({gradeThresholds}) => {
         gradeThresholds[0].lowScore = minRange;
         suggestedThre = parseInt(minRange);
-        return ({ minRange });
+        return ({minRange});
       },
-      setMaxText: maxRange => state => ({maxRange}),
+      setMaxText: maxRange => state =>{
+        console.log(grafana.options.widgetOptions.gauge.maxRange);
+        grafana.options.widgetOptions.gauge.maxRange = maxRange;
+        console.log(grafana.options.widgetOptions.gauge.maxRange);
+        return ({maxRange});
+      },
       getValues: () => state => state,
-      setThreshold: ({ index, value }) => ({ gradeThresholds, minRange }) => {
+      setThreshold: ({index, value}) => ({gradeThresholds, minRange}) => {
         if (index === 0) {
           gradeThresholds[index].lowScore = minRange;
         } else {
           gradeThresholds[index].lowScore = value;
           suggestedThre = parseInt(value);
         }
-        return { gradeThresholds };
+        return {gradeThresholds};
       },
-      setTitle: ({ index, value }) => ({ gradeThresholds }) => {
+      setTitle: ({index, value}) => ({gradeThresholds}) => {
         gradeThresholds[index].title = value;
-        return { gradeThresholds };
+        return {gradeThresholds};
       },
-      setColor: ({ index, value }) => ({ gradeThresholds }) => {
+      setColor: ({index, value}) => ({gradeThresholds}) => {
         gradeThresholds[index].color = value;
-        return { gradeThresholds };
+        return {gradeThresholds};
       },
-      removeField: (index) => ({ gradeThresholds }) => {
+      removeField: (index) => ({gradeThresholds}) => {
         if (index !== 0) {   // first threshold (min) is essentially needed and can not be removed
           gradeThresholds.splice(index, 1);
           suggestedThre = gradeThresholds[gradeThresholds.length - 1].lowScore;
-          return { gradeThresholds };
+          return {gradeThresholds};
         }
       },
-      addField: () => ({ gradeThresholds, minRange }) => {
+      addField: () => ({gradeThresholds, minRange}) => {
         suggestedThre += 10;
         gradeThresholds.push({
           title: '',
@@ -280,75 +285,77 @@ export default class GaugeWidget extends AbstractGrafana {
           highScore: '',
           color: '#' + (Math.random() * 0xfffff * 1000000).toString(16).slice(0, 6)
         });
-        return { gradeThresholds };
+        return {gradeThresholds};
       }
     };
 
     const view = (state, actions) => (
-      h(Box, {},[
+      h(Box, {}, [
         h(Label, {}, 'Gauge Advanced Settings:  '),
         h('div', {
           class: 'grid-container4'
         }, [
-        h(Label, {}, 'Min Range:  '),
-        h(TextField, {
-          value: state.minRange,
-          oninput: (ev, value) => actions.setMinText(value),
-        }),
-        h(Label, {}, 'Max Range:  '),
-        h(TextField, {
-          value: state.maxRange,
-          oninput: (ev, value) => actions.setMaxText(value)
-        }),
-      ]),
-      h(Box, { grow: 1, shrink: 1 }, [
-        state.gradeThresholds.map((name, index) => {
-          return h(BoxContainer, {}, [
-            h(TextField, {
-              box: { grow: 1, shrink: 1 },
-              placeholder: 'threshold',
-              oninput: (ev, value) => actions.setThreshold({ index, value }),
-              value: state.gradeThresholds[index].lowScore
-            }),
-            h(TextField, {
-              box: { grow: 1, shrink: 1 },
-              placeholder: 'title',
-              oninput: (ev, value) => actions.setTitle({ index, value }),
-              value: state.gradeThresholds[index].title
-            }),
-            h(TextField, {
-              box: { grow: 1, shrink: 1 },
-              placeholder: 'color',
-              oninput: (ev, value) => actions.setColor({ index, value }),
-              value: state.gradeThresholds[index].color
-            }),
-            h(Button, {
-              onclick: () => grafana.core.make('osjs/dialog', 'color', {
-                color: state.gradeThresholds[index].color
-              }, (btn, value) => {
-                if (btn === 'ok') {
-                  let hexCode = value.hex;
-                  actions.setColor({ index, hexCode });
-                  state.gradeThresholds[index].color = hexCode;
-                }
-              })
-            }, 'Set Color'),
-            h(Button, {
-              onclick: () => actions.removeField(index)
-            }, 'Remove')
-          ]);
-        }),
-        h(Button, {
-          onclick: () => actions.addField()
-        }, 'Add Threshold')
+          h(Label, {}, 'Min Range:  '),
+          h(TextField, {
+            oninput: (ev, value) => actions.setMinText(value),
+            value: state.minRange,
+          }),
+          h(Label, {}, 'Max Range:  '),
+          h(TextField, {
+            oninput: (ev, value) => actions.setMaxText(value),
+            value: state.maxRange
+          }),
+        ]),
+        h(Box, {grow: 1, shrink: 1}, [
+          state.gradeThresholds.map((name, index) => {
+            return h(BoxContainer, {}, [
+              h(TextField, {
+                box: {grow: 1, shrink: 1},
+                placeholder: 'threshold',
+                oninput: (ev, value) => actions.setThreshold({index, value}),
+                value: state.gradeThresholds[index].lowScore
+              }),
+              h(TextField, {
+                box: {grow: 1, shrink: 1},
+                placeholder: 'title',
+                oninput: (ev, value) => actions.setTitle({index, value}),
+                value: state.gradeThresholds[index].title
+              }),
+              h(TextField, {
+                box: {grow: 1, shrink: 1},
+                placeholder: 'color',
+                oninput: (ev, value) => actions.setColor({index, value}),
+                value: state.gradeThresholds[index].color
+              }),
+              h(Button, {
+                onclick: () => grafana.core.make('osjs/dialog', 'color', {
+                  color: state.gradeThresholds[index].color
+                }, (btn, value) => {
+                  if (btn === 'ok') {
+                    let hexCode = value.hex;
+                    actions.setColor({index, hexCode});
+                    state.gradeThresholds[index].color = hexCode;
+                  }
+                })
+              }, 'Set Color'),
+              h(Button, {
+                onclick: () => actions.removeField(index)
+              }, 'Remove')
+            ]);
+          }),
+          h(Button, {
+            onclick: () => actions.addField()
+          }, 'Add Threshold')
+        ])
       ])
-    ])
     );
     return {state, actions, view};
   }
 
-  saveWidgetOptions(widgetOptions, advSetting){
+  saveWidgetOptions(widgetOptions, advSetting) {
+    console.log('sooooot');
     console.log(widgetOptions);
+    console.log(advSetting);
     widgetOptions.gauge.minRange = parseInt(advSetting.minRange);
     widgetOptions.gauge.maxRange = parseInt(advSetting.maxRange);
     widgetOptions.gauge.gradeThresholds = [];  // delete the previous set thresholds
