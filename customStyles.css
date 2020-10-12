@@ -1,23 +1,132 @@
 
 .grid-container4 {
   display: grid;
-  grid-template-columns:120px 150px 120px 150px;
-  padding: 10px;
+  grid-template-columns:100px 172px 100px 172px;
+  padding: 15px;
   grid-gap: 10px;
   text-align: left;
 }
+
 .grid-container2 {
   display: grid;
-  grid-template-columns:120px 440px;
-  padding: 10px;
+  grid-template-columns:100px 462px;
+  padding: 15px;
   grid-gap: 10px;
   text-align: left;
 }
+
 .hidden-div{
   /* visibility: hidden; */
   display: none;
   text-align: center;
 }
 
+* {
+  box-sizing: border-box;
+}
 
+body {
+  margin: 0;
+  font-family: Arial;
+}
+
+/* The grid: Four equal columns that floats next to each other */
+.column {
+  float: left;
+  width: 25%;
+  height: 70px;
+  padding: 10px;
+}
+
+/* Style the images inside the grid */
+/*.column img {*/
+/*  opacity: 0.8;*/
+/*  cursor: pointer;*/
+/*}*/
+
+.column img:hover {
+  opacity: 1;
+}
+
+/* Clear floats after the columns */
+.row:after {
+  content: "";
+  display: table;
+  clear: both;
+}
+
+/* Expanding image text */
+#imgtext {
+  position: absolute;
+  bottom: 15px;
+  left: 15px;
+  color: white;
+  font-size: 20px;
+}
+
+/* Container needed to position the overlay. Adjust the width as needed */
+.container {
+  position: relative;
+  max-width: 300px;
+  max-height: 65px;
+}
+/* The overlay effect - lays on top of the container and over the image */
+.overlay {
+  position: absolute;
+  bottom: 0;
+  background: rgb(0, 0, 0);
+  background: rgba(0, 0, 0, 0.5); /* Black see-through */
+  color: #f1f1f1;
+  width: 100%;
+  transition: .5s ease;
+  opacity:0;
+  color: white;
+  font-size: 20px;
+  padding: 20px;
+  text-align: center;
+}
+/* When you mouse over the container, fade in the overlay title */
+.container:hover .overlay {
+  opacity: 1;
+}
+/* Add a pointer when hovering over the thumbnail images */
+.cursor {
+  cursor: pointer;
+}
+/* Next & previous buttons */
+.prev,
+.next {
+  cursor: pointer;
+  position: absolute;
+  top: 40%;
+  width: auto;
+  padding: 5px;
+  margin-top: 15px;
+  color: white;
+  font-weight: bold;
+  font-size: 14px;
+  border-radius: 0 3px 3px 0;
+  user-select: none;
+  -webkit-user-select: none;
+}
+/* Position the "next button" to the right */
+.next {
+  right: 0;
+  border-radius: 3px 0 0 3px;
+}
+
+/* On hover, add a black background color with a little bit see-through */
+.prev:hover,
+.next:hover {
+  background-color: rgba(0, 0, 0, 0.8);
+}
+
+/* Add a transparency effect for thumnbail images */
+.demo {
+  opacity: 0.6;
+}
+.active,
+.demo:hover {
+  opacity: 1;
+}
 

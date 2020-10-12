@@ -4,9 +4,10 @@ import am4themes_animated from '@amcharts/amcharts4/themes/animated';
 import AbstractGrafana from '../AbstractGrafana';
 
 import { h } from 'hyperapp';
-import { TextField, Button, BoxContainer, Label, Box} from '@osjs/gui';
+import { TextField, Button, Label, Box} from '@osjs/gui';
 
 import '../../customStyles.css';
+import './gauge.css';
 
 export default class GaugeWidget extends AbstractGrafana {
   constructor(widgetOptions) {
@@ -31,7 +32,7 @@ export default class GaugeWidget extends AbstractGrafana {
     console.log(grafana.$mycontainer);
     let calcAvg = 0;
     let chartData = [];
-    let url = `/grafana/api/datasources/proxy/1/query?db=opentsdb&q=SELECT ${grafana.options.aggregateFunction}("value") FROM "${grafana.options.measurment}" WHERE time >= now() - ${grafana.options.timeRange}ms GROUP BY time(${grafana.options.timeGroupBy}ms) fill(null)&epoch=ms`;
+    let url = `/grafana/api/datasources/proxy/1/query?db=opentsdb&q=SELECT ${grafana.options.aggregateFunction}("value") FROM "${grafana.options.measurement}" WHERE time >= now() - ${grafana.options.timeRange}ms GROUP BY time(${grafana.options.timeGroupBy}ms) fill(null)&epoch=ms`;
     let response = await fetch(url);
     if (response.ok) {
       let data = await response.json();
@@ -88,7 +89,7 @@ export default class GaugeWidget extends AbstractGrafana {
     axis.renderer.ticks.template.length = 5;
     axis.renderer.grid.template.disabled = true;
     axis.renderer.labels.template.radius = am4core.percent(15);
-    axis.renderer.labels.template.fontSize = '1em';
+    axis.renderer.labels.template.fontSize = '0.9em';
 
     /**
      * Axis for ranges
@@ -137,7 +138,7 @@ export default class GaugeWidget extends AbstractGrafana {
 
     let label = grafana.chart.radarContainer.createChild(am4core.Label);
     label.isMeasured = false;
-    label.fontSize = '6em';
+    label.fontSize = '5em';
     label.x = am4core.percent(50);
     label.paddingBottom = 15;
     label.horizontalCenter = 'middle';
@@ -210,7 +211,7 @@ export default class GaugeWidget extends AbstractGrafana {
     grafana._interval = setInterval(async () => {
       let calcAvgUpdated = 0;
       let chartData = [];
-      let url = `/grafana/api/datasources/proxy/1/query?db=opentsdb&q=SELECT ${grafana.options.aggregateFunction}("value") FROM "${grafana.options.measurment}" WHERE time >= now() - ${grafana.options.timeRange}ms GROUP BY time(${grafana.options.timeGroupBy}ms) fill(null)&epoch=ms`;
+      let url = `/grafana/api/datasources/proxy/1/query?db=opentsdb&q=SELECT ${grafana.options.aggregateFunction}("value") FROM "${grafana.options.measurement}" WHERE time >= now() - ${grafana.options.timeRange}ms GROUP BY time(${grafana.options.timeGroupBy}ms) fill(null)&epoch=ms`;
       let response = await fetch(url);
       if (response.ok) {
         let data = await response.json();
@@ -230,7 +231,7 @@ export default class GaugeWidget extends AbstractGrafana {
     }, grafana.options.refreshTime);
   }
 
-  showAdvancedSetting(grafana) {
+  showAdvancedSetting(grafana, dialogWindow) {
     let arr = [];   // used for displaying previously set thresholds by opening dialog
     grafana.options.widgetOptions.gauge.gradeThresholds.map((item) => {
       arr.push(item);
@@ -248,7 +249,10 @@ export default class GaugeWidget extends AbstractGrafana {
         state.minRange = minRange;
         return ({ minRange });
       },
-      setMaxText: maxRange => state => ({maxRange}),
+      setMaxText: maxRange  => {
+        state.maxRange = maxRange;
+        return ({maxRange});
+      },
       getValues: () => state => state,
       setThreshold: ({ index, value }) => ({ gradeThresholds, minRange }) => {
         if (index === 0) {
@@ -271,6 +275,7 @@ export default class GaugeWidget extends AbstractGrafana {
         if (index !== 0) {   // first threshold (min) is essentially needed and can not be removed
           gradeThresholds.splice(index, 1);
           suggestedThre = gradeThresholds[gradeThresholds.length - 1].lowScore;
+          setTimeout(() => dialogWindow.emit("num-row-changed"), 100);
           return { gradeThresholds };
         }
       },
@@ -282,6 +287,7 @@ export default class GaugeWidget extends AbstractGrafana {
           highScore: '',
           color: '#' + (Math.random() * 0xfffff * 1000000).toString(16).slice(0, 6)
         });
+        setTimeout(() => dialogWindow.emit("num-row-changed"), 100);
         return { gradeThresholds };
       }
     };
@@ -290,7 +296,8 @@ export default class GaugeWidget extends AbstractGrafana {
       h(Box, {
         class: 'outer'
       },[
-        h(Label, {}, 'Gauge Advanced Settings:  '),
+        h('hr', {}, ''),
+        h('h4', { }, 'Gauge Advanced Settings:  '),
         h('div', {
           class: 'grid-container4'
         }, [
@@ -305,9 +312,14 @@ export default class GaugeWidget extends AbstractGrafana {
           oninput: (ev, value) => actions.setMaxText(value)
         }),
       ]),
+      h('div', {class: 'grid-container3' },[
+        h(Label, {}, 'Threshold:  '),
+        h(Label, {}, 'Title:  '),
+        h(Label, {}, 'Color:  '),
+      ]),
       h(Box, { grow: 1, shrink: 1 }, [
         state.gradeThresholds.map((name, index) => {
-          return h(BoxContainer, {}, [
+          return h('div', {class: 'grid-container5'}, [
             h(TextField, {
               box: { grow: 1, shrink: 1 },
               placeholder: 'threshold',
@@ -342,10 +354,12 @@ export default class GaugeWidget extends AbstractGrafana {
             }, 'Remove')
           ]);
         }),
+        h('div', {class: 'grid-container1'}, [
         h(Button, {
           onclick: () => actions.addField()
         }, 'Add Threshold')
       ])
+    ])
     ])
     );
     return {state, actions, view};

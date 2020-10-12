@@ -98,7 +98,7 @@ export default class BarWidget extends AbstractGrafana {
             .attr("x", width / 2 )
             .attr("y",  height - 5)
             .style("text-anchor", "middle")
-            .text(grafana.options.measurment);
+            .text(grafana.options.measurement);
 
 
         if (grafana.options.refreshTime !== 'off') {
@@ -111,7 +111,7 @@ export default class BarWidget extends AbstractGrafana {
 
     async updateChartData(grafana) {
         let chartData = [];
-        let url = `/grafana/api/datasources/proxy/1/query?db=opentsdb&q=SELECT ${grafana.options.aggregateFunction}("value") FROM "${grafana.options.measurment}" WHERE time >= now() - ${grafana.options.timeRange}ms GROUP BY time(${grafana.options.timeGroupBy}ms) fill(null)&epoch=ms`;
+        let url = `/grafana/api/datasources/proxy/1/query?db=opentsdb&q=SELECT ${grafana.options.aggregateFunction}("value") FROM "${grafana.options.measurement}" WHERE time >= now() - ${grafana.options.timeRange}ms GROUP BY time(${grafana.options.timeGroupBy}ms) fill(null)&epoch=ms`;
         let response = await fetch(url);
         if (response.ok) {
             let data = await response.json();
