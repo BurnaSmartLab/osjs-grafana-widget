@@ -20,6 +20,7 @@ export const en_EN = {
   TTL_SETTING: 'Settings',
   MSG_SETTING: 'Choose Your Custom Settings',
   STATSD: 'Statsd',
+  GAUGE: 'Gauge'
 };
 
 export const fa_FA = {
@@ -44,4 +45,5 @@ export const fa_FA = {
   TTL_SETTING: 'تنظیمات',
   MSG_SETTING: 'تنظیمات دلخواه خود را انتخاب نمایید:',
   STATSD: 'نمودار آمار',
+  GAUGE: 'نمودار گاج',
 };

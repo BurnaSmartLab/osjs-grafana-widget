@@ -13,7 +13,7 @@ export default class GaugeWidget extends AbstractGrafana {
   constructor(widgetOptions) {
     super();
     this.widgetHand = null;
-    //custom widget option could be added here.
+    // custom widget option could be added here.
     if (!('gauge' in widgetOptions)) {
       widgetOptions.gauge = {
         gradeThresholds: [{
@@ -243,35 +243,40 @@ export default class GaugeWidget extends AbstractGrafana {
       gradeThresholds: arr,  // containing threshold(low score and high score), title and its color
     };
     const actions = {
-      setMinText: minRange => ({ gradeThresholds}) => {
+      setMinText: minRange => ({gradeThresholds}) => {
         gradeThresholds[0].lowScore = minRange;
         suggestedThre = parseInt(minRange);
-        state.minRange = minRange;
-        return ({ minRange });
+        state.minRange = suggestedThre;
+        return ({minRange});
+      },
+      setMaxText: maxRange => {
+        state.maxRange = parseInt(maxRange);
+        grafana.options.widgetOptions.gauge.maxRange = parseInt(maxRange);
+        return ({maxRange});
       },
       setMaxText: maxRange  => {
         state.maxRange = maxRange;
         return ({maxRange});
       },
       getValues: () => state => state,
-      setThreshold: ({ index, value }) => ({ gradeThresholds, minRange }) => {
+      setThreshold: ({index, value}) => ({gradeThresholds, minRange}) => {
         if (index === 0) {
           gradeThresholds[index].lowScore = minRange;
         } else {
           gradeThresholds[index].lowScore = value;
           suggestedThre = parseInt(value);
         }
-        return { gradeThresholds };
+        return {gradeThresholds};
       },
-      setTitle: ({ index, value }) => ({ gradeThresholds }) => {
+      setTitle: ({index, value}) => ({gradeThresholds}) => {
         gradeThresholds[index].title = value;
-        return { gradeThresholds };
+        return {gradeThresholds};
       },
-      setColor: ({ index, value }) => ({ gradeThresholds }) => {
+      setColor: ({index, value}) => ({gradeThresholds}) => {
         gradeThresholds[index].color = value;
-        return { gradeThresholds };
+        return {gradeThresholds};
       },
-      removeField: (index) => ({ gradeThresholds }) => {
+      removeField: (index) => ({gradeThresholds}) => {
         if (index !== 0) {   // first threshold (min) is essentially needed and can not be removed
           gradeThresholds.splice(index, 1);
           suggestedThre = gradeThresholds[gradeThresholds.length - 1].lowScore;
@@ -279,7 +284,7 @@ export default class GaugeWidget extends AbstractGrafana {
           return { gradeThresholds };
         }
       },
-      addField: () => ({ gradeThresholds, minRange }) => {
+      addField: () => ({gradeThresholds, minRange}) => {
         suggestedThre += 10;
         gradeThresholds.push({
           title: '',
@@ -365,9 +370,9 @@ export default class GaugeWidget extends AbstractGrafana {
     return {state, actions, view};
   }
 
-  saveWidgetOptions(widgetOptions, advSetting){
-    widgetOptions.gauge.minRange = parseInt(advSetting.minRange);
-    widgetOptions.gauge.maxRange = parseInt(advSetting.maxRange);
+  saveWidgetOptions(widgetOptions, advSetting) {
+    // widgetOptions.gauge.minRange = parseInt(advSetting.minRange);
+    // widgetOptions.gauge.maxRange = parseInt(advSetting.maxRange);
     widgetOptions.gauge.gradeThresholds = [];  // delete the previous set thresholds
     advSetting.gradeThresholds.sort((a, b) => (a.lowScore > b.lowScore) ? 1 : (b.lowScore > a.lowScore) ? -1 : 0);  // sort based on lowscore
     advSetting.gradeThresholds = advSetting.gradeThresholds.filter(item => item.lowScore !== '' && !isNaN(item.lowScore));  // remove objects with undefined threshold
@@ -390,9 +395,8 @@ export default class GaugeWidget extends AbstractGrafana {
     }
   }
 
-  destroy(grafana){
+  destroy(grafana) {
     grafana.chart.data = null;
     grafana.chart.dispose();
   }
-
 }
