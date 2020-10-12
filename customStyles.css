@@ -127,3 +127,8 @@ body {
 .demo:hover {
   opacity: 1;
 }
+
+.thumb {
+  width: 155.5px;
+  height: 60px;
+}

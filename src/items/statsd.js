@@ -22,7 +22,7 @@ export default class StatsdWidget extends AbstractGrafana {
 
     let title = grafana.chart.chartContainer.createChild(am4core.Label);
     title.color = '#df1';
-    title.text = '- ' + grafana.options.measurment;
+    title.text = '- ' + grafana.options.measurement;
 
     // get chart data and assigned it to this.chart.data
     this.updateChartData(grafana);
@@ -69,7 +69,7 @@ export default class StatsdWidget extends AbstractGrafana {
   async updateChartData(grafana) {
     let chartData = [];
     //let url = '/grafana/api/datasources/proxy/1/query?db=opentsdb&q=SELECT distinct("value") FROM "netdata.apps.cpu.system" WHERE time >= now() - 12h GROUP BY time(1m) fill(null)'
-    let url = `/grafana/api/datasources/proxy/1/query?db=opentsdb&q=SELECT ${grafana.options.aggregateFunction}("value") FROM "${grafana.options.measurment}" WHERE time >= now() - ${grafana.options.timeRange}ms GROUP BY time(${grafana.options.timeGroupBy}ms) fill(null)&epoch=ms`;
+    let url = `/grafana/api/datasources/proxy/1/query?db=opentsdb&q=SELECT ${grafana.options.aggregateFunction}("value") FROM "${grafana.options.measurement}" WHERE time >= now() - ${grafana.options.timeRange}ms GROUP BY time(${grafana.options.timeGroupBy}ms) fill(null)&epoch=ms`;
     let response = await fetch(url);
     if (response.ok) {
       let data = await response.json();
@@ -94,7 +94,7 @@ export default class StatsdWidget extends AbstractGrafana {
       grafana._interval = setInterval(async () => {
         let chartData = [];
         let timeRange = grafana.options.refreshTime < 20000 ? 20000 : grafana.options.refreshTime;
-        let url = `/grafana/api/datasources/proxy/1/query?db=opentsdb&q=SELECT ${grafana.options.aggregateFunction}("value") FROM "${grafana.options.measurment}" WHERE time >= now() - ${timeRange}ms GROUP BY time(${grafana.options.timeGroupBy}ms) fill(null)&epoch=ms`;
+        let url = `/grafana/api/datasources/proxy/1/query?db=opentsdb&q=SELECT ${grafana.options.aggregateFunction}("value") FROM "${grafana.options.measurement}" WHERE time >= now() - ${timeRange}ms GROUP BY time(${grafana.options.timeGroupBy}ms) fill(null)&epoch=ms`;
         let response = await fetch(url);
         if (response.ok) {
           let data = await response.json();

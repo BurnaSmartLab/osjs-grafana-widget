@@ -5,7 +5,7 @@ import widgetItem from './src/widgetItems';
 import dialogChoices from './dialogChoices';
 
 import {h, app} from 'hyperapp';
-import {Label, Box, SelectField} from '@osjs/gui';
+import {Label, Box, SelectField, Image} from '@osjs/gui';
 import $ from 'jquery';
 import './node_modules/select2/dist/css/select2.min.css';
 import './node_modules/select2/dist/js/select2.min';
@@ -21,7 +21,7 @@ export default class GrafanaWidget extends Widget {
       }
     }, {
       // Custom options that can be saved
-      measurment: 'netdata.system.cpu.system',
+      measurement: 'netdata.system.cpu.system',
       timeRange: '300000',
       timeGroupBy: '1000',
       aggregateFunction: 'integral',
@@ -112,7 +112,7 @@ export default class GrafanaWidget extends Widget {
       // state
       dialog.app = app({
         widgetTypeValue: this.options.widgetType,
-        measurementValue: this.options.measurment,
+        measurementValue: this.options.measurement,
         timeRangeValue: this.options.timeRange,
         refreshTimeValue: this.options.refreshTime,
         groupByValue: this.options.timeGroupBy,
@@ -124,8 +124,9 @@ export default class GrafanaWidget extends Widget {
         onRefreshTimeChange: refreshTimeValue => state => ({refreshTimeValue}),
         onGroupByChange: groupByValue => state => ({groupByValue}),
         onAggregateFuncChange: aggregateFuncValue => state => ({aggregateFuncValue}),
-        createSelect2: el => {
-          $(el).select2({
+        createSelect2: el => (state, actions) => {
+          let measurementSelect = $(el);
+          measurementSelect.select2({
             ajax: {
               url: '/grafana/api/datasources/proxy/1/query',
               dataType: 'json',
@@ -140,10 +141,9 @@ export default class GrafanaWidget extends Widget {
                   measurements.map(arr => {
                     arr.id = arr[0];
                     arr.text = arr[0];
-                    arr.selected = (arr[0] === this.options.measurment) ? true : false;
+                    arr.selected = (arr[0] === this.options.measurement) ? true : false;
                     delete arr[0];
                   });
-                  console.log(measurements);
                   return {
                     results: measurements
                   };
@@ -152,15 +152,16 @@ export default class GrafanaWidget extends Widget {
               }
             },
           });
-          let measurementSelect = $(el);
           $.ajax({
             type: 'GET',
-            url: `/grafana/api/datasources/proxy/1/query?db=opentsdb&q=SHOW MEASUREMENTS WITH MEASUREMENT =~ /${typeof this.options.measurment !== 'undefined' ? this.options.measurment : ''}/&epoch=ms `,
+            url: `/grafana/api/datasources/proxy/1/query?db=opentsdb&q=SHOW MEASUREMENTS WITH MEASUREMENT =~ /${typeof this.options.measurement !== 'undefined' ? this.options.measurement : ''}/&epoch=ms `,
           }).then((data)  => {
             // create the option and append to Select2
-            let option = new Option(data.results[0].series[0].values[0], data.results[0].series[0].values[0], true, true);
+            let measurement = data.results[0].series[0].values[0];
+            state.measurementValue = measurement[0];
+            this.options.measurement = measurement[0];
+            let option = new Option(state.measurementValue, state.measurementValue, true, true);
             measurementSelect.append(option).trigger('change');
-
             // manually trigger the `select2:select` event
             measurementSelect.trigger({
               type: 'select2:select',
@@ -168,6 +169,9 @@ export default class GrafanaWidget extends Widget {
                 data: data
               }
             });
+          });
+          measurementSelect.on('change', (e) => {
+            actions.onMeasurementChange(measurementSelect.val());
           });
           $('b[role="presentation"]').hide();
         },
@@ -179,10 +183,11 @@ export default class GrafanaWidget extends Widget {
               onclick: () => actions.onWidgetTypeChange(item)
             }, h('div', {
               class: 'container',
-            }, [h('img', {
+            }, [h(Image, {
               src: widgetItem[item].image,
               alt: widgetItem[item].image,
-              style: 'width: 100%'
+              style: 'width: 100%',
+              class: 'thumb'
             }, {}),
             h('div', {
               class:'cursor overlay',
@@ -204,7 +209,11 @@ export default class GrafanaWidget extends Widget {
           const row = (state, actions) => (h('div', {class: 'row'}, view));
           app(state, actions, row, el);
         },
-        setActiveClassSlide: (el) => {
+        setActiveClassSlide: (el) => (state, actions) => {
+          if (this.options.widgetType === null) {
+            this.options.widgetType = el.innerText;
+            actions.onWidgetTypeChange(el.innerText);
+          }
           if (el.innerText === this.options.widgetType) {
             el.className += ' active';
           }
@@ -214,7 +223,6 @@ export default class GrafanaWidget extends Widget {
           for (let i = 0; i < dots.length; i++) {
             dots[i].className = dots[i].className.replace(' active', '');
           }
-          console.log(el);
           el.currentTarget.className += ' active';
         },
         // createSplide: el => (state, actions) => {
@@ -326,7 +334,6 @@ export default class GrafanaWidget extends Widget {
                 choices: {},
                 value: state.measurementValue,
                 oncreate: el => actions.createSelect2(el),
-                onchange: (ev, value) => actions.onMeasurementChange(value)
               }),
             ]),
             h('div', {
@@ -367,7 +374,7 @@ export default class GrafanaWidget extends Widget {
     const callbackValue = dialog => dialog.app.getValues();
     const callbackButton = (button, value) => {
       if (button === 'ok') {
-        this.options.measurment = value.measurementValue;
+        this.options.measurement = value.measurementValue;
         this.options.timeRange = value.timeRangeValue;
         this.options.timeGroupBy = value.groupByValue;
         this.options.refreshTime = value.refreshTimeValue;

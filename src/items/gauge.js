@@ -29,7 +29,7 @@ export default class GaugeWidget extends AbstractGrafana {
     console.log(grafana.$mycontainer);
     let calcAvg = 0;
     let chartData = [];
-    let url = `/grafana/api/datasources/proxy/1/query?db=opentsdb&q=SELECT ${grafana.options.aggregateFunction}("value") FROM "${grafana.options.measurment}" WHERE time >= now() - ${grafana.options.timeRange}ms GROUP BY time(${grafana.options.timeGroupBy}ms) fill(null)&epoch=ms`;
+    let url = `/grafana/api/datasources/proxy/1/query?db=opentsdb&q=SELECT ${grafana.options.aggregateFunction}("value") FROM "${grafana.options.measurement}" WHERE time >= now() - ${grafana.options.timeRange}ms GROUP BY time(${grafana.options.timeGroupBy}ms) fill(null)&epoch=ms`;
     let response = await fetch(url);
     if (response.ok) {
       let data = await response.json();
@@ -208,7 +208,7 @@ export default class GaugeWidget extends AbstractGrafana {
     grafana._interval = setInterval(async () => {
       let calcAvgUpdated = 0;
       let chartData = [];
-      let url = `/grafana/api/datasources/proxy/1/query?db=opentsdb&q=SELECT ${grafana.options.aggregateFunction}("value") FROM "${grafana.options.measurment}" WHERE time >= now() - ${grafana.options.timeRange}ms GROUP BY time(${grafana.options.timeGroupBy}ms) fill(null)&epoch=ms`;
+      let url = `/grafana/api/datasources/proxy/1/query?db=opentsdb&q=SELECT ${grafana.options.aggregateFunction}("value") FROM "${grafana.options.measurement}" WHERE time >= now() - ${grafana.options.timeRange}ms GROUP BY time(${grafana.options.timeGroupBy}ms) fill(null)&epoch=ms`;
       let response = await fetch(url);
       if (response.ok) {
         let data = await response.json();
@@ -227,7 +227,7 @@ export default class GaugeWidget extends AbstractGrafana {
       this.widgetHand.showValue(calcAvgUpdated, grafana.options.refreshTime, am4core.ease.cubicOut);
     }, grafana.options.refreshTime);
   }
-
+  // todo: checking min,max values
   showAdvancedSetting(grafana) {
     let arr = [];   // used for displaying previously set thresholds by opening dialog
     grafana.options.widgetOptions.gauge.gradeThresholds.map((item) => {
@@ -243,13 +243,12 @@ export default class GaugeWidget extends AbstractGrafana {
       setMinText: minRange => ({gradeThresholds}) => {
         gradeThresholds[0].lowScore = minRange;
         suggestedThre = parseInt(minRange);
-        state.minRange = minRange;
+        state.minRange = suggestedThre;
         return ({minRange});
       },
-      setMaxText: maxRange => state =>{
-        console.log(grafana.options.widgetOptions.gauge.maxRange);
-        grafana.options.widgetOptions.gauge.maxRange = maxRange;
-        console.log(grafana.options.widgetOptions.gauge.maxRange);
+      setMaxText: maxRange => {
+        state.maxRange = parseInt(maxRange);
+        grafana.options.widgetOptions.gauge.maxRange = parseInt(maxRange);
         return ({maxRange});
       },
       getValues: () => state => state,
@@ -273,7 +272,7 @@ export default class GaugeWidget extends AbstractGrafana {
       removeField: (index) => ({gradeThresholds}) => {
         if (index !== 0) {   // first threshold (min) is essentially needed and can not be removed
           gradeThresholds.splice(index, 1);
-          suggestedThre = gradeThresholds[gradeThresholds.length - 1].lowScore;
+          suggestedThre = parseInt(gradeThresholds[gradeThresholds.length - 1].lowScore);
           return {gradeThresholds};
         }
       },
@@ -355,8 +354,8 @@ export default class GaugeWidget extends AbstractGrafana {
   }
 
   saveWidgetOptions(widgetOptions, advSetting) {
-    widgetOptions.gauge.minRange = parseInt(advSetting.minRange);
-    widgetOptions.gauge.maxRange = parseInt(advSetting.maxRange);
+    // widgetOptions.gauge.minRange = parseInt(advSetting.minRange);
+    // widgetOptions.gauge.maxRange = parseInt(advSetting.maxRange);
     widgetOptions.gauge.gradeThresholds = [];  // delete the previous set thresholds
     advSetting.gradeThresholds.sort((a, b) => (a.lowScore > b.lowScore) ? 1 : (b.lowScore > a.lowScore) ? -1 : 0);  // sort based on lowscore
     advSetting.gradeThresholds = advSetting.gradeThresholds.filter(item => item.lowScore !== '' && !isNaN(item.lowScore));  // remove objects with undefined threshold

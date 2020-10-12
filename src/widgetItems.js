@@ -18,7 +18,7 @@ const widgetItem = {
   barChart:{
     object: BarWidget,
     name: 'BARCHART',
-    image: statsdImage
+    image: gaugeImage
   }
 };
 export default widgetItem;
