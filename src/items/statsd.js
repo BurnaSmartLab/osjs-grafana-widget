@@ -49,8 +49,9 @@ export default class StatsdWidget extends AbstractGrafana {
 
     grafana.chart.cursor = new am4charts.XYCursor();
     grafana.chart.cursor.lineY.opacity = 0;
-    grafana.chart.scrollbarX = new am4charts.XYChartScrollbar();
-    grafana.chart.scrollbarX.series.push(series);
+    // grafana.chart.scrollbarX = new am4charts.XYChartScrollbar();
+    // grafana.chart.scrollbarX.series.push(series);
+    grafana.chart.scrollbarX = new am4core.Scrollbar();
 
 
     dateAxis.start = 0.0;
@@ -68,7 +69,7 @@ export default class StatsdWidget extends AbstractGrafana {
   }
   async updateChartData(grafana) {
     let chartData = [];
-    //let url = '/grafana/api/datasources/proxy/1/query?db=opentsdb&q=SELECT distinct("value") FROM "netdata.apps.cpu.system" WHERE time >= now() - 12h GROUP BY time(1m) fill(null)'
+    // let url = '/grafana/api/datasources/proxy/1/query?db=opentsdb&q=SELECT distinct("value") FROM "netdata.apps.cpu.system" WHERE time >= now() - 12h GROUP BY time(1m) fill(null)'
     let url = `/grafana/api/datasources/proxy/1/query?db=opentsdb&q=SELECT ${grafana.options.aggregateFunction}("value") FROM "${grafana.options.measurement}" WHERE time >= now() - ${grafana.options.timeRange}ms GROUP BY time(${grafana.options.timeGroupBy}ms) fill(null)&epoch=ms`;
     let response = await fetch(url);
     if (response.ok) {
@@ -121,13 +122,13 @@ export default class StatsdWidget extends AbstractGrafana {
     }
   }
 
-  showAdvancedSetting(grafana){
-  return{};
-}
-saveWidgetOptions(widgetOptions, advSetting){
-}
-destroy(grafana){
-  grafana.chart.data = null;
-  grafana.chart.dispose();
-}
+  showAdvancedSetting(grafana) {
+    return{};
+  }
+  saveWidgetOptions(widgetOptions, advSetting) {
+  }
+  destroy(grafana) {
+    grafana.chart.data = null;
+    grafana.chart.dispose();
+  }
 }

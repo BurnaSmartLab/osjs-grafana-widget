@@ -1,6 +1,7 @@
 import StatsdWidget from './items/statsd';
 import GaugeWidget from './items/gauge';
 import BarWidget from './items/bars';
+import BadgeWidget from './items/badge';
 import statsdImage from '../XY-Chart.png';
 import gaugeImage from '../gauge-Chart.png';
 import barChartImage from '../bar-Chart.png';
@@ -20,6 +21,11 @@ const widgetItem = {
     object: BarWidget,
     name: 'BARCHART',
     image: barChartImage
-  }
+  },
+  badge:{
+    object: BadgeWidget,
+    name: 'BADGE',
+    image: barChartImage
+  },
 };
 export default widgetItem;
