@@ -30,15 +30,13 @@ export default class GaugeWidget extends AbstractGrafana {
   }
   // Every rendering tick (or just once if no canvas)
   async printChart(grafana) {
-    console.log(grafana.$mycontainer);
     let calcAvg = 0;
     let chartData = [];
-    let url = `/grafana/api/datasources/proxy/1/query?db=opentsdb&q=SELECT ${grafana.options.aggregateFunction}("value") FROM "${grafana.options.measurement}" WHERE time >= now() - ${grafana.options.timeRange}ms GROUP BY time(${grafana.options.timeGroupBy}ms) fill(null)&epoch=ms`;
+    let url = `/grafana/api/datasources/proxy/1/query?db=opentsdb&q=SELECT ${grafana.options.aggregateSelect}("value") FROM "${grafana.options.measurement}" WHERE time >= now() - ${grafana.options.timeRange}ms GROUP BY time(${grafana.options.timeGroupBy}ms) fill(null)&epoch=ms`; 
     let response = await fetch(url);
     if (response.ok) {
       let data = await response.json();
       chartData = data.results[0].series[0].values;
-      console.log(chartData);
       let sum = 0, count = 0;
       for (let elem of chartData) {
         if (elem[1] !== null) {
@@ -212,7 +210,7 @@ export default class GaugeWidget extends AbstractGrafana {
     grafana._interval = setInterval(async () => {
       let calcAvgUpdated = 0;
       let chartData = [];
-      let url = `/grafana/api/datasources/proxy/1/query?db=opentsdb&q=SELECT ${grafana.options.aggregateFunction}("value") FROM "${grafana.options.measurement}" WHERE time >= now() - ${grafana.options.timeRange}ms GROUP BY time(${grafana.options.timeGroupBy}ms) fill(null)&epoch=ms`;
+      let url = `/grafana/api/datasources/proxy/1/query?db=opentsdb&q=SELECT ${grafana.options.aggregateSelect}("value") FROM "${grafana.options.measurement}" WHERE time >= now() - ${grafana.options.timeRange}ms GROUP BY time(${grafana.options.timeGroupBy}ms) fill(null)&epoch=ms`;
       let response = await fetch(url);
       if (response.ok) {
         let data = await response.json();
@@ -364,6 +362,8 @@ export default class GaugeWidget extends AbstractGrafana {
           ])
         ])
       ])
+    ])
+    ])
     );
     return {state, actions, view};
   }

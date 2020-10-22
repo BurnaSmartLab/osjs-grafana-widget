@@ -1,4 +1,4 @@
-import {Widget} from '@osjs/widgets';
+import { Widget } from '@osjs/widgets';
 
 import * as translations from './locales.js';
 import widgetItem from './src/widgetItems';
@@ -24,17 +24,7 @@ export default class GrafanaWidget extends Widget {
       measurement: 'netdata.system.cpu.system',
       timeRange: '300000',
       timeGroupBy: '1000',
-      // groupByRange: Object.assign({}, ...Object.keys(dialogChoices.All_GroupBy).map( k =>  ({[k]: __(dialogChoices.All_GroupBy[k])}) )),
-      groupByRange: {
-        '1000': '1s',
-        '10000': '10s',
-        '60000': '1m',
-        '300000': '5m',
-        '600000': '10m',
-        '900000': '15m',
-        '36000000': '1h'
-      },
-      aggregateFunction: 'integral',
+      aggregateSelect: 'integral',
       title: '',
       unit: '',
       refreshTime: 'off',
@@ -94,7 +84,7 @@ export default class GrafanaWidget extends Widget {
   // A custom set of menu entries
   getContextMenu() {
     // eslint-disable-next-line no-unused-vars
-    const {translatable} = this.core.make('osjs/locale');
+    const { translatable } = this.core.make('osjs/locale');
     const __ = translatable(translations);
     return [{
       label: __('LBL_SET_SETTING'),
@@ -116,13 +106,13 @@ export default class GrafanaWidget extends Widget {
 
   createSettingDialog() {
     // eslint-disable-next-line no-unused-vars
-    const {translate: _, translatable} = this.core.make('osjs/locale');
+    const { translate: _, translatable } = this.core.make('osjs/locale');
     const __ = translatable(translations);
     let advancedSetting = {};
-    let groupByRange = {};
+    let x = {};
 
     const callbackRender = ($content, dialogWindow, dialog) => {
-      // dialogWindow.on('render', win => win.resizeFit(win.$content.querySelector('.outerBox')))
+      //dialogWindow.on('render', win => win.resizeFit(win.$content.querySelector('.outerBox')))
       // state
       dialog.app = app({
         widgetTypeValue: this.options.widgetType,
@@ -130,31 +120,18 @@ export default class GrafanaWidget extends Widget {
         timeRangeValue: this.options.timeRange,
         refreshTimeValue: this.options.refreshTime,
         groupByValue: this.options.timeGroupBy,
-        groupByRangeValue: this.options.groupByRange,
-        aggregateFuncValue: this.options.aggregateFunction,
+        aggregateSelectValue: this.options.aggregateSelect,
         titleValue: this.options.title,
         unitValue: this.options.unit,
       }, {
         // actions
-        onMeasurementChange: measurementValue => state => ({measurementValue}),
+        onMeasurementChange: measurementValue => state => ({ measurementValue }),
         onTitleChange: titleValue => state => ({titleValue}),
         onUnitChange: unitValue => state => ({unitValue}),
-        onTimeRangeChange: timeRangeValue => ({groupByRangeValue}) => {
-          if ((timeRangeValue >= 86400000) && (timeRangeValue < 604800000)) {
-            groupByRangeValue = Object.assign({}, ...Object.keys(dialogChoices.Avg_GroupBy).map(k => ({[k]: __(dialogChoices.Avg_GroupBy[k])})));
-            groupByRange = groupByRangeValue;
-          } else if (timeRangeValue >= 604800000) {
-            groupByRangeValue = Object.assign({}, ...Object.keys(dialogChoices.Big_GroupBy).map(k => ({[k]: __(dialogChoices.Big_GroupBy[k])})));
-            groupByRange = groupByRangeValue;
-          } else {
-            groupByRangeValue = Object.assign({}, ...Object.keys(dialogChoices.All_GroupBy).map(k => ({[k]: __(dialogChoices.All_GroupBy[k])})));
-            groupByRange = groupByRangeValue;
-          }
-          return {timeRangeValue, groupByRangeValue};
-        },
-        onRefreshTimeChange: refreshTimeValue => state => ({refreshTimeValue}),
-        onGroupByChange: groupByValue => state => ({groupByValue}),
-        onAggregateFuncChange: aggregateFuncValue => state => ({aggregateFuncValue}),
+        onTimeRangeChange: timeRangeValue => state => ({ timeRangeValue }),
+        onRefreshTimeChange: refreshTimeValue => state => ({ refreshTimeValue }),
+        onGroupByChange: groupByValue => state => ({ groupByValue }),
+        onAggregateSelectChange: aggregateSelectValue => state => ({ aggregateSelectValue }),
         createSelect2: el => (state, actions) => {
           let measurementSelect = $(el);
           measurementSelect.select2({
@@ -179,14 +156,15 @@ export default class GrafanaWidget extends Widget {
                     results: measurements
                   };
                 }
-                return {results: []};
+                return { results: [] };
               }
             },
           });
+
           $.ajax({
             type: 'GET',
             url: `/grafana/api/datasources/proxy/1/query?db=opentsdb&q=SHOW MEASUREMENTS WITH MEASUREMENT =~ /${typeof this.options.measurement !== 'undefined' ? this.options.measurement : ''}/&epoch=ms `,
-          }).then((data)  => {
+          }).then((data) => {
             // create the option and append to Select2
             let measurement = data.results[0].series[0].values[0];
             state.measurementValue = measurement[0];
@@ -402,7 +380,7 @@ export default class GrafanaWidget extends Widget {
               }),
               h(Label, {}, __('LBL_SET_TIME_GROUP_BY')),
               h(SelectField, {
-                choices: state.groupByRangeValue,
+                choices: Object.assign({}, ...Object.keys(dialogChoices.GroupBy).map(k => ({ [k]: __(dialogChoices.GroupBy[k]) }))),
                 value: state.groupByValue,
                 // value: state.groupByRange,
                 onchange: (ev, value) => actions.onGroupByChange(value)
@@ -415,23 +393,26 @@ export default class GrafanaWidget extends Widget {
               }),
               h(Label, {}, __('LBL_SET_AGGREGATE_FUNCTION')),
               h(SelectField, {
-                choices: Object.assign({}, ...Object.keys(dialogChoices.AggregateFunction).map(k => ({[k]: __(dialogChoices.AggregateFunction[k])}))),
-                value: state.aggregateFuncValue,
-                onchange: (ev, value) => actions.onAggregateFuncChange(value)
-              }),
+                value: state.aggregateSelectValue,
+                onchange: (ev, value) => actions.onAggregateSelectChange(value)
+              }, [
+                h('optgroup', { label: 'Aggregations' }, [
+                  Object.entries(dialogChoices.Aggregations).map((x) => h('option', { value: x[0] }, x[1])),
+
+                ]),
+                h('optgroup', { label: 'Selectors' }, [
+                  Object.entries(dialogChoices.Selectors).map((x) => h('option', { value: x[0] }, x[1])),
+                ]),
+              ]),
             ]),
-            h('div', {class: 'hidden-div'}),
+            h('div', { class: 'hidden-div' }),
           ])
         ]);
       }, $content);
 
-      dialogWindow.on('num-row-changed', () => {
-        console.log('I am in row added event');
-        const $outerBox = dialogWindow.$content.querySelector('.outerBox');
-        console.log($outerBox);
+      dialogWindow.on("num-row-changed", () => {
+        const $outerBox = dialogWindow.$content.querySelector(".outerBox");
         const height = this.getNewWindowHeight(dialogWindow, $outerBox);
-        console.log(height);
-
         dialogWindow.setDimension({
           height
         });
@@ -448,8 +429,7 @@ export default class GrafanaWidget extends Widget {
         this.options.timeRange = value.timeRangeValue;
         this.options.timeGroupBy = value.groupByValue;
         this.options.refreshTime = value.refreshTimeValue;
-        this.options.aggregateFunction = value.aggregateFuncValue;
-        this.options.groupByRange = groupByRange;
+        this.options.aggregateSelect = value.aggregateSelectValue;
         this.widget.saveWidgetOptions(this.options.widgetOptions, advancedSetting.state);
         this.saveSettings();
         this.init();
@@ -494,5 +474,4 @@ export default class GrafanaWidget extends Widget {
       }
     };
   }
-
 }
