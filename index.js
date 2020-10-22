@@ -4,8 +4,8 @@ import * as translations from './locales.js';
 import widgetItem from './src/widgetItems';
 import dialogChoices from './dialogChoices';
 
-import { h, app } from 'hyperapp';
-import { Label, Box, SelectField, Image } from '@osjs/gui';
+import {h, app} from 'hyperapp';
+import {Label, Box, SelectField, Image, TextField} from '@osjs/gui';
 import $ from 'jquery';
 import './node_modules/select2/dist/css/select2.min.css';
 import './node_modules/select2/dist/js/select2.min';
@@ -17,7 +17,7 @@ export default class GrafanaWidget extends Widget {
       canvas: false,
       dimension: {
         width: 400,
-        height: 300,
+        height: 300
       }
     }, {
       // Custom options that can be saved
@@ -25,6 +25,8 @@ export default class GrafanaWidget extends Widget {
       timeRange: '300000',
       timeGroupBy: '1000',
       aggregateSelect: 'integral',
+      title: '',
+      unit: '',
       refreshTime: 'off',
       widgetType: null,
       widgetOptions: {},  // object properties of each widget class that must be saved
@@ -119,9 +121,13 @@ export default class GrafanaWidget extends Widget {
         refreshTimeValue: this.options.refreshTime,
         groupByValue: this.options.timeGroupBy,
         aggregateSelectValue: this.options.aggregateSelect,
+        titleValue: this.options.title,
+        unitValue: this.options.unit,
       }, {
         // actions
         onMeasurementChange: measurementValue => state => ({ measurementValue }),
+        onTitleChange: titleValue => state => ({titleValue}),
+        onUnitChange: unitValue => state => ({unitValue}),
         onTimeRangeChange: timeRangeValue => state => ({ timeRangeValue }),
         onRefreshTimeChange: refreshTimeValue => state => ({ refreshTimeValue }),
         onGroupByChange: groupByValue => state => ({ groupByValue }),
@@ -182,10 +188,10 @@ export default class GrafanaWidget extends Widget {
           let view = [];
           for (const item in widgetItem) {
             const slide = (state, actions) => (h('div', {
-              class: 'column',
+              class: 'slider-column',
               onclick: () => actions.onWidgetTypeChange(item)
             }, h('div', {
-              class: 'container',
+              class: 'slider-container',
             }, [h(Image, {
               src: widgetItem[item].image,
               alt: widgetItem[item].image,
@@ -193,10 +199,11 @@ export default class GrafanaWidget extends Widget {
               class: 'thumb'
             }, {}),
             h('div', {
-              class: 'cursor overlay',
+              class: 'cursor slider-overlay',
               oncreate: el => actions.setActiveClassSlide(el),
               onclick: el => actions.addActiveClass(el)
-            }, item)])));
+            //  todo:multilangual
+            }, __(widgetItem[item].name))])));
             view.push(slide);
           }
           // adding prev and next
@@ -209,7 +216,7 @@ export default class GrafanaWidget extends Widget {
           //   onclick: console.log('next')
           // }, '❯');
           // view.push(prev, next);
-          const row = (state, actions) => (h('div', { class: 'row' }, view));
+          const row = (state, actions) => (h('div', {class: 'slider-row'}, view));
           app(state, actions, row, el);
         },
         setActiveClassSlide: (el) => (state, actions) => {
@@ -279,8 +286,8 @@ export default class GrafanaWidget extends Widget {
           this.generateWidget();
           advancedSetting = this.widget.showAdvancedSetting(this, dialogWindow);
           app(advancedSetting.state, advancedSetting.actions, advancedSetting.view, div[0]);
-          setTimeout(() => dialogWindow.emit("num-row-changed"), 100);
-          return ({ widgetTypeValue });
+          setTimeout(() => dialogWindow.emit('num-row-changed'), 100);
+          return ({widgetTypeValue});
         },
         startDialog: (widgetTypeValue) => (state) => {
           if (widgetTypeValue !== null) {
@@ -289,7 +296,7 @@ export default class GrafanaWidget extends Widget {
             advancedSetting = this.widget.showAdvancedSetting(this, dialogWindow);
             app(advancedSetting.state, advancedSetting.actions, advancedSetting.view, div[0]);
           }
-          setTimeout(() => dialogWindow.emit("num-row-changed"), 100);
+          setTimeout(() => dialogWindow.emit('num-row-changed'), 100);
         }
 
       }, (state, actions) => {
@@ -301,7 +308,7 @@ export default class GrafanaWidget extends Widget {
             h(Box, {
               oncreate: () => actions.startDialog(this.options.widgetType)
             }, [
-              h(Label, {}, 'Widget type: '),
+              h(Label, {}, __('LBL_WIDGET_TYPE')),
 
               // h(SelectField, {
               //   choices: Object.assign({}, ...Object.keys(widgetItem).map(k => ({[k]: __(widgetItem[k].name)}))),
@@ -342,7 +349,7 @@ export default class GrafanaWidget extends Widget {
             h('div', {
               class: 'grid-container2'
             }, [
-              h(Label, {}, 'Measurement:  '),
+              h(Label, {}, __('LBL_SET_MEASUREMENT')),
               h(SelectField, {
                 choices: {},
                 value: state.measurementValue,
@@ -352,26 +359,39 @@ export default class GrafanaWidget extends Widget {
             h('div', {
               class: 'grid-container4'
             }, [
-              h(Label, {}, 'Time Range:  '),
+              h(Label, {}, __('LBL_TITLE')),
+              h(TextField, {
+                placeholder: 'Default: Measurement',
+                oninput: (ev, value) => actions.onTitleChange(value),
+                value: state.titleValue
+              }),
+              h(Label, {}, __('LBL_SET_UNIT')),
+              h(TextField, {
+                placeholder: 'Example: %',
+                // value: state.groupByRange,
+                oninput: (ev, value) => actions.onUnitChange(value),
+                value: state.unitValue,
+              }),
+              h(Label, {}, __('LBL_SET_TIME_RANGE')),
               h(SelectField, {
-                choices: Object.assign({}, ...Object.keys(dialogChoices.TimeRange).map(k => ({ [k]: __(dialogChoices.TimeRange[k]) }))),
+                choices: Object.assign({}, ...Object.keys(dialogChoices.TimeRange).map(k => ({[k]: __(dialogChoices.TimeRange[k])}))),
                 value: state.timeRangeValue,
                 onchange: (ev, value) => actions.onTimeRangeChange(value)
               }),
-              h(Label, {}, 'GroupBy:  '),
+              h(Label, {}, __('LBL_SET_TIME_GROUP_BY')),
               h(SelectField, {
                 choices: Object.assign({}, ...Object.keys(dialogChoices.GroupBy).map(k => ({ [k]: __(dialogChoices.GroupBy[k]) }))),
                 value: state.groupByValue,
+                // value: state.groupByRange,
                 onchange: (ev, value) => actions.onGroupByChange(value)
               }),
-
-              h(Label, {}, 'Refresh Time:  '),
+              h(Label, {}, __('LBL_SET_REFRESH')),
               h(SelectField, {
-                choices: Object.assign({}, ...Object.keys(dialogChoices.RefreshTime).map(k => ({ [k]: __(dialogChoices.RefreshTime[k]) }))),
+                choices: Object.assign({}, ...Object.keys(dialogChoices.RefreshTime).map(k => ({[k]: __(dialogChoices.RefreshTime[k])}))),
                 value: state.refreshTimeValue,
                 onchange: (ev, value) => actions.onRefreshTimeChange(value)
               }),
-              h(Label, {}, 'Aggregations:  '),
+              h(Label, {}, __('LBL_SET_AGGREGATE_FUNCTION')),
               h(SelectField, {
                 value: state.aggregateSelectValue,
                 onchange: (ev, value) => actions.onAggregateSelectChange(value)
@@ -404,6 +424,8 @@ export default class GrafanaWidget extends Widget {
     const callbackButton = (button, value) => {
       if (button === 'ok') {
         this.options.measurement = value.measurementValue;
+        this.options.title = value.titleValue;
+        this.options.unit = value.unitValue;
         this.options.timeRange = value.timeRangeValue;
         this.options.timeGroupBy = value.groupByValue;
         this.options.refreshTime = value.refreshTimeValue;
@@ -418,7 +440,7 @@ export default class GrafanaWidget extends Widget {
       window: {
         title: __('TTL_SETTING'),
         message: __('MSG_SETTING'),
-        dimension: { width: 600 },
+        dimension: {width: 600},
       }
     };
     this.core
@@ -428,13 +450,13 @@ export default class GrafanaWidget extends Widget {
   }
 
   getNewWindowHeight(dialogWindow, $target) {
-    const $toolbar = dialogWindow.$content.querySelector(".osjs-dialog-buttons");
+    const $toolbar = dialogWindow.$content.querySelector('.osjs-dialog-buttons');
     const $toolbarStyle = window.getComputedStyle($toolbar);
     const toolbarMargin = [
-      $toolbarStyle["margin-top"],
-      $toolbarStyle["margin-bottom"]
+      $toolbarStyle['margin-top'],
+      $toolbarStyle['margin-bottom']
     ]
-      .map((str) => str.replace("px", ""))
+      .map((str) => str.replace('px', ''))
       .reduce((acc, val) => acc + parseInt(val, 10), 0);
 
     const height =
@@ -444,7 +466,12 @@ export default class GrafanaWidget extends Widget {
       toolbarMargin;
 
     return height;
-  };
-
-
+  }
+  static metadata(core) {
+    return {
+      fa_FA: {
+        title: 'گرافانا'
+      }
+    };
+  }
 }

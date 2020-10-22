@@ -49,8 +49,9 @@ export default class StatsdWidget extends AbstractGrafana {
 
     grafana.chart.cursor = new am4charts.XYCursor();
     grafana.chart.cursor.lineY.opacity = 0;
-    grafana.chart.scrollbarX = new am4charts.XYChartScrollbar();
-    grafana.chart.scrollbarX.series.push(series);
+    // grafana.chart.scrollbarX = new am4charts.XYChartScrollbar();
+    // grafana.chart.scrollbarX.series.push(series);
+    grafana.chart.scrollbarX = new am4core.Scrollbar();
 
 
     dateAxis.start = 0.0;
@@ -117,13 +118,13 @@ export default class StatsdWidget extends AbstractGrafana {
     }
   }
 
-  showAdvancedSetting(grafana){
-  return{};
-}
-saveWidgetOptions(widgetOptions, advSetting){
-}
-destroy(grafana){
-  grafana.chart.data = null;
-  grafana.chart.dispose();
-}
+  showAdvancedSetting(grafana) {
+    return{};
+  }
+  saveWidgetOptions(widgetOptions, advSetting) {
+  }
+  destroy(grafana) {
+    grafana.chart.data = null;
+    grafana.chart.dispose();
+  }
 }
