@@ -25,23 +25,10 @@ const dialogChoices =
         '172800000': 'Last 2 days',
         '604800000': 'Last 7 days',
     },
-    All_GroupBy: {
+    GroupBy: {
         '1000': '1s',
         '10000': '10s',
         '60000': '1m',
-        '300000': '5m',
-        '600000': '10m',
-        '900000': '15m',
-        '36000000': '1h'
-    },
-    Avg_GroupBy:{
-        '60000': '1m',
-        '300000': '5m',
-        '600000': '10m',
-        '900000': '15m',
-        '36000000': '1h'
-    },
-    Big_GroupBy:{
         '300000': '5m',
         '600000': '10m',
         '900000': '15m',
@@ -57,7 +44,7 @@ const dialogChoices =
         '72000000': '2h',
         '86400000': '1d'
     },
-    AggregateFunction:{
+    Aggregations:{
         'count': 'Count',
         'distinct': 'Distinct',
         'integral': 'Integral',
@@ -65,6 +52,16 @@ const dialogChoices =
         'median': 'Median',
         'mode': 'Mode',
         'sum': 'Sum'
+    },
+    Selectors:{
+        'bottom': 'Bottom',
+        'first': 'First',
+        'last': 'Last',
+        'max': 'Max',
+        'min': 'Min',
+        'percentile': 'Percentile',
+        'top': 'Top'
     }
+
 };
 export default dialogChoices;
