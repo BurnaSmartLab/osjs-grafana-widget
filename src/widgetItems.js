@@ -36,6 +36,7 @@ const widgetItem = {
   //   name: 'SINGLESTAT',
   //   image: barChartImage
   // },
+
   badge:{
     object: BadgeWidget,
     name: 'BADGE',

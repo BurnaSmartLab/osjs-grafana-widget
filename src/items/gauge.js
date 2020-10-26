@@ -396,4 +396,8 @@ export default class GaugeWidget extends AbstractGrafana {
     grafana.chart.data = null;
     grafana.chart.dispose();
   }
+
+  resize(grafana){
+    grafana.$mycontainer.style.fontSize = parseInt(grafana.$mycontainer.parentElement.style.width) * 0.025 + 'px';
+  }
 }

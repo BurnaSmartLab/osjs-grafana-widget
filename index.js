@@ -4,8 +4,10 @@ import * as translations from './locales.js';
 import widgetItem from './src/widgetItems';
 import dialogChoices from './dialogChoices';
 
+
 import {h, app} from 'hyperapp';
 import {Label, Box, SelectField, Image, TextField} from '@osjs/gui';
+
 import $ from 'jquery';
 import './node_modules/select2/dist/css/select2.min.css';
 import './node_modules/select2/dist/js/select2.min';
@@ -16,8 +18,8 @@ export default class GrafanaWidget extends Widget {
     super(core, options, {
       canvas: false,
       dimension: {
-        width: 400,
-        height: 300
+        width: 250,
+        height: 150
       }
     }, {
       // Custom options that can be saved
@@ -35,7 +37,6 @@ export default class GrafanaWidget extends Widget {
 
     this.$mycontainer = document.createElement('div');
     this.$mycontainer.setAttribute('style', 'height:100%; width: 100%;');
-    this.$mycontainer.setAttribute('id', 'mydiv');
     this.$element.appendChild(this.$mycontainer);
     this._interval = null;
     this.chart = null;
@@ -59,7 +60,8 @@ export default class GrafanaWidget extends Widget {
 
   // When widget was resized
   onResize() {
-    this.$mycontainer.style.fontSize = parseInt(this.$mycontainer.parentElement.style.width) * 0.025 + 'px';
+    this.widget.resize(this);
+    
   }
 
   // When widget was moved
@@ -112,7 +114,6 @@ export default class GrafanaWidget extends Widget {
     let x = {};
 
     const callbackRender = ($content, dialogWindow, dialog) => {
-      //dialogWindow.on('render', win => win.resizeFit(win.$content.querySelector('.outerBox')))
       // state
       dialog.app = app({
         widgetTypeValue: this.options.widgetType,
