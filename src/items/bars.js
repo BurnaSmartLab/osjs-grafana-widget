@@ -1,11 +1,15 @@
-import * as d3 from "d3"
+import * as d3 from "d3";
 import AbstractGrafana from '../AbstractGrafana';
 
 
 export default class BarWidget extends AbstractGrafana {
-    constructor(widgetOptions) {
+    constructor(grafana) {
         super();
         //custom widget option could be added here.
+        grafana.options.dimension.width = 300;
+        grafana.options.dimension.height= 200;
+        grafana.attributes.minDimension.width = 300;
+        grafana.attributes.minDimension.height = 200;
     }
 
     async printChart(grafana) {
@@ -145,6 +149,11 @@ export default class BarWidget extends AbstractGrafana {
     }
 
     destroy(grafana){
+
+      }
+
+      resize(grafana){
+        grafana.$mycontainer.style.fontSize = parseInt(grafana.$mycontainer.parentElement.style.width) * 0.025 + 'px';
       }
 
 

@@ -17,10 +17,10 @@ export default class GrafanaWidget extends Widget {
   constructor(core, options) {
     super(core, options, {
       canvas: false,
-      dimension: {
-        width: 250,
-        height: 150
-      }
+      // dimension: {
+      //   width: 250,
+      //   height: 150
+      // }
     }, {
       // Custom options that can be saved
       measurement: 'netdata.system.cpu.system',
@@ -101,7 +101,8 @@ export default class GrafanaWidget extends Widget {
   generateWidget() {
     for (const key in widgetItem) {
       if (key === this.options.widgetType) {
-        this.widget = new widgetItem[key].object(this.options.widgetOptions);
+        //this.widget = new widgetItem[key].object(this.options.widgetOptions);
+        this.widget = new widgetItem[key].object(this);
       }
     }
   }

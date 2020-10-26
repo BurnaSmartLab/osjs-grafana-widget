@@ -8,11 +8,15 @@ import './badge.scss';
 import * as translations from '../../locales';
 
 export default class BadgeWidget extends AbstractGrafana {
-  constructor(widgetOptions) {
+  constructor(grafana) {
+    grafana.options.dimension.width = 150;
+    grafana.options.dimension.height= 25;
+    grafana.attributes.minDimension.width = 150;
+    grafana.attributes.minDimension.height = 25;
     super();
     // custom widget option could be added here.
-    if (!('badge' in widgetOptions)) {
-      widgetOptions.badge = {
+    if (!('badge' in grafana.options.widgetOptions)) {
+      grafana.options.widgetOptions.badge = {
         color: '#54b947'
       };
     }
@@ -93,6 +97,7 @@ export default class BadgeWidget extends AbstractGrafana {
           h(Label, {box: {grow: 1}}, __('LBL_COLOR')),
           h(TextField, {
             box: {grow:3},
+            style: {'color': state.color},
             placeholder: __('LBL_COLOR'),
             oninput: (ev, value) => actions.setColor(value),
             value: state.color
@@ -136,9 +141,13 @@ export default class BadgeWidget extends AbstractGrafana {
           }, `${calcAvg} ${state.unit}`)
         ])
     );
-    return {state,actions,view}
+    return {state, actions, view}
   }
   destroy(grafana) {
     grafana = null;
   }
+  resize(grafana){
+    grafana.$mycontainer.style.fontSize = parseInt(grafana.$mycontainer.parentElement.style.width) * 0.025 + 'px';
+  }
+
 }

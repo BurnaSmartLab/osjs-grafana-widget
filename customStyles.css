@@ -204,3 +204,5 @@
 .empty {
   width: 10px;
 }
+.osjs-widget.active,.osjs-widget:hover{background-color:rgba(0,0,0,0)}
+

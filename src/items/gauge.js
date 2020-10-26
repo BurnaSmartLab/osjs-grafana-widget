@@ -11,12 +11,16 @@ import './gauge.css';
 import * as translations from '../../locales';
 
 export default class GaugeWidget extends AbstractGrafana {
-  constructor(widgetOptions) {
+  constructor(grafana) {
     super();
     this.widgetHand = null;
+    grafana.options.dimension.width = 250;
+    grafana.options.dimension.height= 150;
+    grafana.attributes.minDimension.width = 250;
+    grafana.attributes.minDimension.height = 150;
     // custom widget option could be added here.
-    if (!('gauge' in widgetOptions)) {
-      widgetOptions.gauge = {
+    if (!('gauge' in grafana.options.widgetOptions)) {
+      grafana.options.widgetOptions.gauge = {
         gradeThresholds: [{
           title: 'status',
           color: '#54b947',
@@ -336,6 +340,7 @@ export default class GaugeWidget extends AbstractGrafana {
               h(TextField, {
                 box: {grow: 1, shrink: 1},
                 placeholder: __('LBL_GAUGE_COLOR'),
+                style: {'color': state.gradeThresholds[index].color},
                 oninput: (ev, value) => actions.setColor({index, value}),
                 value: state.gradeThresholds[index].color
               }),
@@ -362,8 +367,6 @@ export default class GaugeWidget extends AbstractGrafana {
           ])
         ])
       ])
-    ])
-    ])
     );
     return {state, actions, view};
   }

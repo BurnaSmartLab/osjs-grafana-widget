@@ -10,11 +10,15 @@ import '../../customStyles.css';
 import * as translations from '../../locales';
 
 export default class SingleStatWidget extends AbstractGrafana {
-  constructor(widgetOptions) {
+  constructor(grafana) {
     // custom widget option could be added here.
     super();
-    if (!('singleStat' in widgetOptions)) {
-      widgetOptions.singleStat = {
+    grafana.options.dimension.width = 200;
+    grafana.options.dimension.height= 100;
+    grafana.attributes.minDimension.width = 200;
+    grafana.attributes.minDimension.height = 100;
+    if (!('singleStat' in grafana.options.widgetOptions)) {
+      grafana.options.widgetOptions.singleStat = {
         gradeThresholds: [{
           title: 'status',
           color: '#1464F4',
