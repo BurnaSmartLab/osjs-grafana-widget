@@ -77,6 +77,9 @@ export default class SingleStatWidget extends AbstractGrafana {
 
     let spark1 = {
       chart: {
+        animations: {
+          enabled: true,
+      },
         id: 'spark1',
         group: 'sparks',
         type: 'line',
@@ -119,6 +122,10 @@ export default class SingleStatWidget extends AbstractGrafana {
           }
         }
       }
+    }
+
+    if (grafana.options.refreshTime !== 'off') {
+      spark1.chart.animations.enabled = false;
     }
 
     //hyperapp
