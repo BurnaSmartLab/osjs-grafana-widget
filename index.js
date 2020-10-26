@@ -189,7 +189,7 @@ export default class GrafanaWidget extends Widget {
           let view = [];
           for (const item in widgetItem) {
             const slide = (state, actions) => (h('div', {
-              class: 'slider-column',
+              class: 'item',
               onclick: () => actions.onWidgetTypeChange(item)
             }, h('div', {
               class: 'slider-container',
@@ -201,6 +201,7 @@ export default class GrafanaWidget extends Widget {
             }, {}),
             h('div', {
               class: 'cursor slider-overlay',
+              'data-widget':item,
               oncreate: el => actions.setActiveClassSlide(el),
               onclick: el => actions.addActiveClass(el)
             //  todo:multilangual
@@ -220,12 +221,13 @@ export default class GrafanaWidget extends Widget {
           const row = (state, actions) => (h('div', {class: 'slider-row'}, view));
           app(state, actions, row, el);
         },
+        // todo: inner text is not correct.
         setActiveClassSlide: (el) => (state, actions) => {
           if (this.options.widgetType === null) {
-            this.options.widgetType = el.innerText;
-            actions.onWidgetTypeChange(el.innerText);
+            this.options.widgetType = el.getAttribute('data-widget');
+            actions.onWidgetTypeChange(el.getAttribute('data-widget'));
           }
-          if (el.innerText === this.options.widgetType) {
+          if (el.getAttribute('data-widget') === this.options.widgetType) {
             el.className += ' active';
           }
         },
@@ -368,7 +370,7 @@ export default class GrafanaWidget extends Widget {
               }),
               h(Label, {}, __('LBL_SET_UNIT')),
               h(TextField, {
-                placeholder: 'Example: %',
+                placeholder: 'Example: %, /s, Mb, Gb',
                 // value: state.groupByRange,
                 oninput: (ev, value) => actions.onUnitChange(value),
                 value: state.unitValue,
@@ -469,10 +471,10 @@ export default class GrafanaWidget extends Widget {
     return height;
   }
   static metadata(core) {
+    const {translatable} = core.make('osjs/locale');
+    const __ = translatable(translations);
     return {
-      fa_FA: {
-        title: 'گرافانا'
-      }
+      title: __('LBL_GRAFANA')
     };
   }
 }
