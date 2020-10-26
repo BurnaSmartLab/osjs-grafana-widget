@@ -118,13 +118,17 @@ export default class StatsdWidget extends AbstractGrafana {
     }
   }
 
-  showAdvancedSetting(grafana) {
-    return{};
-  }
-  saveWidgetOptions(widgetOptions, advSetting) {
-  }
-  destroy(grafana) {
-    grafana.chart.data = null;
-    grafana.chart.dispose();
-  }
+  showAdvancedSetting(grafana){
+  return{};
+}
+saveWidgetOptions(widgetOptions, advSetting){
+}
+destroy(grafana){
+  grafana.chart.data = null;
+  grafana.chart.dispose();
+}
+resize(grafana){
+  grafana.$mycontainer.style.fontSize = parseInt(grafana.$mycontainer.parentElement.style.width) * 0.025 + 'px';
+}
+
 }
