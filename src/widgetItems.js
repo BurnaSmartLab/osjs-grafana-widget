@@ -3,6 +3,7 @@ import GaugeWidget from './items/gauge';
 import BarWidget from './items/bars';
 import SingleStatWidget from './items/singlestat';
 //import BarChartAppexWidget from './items/barChart-apex';
+import BadgeWidget from './items/badge';
 
 import statsdImage from '../XY-Chart.png';
 import gaugeImage from '../gauge-Chart.png';
@@ -35,5 +36,11 @@ const widgetItem = {
   //   name: 'SINGLESTAT',
   //   image: barChartImage
   // },
+  // badge:{
+  //   object: BadgeWidget,
+  //   name: 'BADGE',
+  //   image: barChartImage
+  // },
+
 };
 export default widgetItem;

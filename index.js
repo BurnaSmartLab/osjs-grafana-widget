@@ -5,7 +5,7 @@ import widgetItem from './src/widgetItems';
 import dialogChoices from './dialogChoices';
 
 import { h, app } from 'hyperapp';
-import { Label, Box, SelectField, Image } from '@osjs/gui';
+import { Label, Box, SelectField, Image, TextField } from '@osjs/gui';
 import $ from 'jquery';
 import './node_modules/select2/dist/css/select2.min.css';
 import './node_modules/select2/dist/js/select2.min';
@@ -16,8 +16,10 @@ export default class GrafanaWidget extends Widget {
     super(core, options, {
       canvas: false,
       dimension: {
-        width: 400,
-        height: 300,
+        // width: 400,
+        // height: 300,
+        width: 250,
+        height: 100,
       }
     }, {
       // Custom options that can be saved
@@ -33,7 +35,6 @@ export default class GrafanaWidget extends Widget {
 
     this.$mycontainer = document.createElement('div');
     this.$mycontainer.setAttribute('style', 'height:100%; width: 100%;');
-    this.$mycontainer.setAttribute('id', 'mydiv');
     this.$element.appendChild(this.$mycontainer);
     this._interval = null;
     this.chart = null;
@@ -57,7 +58,8 @@ export default class GrafanaWidget extends Widget {
 
   // When widget was resized
   onResize() {
-    this.$mycontainer.style.fontSize = parseInt(this.$mycontainer.parentElement.style.width) * 0.025 + 'px';
+    this.widget.resize(this);
+    
   }
 
   // When widget was moved
@@ -110,7 +112,6 @@ export default class GrafanaWidget extends Widget {
     let x = {};
 
     const callbackRender = ($content, dialogWindow, dialog) => {
-      //dialogWindow.on('render', win => win.resizeFit(win.$content.querySelector('.outerBox')))
       // state
       dialog.app = app({
         widgetTypeValue: this.options.widgetType,
@@ -119,6 +120,8 @@ export default class GrafanaWidget extends Widget {
         refreshTimeValue: this.options.refreshTime,
         groupByValue: this.options.timeGroupBy,
         aggregateSelectValue: this.options.aggregateSelect,
+        widthValue: this.options.dimension.width,
+        heightValue: this.options.dimension.height
       }, {
         // actions
         onMeasurementChange: measurementValue => state => ({ measurementValue }),
@@ -126,6 +129,8 @@ export default class GrafanaWidget extends Widget {
         onRefreshTimeChange: refreshTimeValue => state => ({ refreshTimeValue }),
         onGroupByChange: groupByValue => state => ({ groupByValue }),
         onAggregateSelectChange: aggregateSelectValue => state => ({ aggregateSelectValue }),
+        setWidth: widthValue => state => ({widthValue}),
+        setHeight: heightValue => state => ({heightValue}),
         createSelect2: el => (state, actions) => {
           let measurementSelect = $(el);
           measurementSelect.select2({
@@ -340,6 +345,24 @@ export default class GrafanaWidget extends Widget {
               // })
             ]),
             h('div', {
+              class: 'grid-container4'
+            }, [
+              h(Label, {}, 'Width (pixcels):  '),
+              h(TextField, {
+                box: { grow: 1, shrink: 1 },
+                value: state.widthValue,
+                placeholder: 'width',
+                oninput: (ev, value) => actions.setWidth(value),
+              }),
+              h(Label, {}, 'Height (pixcels):  '),
+              h(TextField, {
+                box: { grow: 1, shrink: 1 },
+                value: state.heightValue,
+                placeholder: 'height',
+                oninput: (ev, value) => actions.setHeight(value),
+              }),
+            ]),
+            h('div', {
               class: 'grid-container2'
             }, [
               h(Label, {}, 'Measurement:  '),
@@ -408,6 +431,8 @@ export default class GrafanaWidget extends Widget {
         this.options.timeGroupBy = value.groupByValue;
         this.options.refreshTime = value.refreshTimeValue;
         this.options.aggregateSelect = value.aggregateSelectValue;
+        this.options.dimension.width = value.widthValue;
+        this.options.dimension.height = value.heightValue;
         this.widget.saveWidgetOptions(this.options.widgetOptions, advancedSetting.state);
         this.saveSettings();
         this.init();

@@ -42,8 +42,8 @@ export default class GaugeWidget extends AbstractGrafana {
           sum += elem[1];
           count += 1;
         }
-        calcAvg = sum / count;
       }
+      calcAvg = sum / count;
     } else {
       alert('HTTP-Error: ' + response.status);
     }
@@ -391,5 +391,9 @@ export default class GaugeWidget extends AbstractGrafana {
   destroy(grafana) {
     grafana.chart.data = null;
     grafana.chart.dispose();
+  }
+
+  resize(grafana){
+    grafana.$mycontainer.style.fontSize = parseInt(grafana.$mycontainer.parentElement.style.width) * 0.025 + 'px';
   }
 }
