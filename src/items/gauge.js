@@ -362,6 +362,8 @@ export default class GaugeWidget extends AbstractGrafana {
           ])
         ])
       ])
+    ])
+    ])
     );
     return {state, actions, view};
   }

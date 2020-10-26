@@ -3,7 +3,7 @@ export const en_EN = {
   LBL_SET_MEASUREMENT: 'Measurement',
   LBL_SET_TIME_RANGE: 'Time Range',
   LBL_SET_TIME_GROUP_BY: 'Group By',
-  LBL_SET_AGGREGATE_FUNCTION: 'Aggregate Function',
+  LBL_SET_AGGREGATE_FUNCTION: 'Agg/Sel',
   LBL_REMOVE_WIDGET: 'Remove Widget',
   MSG_Off: 'Off',
   LBL_SET_SETTING: 'Set Settings',
@@ -25,6 +25,7 @@ export const en_EN = {
   LBL_GAUGE_ADD_THRESHOLD: 'Add Threshold',
   BADGE: 'Badge',
   LBL_SET_UNIT: 'Unit',
+  LBL_GRAFANA: 'Grafana',
 };
 
 export const fa_FA = {
@@ -32,7 +33,7 @@ export const fa_FA = {
   LBL_SET_MEASUREMENT: 'شاخص',
   LBL_SET_TIME_RANGE: 'بازه زمانی',
   LBL_SET_TIME_GROUP_BY: 'زمان دسته بندی',
-  LBL_SET_AGGREGATE_FUNCTION: 'تابع تجمعی',
+  LBL_SET_AGGREGATE_FUNCTION: 'تجمعی/انتخابی',
   LBL_REMOVE_WIDGET: 'حذف ابزارک',
   MSG_Off: 'خاموش',
   LBL_SET_SETTING: 'تنظیمات',
@@ -54,4 +55,5 @@ export const fa_FA = {
   LBL_GAUGE_ADD_THRESHOLD: 'افزودن حد آستانه',
   BADGE: 'نشان',
   LBL_SET_UNIT: 'واحد',
+  LBL_GRAFANA: 'گرافانا',
 };
