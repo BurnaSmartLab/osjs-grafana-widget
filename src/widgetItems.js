@@ -36,11 +36,11 @@ const widgetItem = {
   //   name: 'SINGLESTAT',
   //   image: barChartImage
   // },
-  // badge:{
-  //   object: BadgeWidget,
-  //   name: 'BADGE',
-  //   image: barChartImage
-  // },
 
+  badge:{
+    object: BadgeWidget,
+    name: 'BADGE',
+    image: barChartImage
+  },
 };
 export default widgetItem;

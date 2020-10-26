@@ -7,6 +7,7 @@ import { app, h } from 'hyperapp';
 import { Label, Box, TextField, Button } from '@osjs/gui';
 
 import '../../customStyles.css';
+import * as translations from '../../locales';
 
 export default class SingleStatWidget extends AbstractGrafana {
   constructor(widgetOptions) {
@@ -16,7 +17,7 @@ export default class SingleStatWidget extends AbstractGrafana {
       widgetOptions.singleStat = {
         gradeThresholds: [{
           title: 'status',
-          color: '#2F50BF',
+          color: '#1464F4',
           lowScore: 0,
           highScore: 100000000000
         }],
@@ -123,7 +124,7 @@ export default class SingleStatWidget extends AbstractGrafana {
     //hyperapp
     const state = {
       singleValue: calcAvg,
-      measurement: grafana.options.measurement,
+      measurement:  grafana.options.title === '' ? grafana.options.measurement : grafana.options.title,
     };
     const actions = {
       makeSpark: (el) => {
@@ -155,7 +156,7 @@ export default class SingleStatWidget extends AbstractGrafana {
           class:'sparkboxes',
         },[  
             h('div', { class: 'details' }, [
-              h('p', { class: 'singleValue' }, state.singleValue.toFixed(2) + ' unit'),
+              h('p', { class: 'singleValue' }, state.singleValue.toFixed(2) + grafana.options.unit),
               h('p', { class: 'status' , oncreate: el => actions.setStatus(el)} )
             ]),
             h('div', { class: 'spark1' , oncreate: el => actions.makeSpark(el) } ),
@@ -178,6 +179,8 @@ export default class SingleStatWidget extends AbstractGrafana {
     }
   }
   showAdvancedSetting(grafana, dialogWindow) {
+    const {translatable} = grafana.core.make('osjs/locale');
+    const __ = translatable(translations);
     let arr = [];   // used for displaying previously set thresholds by opening dialog
     grafana.options.widgetOptions.singleStat.gradeThresholds.map((item) => {
       arr.push(item);
@@ -232,30 +235,30 @@ export default class SingleStatWidget extends AbstractGrafana {
         class: 'outer'
       },[
         h('hr', {}, ''),
-        h('h4', { }, 'SingleStat Advanced Settings:  '),
+        h('h6', { }, __('MSG_SINGLESTAT')),
       h('div', {class: 'grid-container3' },[
-        h(Label, {}, 'Threshold:  '),
-        h(Label, {}, 'Title:  '),
-        h(Label, {}, 'Color:  '),
+        h(Label, {}, __('LBL_GAUGE_THRESHOLD')),
+        h(Label, {}, __('LBL_TITLE')),
+        h(Label, {}, __('LBL_COLOR')),
       ]),
       h(Box, { grow: 1, shrink: 1 }, [
         state.gradeThresholds.map((name, index) => {
           return h('div', {class: 'grid-container5'}, [
             h(TextField, {
               box: { grow: 1, shrink: 1 },
-              placeholder: 'threshold',
+              placeholder: __('LBL_GAUGE_THRESHOLD'),
               oninput: (ev, value) => actions.setThreshold({ index, value }),
               value: state.gradeThresholds[index].lowScore
             }),
             h(TextField, {
               box: { grow: 1, shrink: 1 },
-              placeholder: 'title',
+              placeholder: __('LBL_TITLE'),
               oninput: (ev, value) => actions.setTitle({ index, value }),
               value: state.gradeThresholds[index].title
             }),
             h(TextField, {
               box: { grow: 1, shrink: 1 },
-              placeholder: 'color',
+              placeholder: __('LBL_GAUGE_COLOR'),
               oninput: (ev, value) => actions.setColor({ index, value }),
               value: state.gradeThresholds[index].color
             }),
@@ -269,16 +272,16 @@ export default class SingleStatWidget extends AbstractGrafana {
                   state.gradeThresholds[index].color = hexCode;
                 }
               })
-            }, 'Set Color'),
+            }, __('LBL_SET_COLOR')),
             h(Button, {
               onclick: () => actions.removeField(index)
-            }, 'Remove')
+            }, __('LBL_GAUGE_REMOVE'))
           ]);
         }),
         h('div', {class: 'grid-container1'}, [
         h(Button, {
           onclick: () => actions.addField()
-        }, 'Add Threshold')
+        }, __('LBL_GAUGE_ADD_THRESHOLD'))
       ])
     ])
     ])

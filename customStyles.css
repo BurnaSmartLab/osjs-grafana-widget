@@ -31,7 +31,7 @@ body {
 }
 
 /* The grid: Four equal columns that floats next to each other */
-.column {
+.slider-column {
   float: left;
   width: 25%;
   height: 70px;
@@ -44,12 +44,12 @@ body {
 /*  cursor: pointer;*/
 /*}*/
 
-.column img:hover {
+.slider-column img:hover {
   opacity: 1;
 }
 
 /* Clear floats after the columns */
-.row:after {
+.slider-row:after {
   content: "";
   display: table;
   clear: both;
@@ -65,13 +65,13 @@ body {
 }
 
 /* Container needed to position the overlay. Adjust the width as needed */
-.container {
+.slider-container {
   position: relative;
   max-width: 300px;
   max-height: 65px;
 }
 /* The overlay effect - lays on top of the container and over the image */
-.overlay {
+.slider-overlay {
   position: absolute;
   bottom: 0;
   background: rgb(0, 0, 0);
@@ -86,7 +86,7 @@ body {
   text-align: center;
 }
 /* When you mouse over the container, fade in the overlay title */
-.container:hover .overlay {
+.slider-container:hover .slider-overlay {
   opacity: 1;
 }
 /* Add a pointer when hovering over the thumbnail images */

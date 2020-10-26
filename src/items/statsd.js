@@ -49,8 +49,9 @@ export default class StatsdWidget extends AbstractGrafana {
 
     grafana.chart.cursor = new am4charts.XYCursor();
     grafana.chart.cursor.lineY.opacity = 0;
-    grafana.chart.scrollbarX = new am4charts.XYChartScrollbar();
-    grafana.chart.scrollbarX.series.push(series);
+    // grafana.chart.scrollbarX = new am4charts.XYChartScrollbar();
+    // grafana.chart.scrollbarX.series.push(series);
+    grafana.chart.scrollbarX = new am4core.Scrollbar();
 
 
     dateAxis.start = 0.0;
@@ -129,4 +130,5 @@ destroy(grafana){
 resize(grafana){
   grafana.$mycontainer.style.fontSize = parseInt(grafana.$mycontainer.parentElement.style.width) * 0.025 + 'px';
 }
+
 }
