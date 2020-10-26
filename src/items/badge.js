@@ -25,17 +25,17 @@ export default class BadgeWidget extends AbstractGrafana {
     let response = await fetch(url);
     if (response.ok) {
       let data = await response.json();
-     if (!data.results['error']) {
-       badgeData = data.results[0].series[0].values;
-       let sum = 0, count = 0;
-       for (let elem of badgeData) {
-         if (elem[1] !== null) {
-           sum += elem[1];
-           count += 1;
-         }
-       }
-       calcAvg = (sum / count).toFixed(2);
-     }
+      if (!data.results['error']) {
+        badgeData = data.results[0].series[0].values;
+        let sum = 0, count = 0;
+        for (let elem of badgeData) {
+          if (elem[1] !== null) {
+            sum += elem[1];
+            count += 1;
+          }
+        }
+        calcAvg = (sum / count).toFixed(2);
+      }
     } else {
       alert('HTTP-Error: ' + response.status);
     }
@@ -82,7 +82,7 @@ export default class BadgeWidget extends AbstractGrafana {
         state.color = color;
         return ({color});
       },
-      getValues: () => state => state,
+      // getValues: () => state => state,
     };
 
     const view = (state, actions) => (
@@ -93,6 +93,7 @@ export default class BadgeWidget extends AbstractGrafana {
           h(Label, {box: {grow: 1}}, __('LBL_COLOR')),
           h(TextField, {
             box: {grow:3},
+            style: {'color': state.color},
             placeholder: __('LBL_COLOR'),
             oninput: (ev, value) => actions.setColor(value),
             value: state.color
@@ -127,16 +128,16 @@ export default class BadgeWidget extends AbstractGrafana {
     };
     const actions = {};
     const view = state => (
-        h('div', {
-          class: 'double-val-label'
-        }, [
-          h('span', {}, state.title),
-          h('span', {
-            style: `background-color: ${state.color}`
-          }, `${calcAvg} ${state.unit}`)
-        ])
+      h('div', {
+        class: 'double-val-label'
+      }, [
+        h('span', {}, state.title),
+        h('span', {
+          style: `background-color: ${state.color}`
+        }, `${calcAvg} ${state.unit}`)
+      ])
     );
-    return {state,actions,view}
+    return {state, actions, view};
   }
   destroy(grafana) {
     grafana = null;

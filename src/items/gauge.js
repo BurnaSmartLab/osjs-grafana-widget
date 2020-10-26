@@ -336,6 +336,7 @@ export default class GaugeWidget extends AbstractGrafana {
               h(TextField, {
                 box: {grow: 1, shrink: 1},
                 placeholder: __('LBL_GAUGE_COLOR'),
+                style: {'color': state.gradeThresholds[index].color},
                 oninput: (ev, value) => actions.setColor({index, value}),
                 value: state.gradeThresholds[index].color
               }),
@@ -362,8 +363,6 @@ export default class GaugeWidget extends AbstractGrafana {
           ])
         ])
       ])
-    ])
-    ])
     );
     return {state, actions, view};
   }
