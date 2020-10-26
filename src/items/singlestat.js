@@ -121,16 +121,28 @@ export default class SingleStatWidget extends AbstractGrafana {
     }
 
     //hyperapp
-    const state = {};
+    const state = {
+      singleValue: calcAvg,
+      measurement: grafana.options.measurement,
+    };
     const actions = {
-      makeSpark: () => {
-        document.querySelector(".singleValue").innerHTML = calcAvg.toFixed(2) + ' unit';
-        document.querySelector(".measurement").innerHTML = grafana.options.measurement;
-        new ApexCharts(document.querySelector(".spark1"), spark1).render();
+      makeSpark: (el) => {
+        new ApexCharts(el, spark1).render();
+      },
+
+      setStatus: (el) => {
+        grafana.options.widgetOptions.singleStat.gradeThresholds.map( elem => {
+          if ( calcAvg >= elem.lowScore && calcAvg < elem.highScore){
+            el.innerHTML = elem.title;
+          }
+        })
+      }, 
+
+      setGradientColor: (el) => {
         grafana.options.widgetOptions.singleStat.gradeThresholds.map( elem => {
           if ( calcAvg >= elem.lowScore && calcAvg < elem.highScore){
             //generate a gradient background color based on user chosen colors
-            document.querySelector('.sparkboxes').style.backgroundImage = "linear-gradient(170deg,"+ elem.color+" 10%,  #E7EFF1 100%)";
+            el.style.backgroundImage = "linear-gradient(170deg,"+ elem.color+" 10%,  #E7EFF1 100%)";
           }
         })
       }
@@ -138,20 +150,22 @@ export default class SingleStatWidget extends AbstractGrafana {
     };
     const view = (state, actions) => (
       
-      h('div', { class: 'outerDiv' }, [
-        h('div', { class: 'sparkboxes', oncreate: () => actions.makeSpark() }, [
-          h('div', { class: 'box box1' }, [
+      h('div', { class: 'outerDiv' , oncreate: el => actions.setGradientColor(el)}, [
+        h('div', { 
+          class:'sparkboxes',
+        },[  
             h('div', { class: 'details' }, [
-              h('p', { class: 'singleValue' }),
+              h('p', { class: 'singleValue' }, state.singleValue.toFixed(2) + ' unit'),
+              h('p', { class: 'status' , oncreate: el => actions.setStatus(el)} )
             ]),
-            h('div', { class: 'spark1' }),
+            h('div', { class: 'spark1' , oncreate: el => actions.makeSpark(el) } ),
           ]),
-          h('p', { class: 'measurement' })
-        ])
+          h('div', { class: 'measurement' }, state.measurement)
       ])
     );
 
     grafana.chart = app(state, actions, view, grafana.$mycontainer);
+
   }
 
 
@@ -297,6 +311,8 @@ export default class SingleStatWidget extends AbstractGrafana {
     grafana.chart.data = null;
   }
 
- 
+  resize(grafana){
+   grafana.$mycontainer.style.fontSize = parseInt(grafana.$mycontainer.parentElement.style.width) * 0.025 + 'px';
+  }
 
 }
