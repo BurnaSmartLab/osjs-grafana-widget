@@ -142,4 +142,7 @@ export default class BadgeWidget extends AbstractGrafana {
   destroy(grafana) {
     grafana = null;
   }
+  resize(grafana) {
+    grafana.$mycontainer.style.fontSize = parseInt(grafana.$mycontainer.parentElement.style.width) * 0.025 + 'px';
+  }
 }

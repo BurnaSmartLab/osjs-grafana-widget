@@ -26,6 +26,7 @@ export const en_EN = {
   BADGE: 'Badge',
   LBL_SET_UNIT: 'Unit',
   LBL_GRAFANA: 'Grafana',
+  SINGLESTAT: 'Single Stat'
 };
 
 export const fa_FA = {
@@ -56,4 +57,5 @@ export const fa_FA = {
   BADGE: 'نشان',
   LBL_SET_UNIT: 'واحد',
   LBL_GRAFANA: 'گرافانا',
+  SINGLESTAT: 'تک آماری'
 };

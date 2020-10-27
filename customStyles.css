@@ -45,7 +45,7 @@
 
 /* The grid: Four equal columns that floats next to each other */
 .slider-column {
-  float: left;
+  /*float: left;*/
   width: 25%;
   height: 70px;
   padding: 10px;
@@ -66,19 +66,16 @@
 }
 
 /* Clear floats after the columns */
+.slider-row {
+  background-color: rgba(0, 243, 255, 0.84);
+  width: 2160px;
+  overflow-x: scroll;
+  height: 82px;
+}
 .slider-row:after {
   content: "";
   display: table;
   clear: both;
-}
-
-/* Expanding image text */
-#imgtext {
-  position: absolute;
-  bottom: 15px;
-  left: 15px;
-  color: white;
-  font-size: 20px;
 }
 
 /* Container needed to position the overlay. Adjust the width as needed */
@@ -193,8 +190,8 @@
 .item {
   float: left;
   /*background-color: #95dde0;*/
-  padding: 0 10px;
-  width: 25%;
+  padding: 10px;
+  width: 6.25%;
   height: 70px;
 }
 .item img:hover {
@@ -204,3 +201,4 @@
 .empty {
   width: 10px;
 }
+

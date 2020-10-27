@@ -1,4 +1,4 @@
-import { Widget } from '@osjs/widgets';
+import {Widget} from '@osjs/widgets';
 
 import * as translations from './locales.js';
 import widgetItem from './src/widgetItems';
@@ -61,7 +61,7 @@ export default class GrafanaWidget extends Widget {
   // When widget was resized
   onResize() {
     this.widget.resize(this);
-    
+
   }
 
   // When widget was moved
@@ -86,7 +86,7 @@ export default class GrafanaWidget extends Widget {
   // A custom set of menu entries
   getContextMenu() {
     // eslint-disable-next-line no-unused-vars
-    const { translatable } = this.core.make('osjs/locale');
+    const {translatable} = this.core.make('osjs/locale');
     const __ = translatable(translations);
     return [{
       label: __('LBL_SET_SETTING'),
@@ -108,7 +108,7 @@ export default class GrafanaWidget extends Widget {
 
   createSettingDialog() {
     // eslint-disable-next-line no-unused-vars
-    const { translate: _, translatable } = this.core.make('osjs/locale');
+    const {translate: _, translatable} = this.core.make('osjs/locale');
     const __ = translatable(translations);
     let advancedSetting = {};
     let x = {};
@@ -126,13 +126,13 @@ export default class GrafanaWidget extends Widget {
         unitValue: this.options.unit,
       }, {
         // actions
-        onMeasurementChange: measurementValue => state => ({ measurementValue }),
+        onMeasurementChange: measurementValue => state => ({measurementValue}),
         onTitleChange: titleValue => state => ({titleValue}),
         onUnitChange: unitValue => state => ({unitValue}),
-        onTimeRangeChange: timeRangeValue => state => ({ timeRangeValue }),
-        onRefreshTimeChange: refreshTimeValue => state => ({ refreshTimeValue }),
-        onGroupByChange: groupByValue => state => ({ groupByValue }),
-        onAggregateSelectChange: aggregateSelectValue => state => ({ aggregateSelectValue }),
+        onTimeRangeChange: timeRangeValue => state => ({timeRangeValue}),
+        onRefreshTimeChange: refreshTimeValue => state => ({refreshTimeValue}),
+        onGroupByChange: groupByValue => state => ({groupByValue}),
+        onAggregateSelectChange: aggregateSelectValue => state => ({aggregateSelectValue}),
         createSelect2: el => (state, actions) => {
           let measurementSelect = $(el);
           measurementSelect.select2({
@@ -157,7 +157,7 @@ export default class GrafanaWidget extends Widget {
                     results: measurements
                   };
                 }
-                return { results: [] };
+                return {results: []};
               }
             },
           });
@@ -383,7 +383,7 @@ export default class GrafanaWidget extends Widget {
               }),
               h(Label, {}, __('LBL_SET_TIME_GROUP_BY')),
               h(SelectField, {
-                choices: Object.assign({}, ...Object.keys(dialogChoices.GroupBy).map(k => ({ [k]: __(dialogChoices.GroupBy[k]) }))),
+                choices: Object.assign({}, ...Object.keys(dialogChoices.GroupBy).map(k => ({[k]: __(dialogChoices.GroupBy[k])}))),
                 value: state.groupByValue,
                 // value: state.groupByRange,
                 onchange: (ev, value) => actions.onGroupByChange(value)
@@ -399,22 +399,22 @@ export default class GrafanaWidget extends Widget {
                 value: state.aggregateSelectValue,
                 onchange: (ev, value) => actions.onAggregateSelectChange(value)
               }, [
-                h('optgroup', { label: 'Aggregations' }, [
-                  Object.entries(dialogChoices.Aggregations).map((x) => h('option', { value: x[0] }, x[1])),
+                h('optgroup', {label: 'Aggregations'}, [
+                  Object.entries(dialogChoices.Aggregations).map((x) => h('option', {value: x[0]}, x[1])),
 
                 ]),
-                h('optgroup', { label: 'Selectors' }, [
-                  Object.entries(dialogChoices.Selectors).map((x) => h('option', { value: x[0] }, x[1])),
+                h('optgroup', {label: 'Selectors'}, [
+                  Object.entries(dialogChoices.Selectors).map((x) => h('option', {value: x[0]}, x[1])),
                 ]),
               ]),
             ]),
-            h('div', { class: 'hidden-div' }),
+            h('div', {class: 'hidden-div'}),
           ])
         ]);
       }, $content);
 
-      dialogWindow.on("num-row-changed", () => {
-        const $outerBox = dialogWindow.$content.querySelector(".outerBox");
+      dialogWindow.on('num-row-changed', () => {
+        const $outerBox = dialogWindow.$content.querySelector('.outerBox');
         const height = this.getNewWindowHeight(dialogWindow, $outerBox);
         dialogWindow.setDimension({
           height
