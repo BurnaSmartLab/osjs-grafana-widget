@@ -117,7 +117,7 @@ export default class SingleStatWidget extends AbstractGrafana {
           bottom: 10,
         }
       },
-      colors: ['#fff'],
+      colors: [grafana.options.fontColor],
       tooltip: {
         x: {
           show: false
@@ -154,11 +154,19 @@ export default class SingleStatWidget extends AbstractGrafana {
         })
       }, 
 
-      setGradientColor: (el) => {
+      setColor: (el) => {
         grafana.options.widgetOptions.singleStat.gradeThresholds.map( elem => {
           if ( calcAvg >= elem.lowScore && calcAvg < elem.highScore){
             //generate a gradient background color based on user chosen colors
             el.style.backgroundImage = "linear-gradient(170deg,"+ elem.color+" 10%,  #E7EFF1 100%)";
+            let result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(elem.color);
+            result = {
+              r: parseInt(result[1], 16),
+              g: parseInt(result[2], 16),
+              b: parseInt(result[3], 16)
+            };
+            //el.style.backgroundImage = `linear-gradient(to right, rgba(${result.r},${result.g}, ${result.b},0), rgba(231,239,241,0.5))`;
+            el.style.color = grafana.options.fontColor;
           }
         })
       }
@@ -166,7 +174,7 @@ export default class SingleStatWidget extends AbstractGrafana {
     };
     const view = (state, actions) => (
       
-      h('div', { class: 'outerDiv' , oncreate: el => actions.setGradientColor(el)}, [
+      h('div', { class: 'outerDiv' , oncreate: el => actions.setColor(el)}, [
         h('div', { 
           class:'sparkboxes',
         },[  

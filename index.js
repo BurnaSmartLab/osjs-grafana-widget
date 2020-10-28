@@ -32,6 +32,7 @@ export default class GrafanaWidget extends Widget {
       refreshTime: 'off',
       widgetType: null,
       widgetOptions: {},  // object properties of each widget class that must be saved
+      fontColor: '#fff'
 
     });
 
@@ -71,7 +72,7 @@ export default class GrafanaWidget extends Widget {
   // Every rendering tick (or just once if no canvas)
   async render() {
     //console.log('sssssssssssssssssssss');
-    //console.log(document.getElementsByClassName('osjs-root').getAttribute('translate'));
+    //console.log(document.getElementsByClassName('osjs-root').getAttribute('data-dir'));
     await this.widget.printChart(this);
   }
 
@@ -128,6 +129,7 @@ export default class GrafanaWidget extends Widget {
         aggregateSelectValue: this.options.aggregateSelect,
         titleValue: this.options.title,
         unitValue: this.options.unit,
+        fontColorValue: this.options.fontColor
       }, {
         // actions
         onMeasurementChange: measurementValue => state => ({ measurementValue }),
@@ -137,6 +139,7 @@ export default class GrafanaWidget extends Widget {
         onRefreshTimeChange: refreshTimeValue => state => ({ refreshTimeValue }),
         onGroupByChange: groupByValue => state => ({ groupByValue }),
         onAggregateSelectChange: aggregateSelectValue => state => ({ aggregateSelectValue }),
+        onFontColorChange: fontColorValue => state => ({ fontColorValue }),
         createSelect2: el => (state, actions) => {
           let measurementSelect = $(el);
           measurementSelect.select2({
@@ -411,6 +414,12 @@ export default class GrafanaWidget extends Widget {
                   Object.entries(dialogChoices.Selectors).map((x) => h('option', { value: x[0] }, x[1])),
                 ]),
               ]),
+              h(Label, {}, __('LBL_SET_FONTCOLOR')),
+              h(SelectField, {
+                choices:Object.assign({}, ...Object.keys(dialogChoices.FontColors).map(k => ({[k]: __(dialogChoices.FontColors[k])}))),
+                value: state.fontColorValue,
+                onchange: (ev, value) => actions.onFontColorChange(value)
+              }),
             ]),
             h('div', { class: 'hidden-div' }),
           ])
@@ -437,6 +446,7 @@ export default class GrafanaWidget extends Widget {
         this.options.timeGroupBy = value.groupByValue;
         this.options.refreshTime = value.refreshTimeValue;
         this.options.aggregateSelect = value.aggregateSelectValue;
+        this.options.fontColor = value.fontColorValue;
         this.widget.saveWidgetOptions(this.options.widgetOptions, advancedSetting.state);
         this.saveSettings();
         this.init();

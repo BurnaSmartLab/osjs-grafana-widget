@@ -135,10 +135,15 @@ export default class BadgeWidget extends AbstractGrafana {
       title: grafana.options.title === '' ? grafana.options.measurement : grafana.options.title,
       unit: grafana.options.unit,
     };
-    const actions = {};
+    const actions = {
+      setColor: (el) => {
+            el.style.color = grafana.options.fontColor;
+      }
+    };
     const view = state => (
         h('div', {
-          class: 'double-val-label'
+          class: 'double-val-label',
+          oncreate: el => actions.setColor(el)
         }, [
           h('span', {}, state.title),
           h('span', {

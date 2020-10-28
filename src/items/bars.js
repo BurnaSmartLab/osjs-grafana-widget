@@ -70,8 +70,9 @@ export default class BarWidget extends AbstractGrafana {
             .call(d3.axisLeft(y).ticks(5, data.format))
             .selectAll("text")
             .style("font-size", "0.9em")
-            .style("color", "black")
+            .style("color", grafana.options.fontColor)
             .style("font-weight", "500");
+
 
 
         let xAxis = g => g
@@ -79,7 +80,7 @@ export default class BarWidget extends AbstractGrafana {
             .call(d3.axisBottom(x).tickValues(tickValues).tickFormat(i => parseDate(data[i].name)).tickSizeOuter(0))
             .selectAll("text")
             .style("font-size", "0.9em")
-            .style("color", "black")
+            .style("color", grafana.options.fontColor)
             .style("font-weight", "500");
 
 
@@ -112,6 +113,7 @@ export default class BarWidget extends AbstractGrafana {
             .attr("y", height - 10)
             .style("text-anchor", "middle")
             .style("font-Size", "1.5em")
+            .style("fill", grafana.options.fontColor)
             .text((grafana.options.title === '' ? grafana.options.measurement : grafana.options.title) + 
                   (grafana.options.unit === '' ? '': ' (' + grafana.options.unit + ')'))
 

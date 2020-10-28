@@ -16,7 +16,6 @@
 
   
   .sparkboxes .details {
-    color: #fff;
     font-size:2.5em;
   }
 
@@ -33,7 +32,6 @@
  
  
  .outerDiv .measurement{
-  color: #fff;
   font-size: 2em;
   display: table-cell;
   float:left;

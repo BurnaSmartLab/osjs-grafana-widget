@@ -37,14 +37,19 @@ export default class StatsdWidget extends AbstractGrafana {
     let title = grafana.chart.chartContainer.createChild(am4core.Label);
     title.text = '- ';
     title.text +=  grafana.options.title === '' ? grafana.options.measurement : grafana.options.title;
-    title.text +=  grafana.options.unit === '' ? '': ' (' + grafana.options.unit + ')'
+    title.text +=  grafana.options.unit === '' ? '': ' (' + grafana.options.unit + ')';
+    title.fill = grafana.options.fontColor;
     title.fontSize = '1.5em';
+
+    grafana.chart.rtl = document.getElementsByClassName('osjs-root')[0].getAttribute('data-dir') === 'rtl';
 
     // get chart data and assigned it to this.chart.data
     this.updateChartData(grafana);
 
     let dateAxis = grafana.chart.xAxes.push(new am4charts.DateAxis());
     dateAxis.fontSize = '1.2em';
+    dateAxis.renderer.labels.template.fill = grafana.options.fontColor;
+    dateAxis.renderer.grid.template.stroke = grafana.options.fontColor;
 
 
     dateAxis.baseInterval = {
@@ -57,12 +62,15 @@ export default class StatsdWidget extends AbstractGrafana {
     valueAxis.tooltip.disabled = true;
     valueAxis.title.text = '';
     valueAxis.fontSize = '1.2em';
+    valueAxis.renderer.labels.template.fill = grafana.options.fontColor;
+    valueAxis.renderer.grid.template.stroke = grafana.options.fontColor;
 
     let series = grafana.chart.series.push(new am4charts.LineSeries());
     series.dataFields.dateX = 'date';
     series.dataFields.valueY = 'events';
     series.tooltipText = 'Events: [bold]{valueY}[/]';
     series.fillOpacity = 0.8;
+    series.fill = '#33D1FF'
 
 
     grafana.chart.cursor = new am4charts.XYCursor();
