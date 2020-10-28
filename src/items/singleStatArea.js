@@ -1,15 +1,16 @@
 import AbstractGrafana from '../AbstractGrafana';
 
 import ApexCharts from 'apexcharts';
-import './singleStat.css';
+import '../../customStyles.css';
+import './singleStatArea.css';
 
 import { app, h } from 'hyperapp';
 import { Label, Box, TextField, Button } from '@osjs/gui';
 
-import '../../customStyles.css';
+
 import * as translations from '../../locales';
 
-export default class SingleStatWidget extends AbstractGrafana {
+export default class SingleStatAreaWidget extends AbstractGrafana {
   constructor(grafana) {
 
     super();
@@ -19,8 +20,8 @@ export default class SingleStatWidget extends AbstractGrafana {
     grafana.attributes.maxDimension.width = 350;
     grafana.attributes.maxDimension.height = 250;
 
-    if (!('singleStat' in grafana.options.widgetOptions)) {
-      grafana.options.widgetOptions.singleStat = {
+    if (!('singleStatArea' in grafana.options.widgetOptions)) {
+      grafana.options.widgetOptions.singleStatArea = {
         gradeThresholds: [{
           title: 'status',
           color: '#1464F4',
@@ -82,59 +83,57 @@ export default class SingleStatWidget extends AbstractGrafana {
         }
       }
     };
-
-    let spark1 = {
+    var spark1 = {
       chart: {
-        animations: {
-          enabled: true,
-      },
-        id: 'spark1',
-        group: 'sparks',
-        type: 'line',
+        id: 'sparkline3',
+        group: 'sparklines',
+        type: 'area',
+        height: 160,
         sparkline: {
           enabled: true
         },
-        dropShadow: {
-          enabled: true,
-          top: 1,
-          left: 1,
-          blur: 2,
-          opacity: 0.2,
-        }
+      },
+      stroke: {
+        curve: 'straight'
+      },
+      fill: {
+        opacity: 1,
       },
       series: [{
+        name: 'Profits',
         data: values
       }],
-      stroke: {
-        curve: 'smooth'
+      labels: [...Array(24).keys()].map(n => `2018-09-0${n+1}`),
+      xaxis: {
+        type: 'datetime',
       },
-      markers: {
-        size: 0
+      yaxis: {
+        min: 0
       },
-      grid: {
-        padding: {
-          top: 0,
-          bottom: 10,
+      colors: ['#008FFB'],
+      //colors: ['#5564BE'],
+      title: {
+        text: '$135,965',
+        offsetX: 30,
+        style: {
+          fontSize: '24px',
+          cssClass: 'apexcharts-yaxis-title'
         }
       },
-      colors: ['#fff'],
-      tooltip: {
-        x: {
-          show: false
-        },
-        y: {
-          title: {
-            formatter: function formatter(val) {
-              return '';
-            }
-          }
+      subtitle: {
+        text: 'Profits',
+        offsetX: 30,
+        style: {
+          fontSize: '14px',
+          cssClass: 'apexcharts-yaxis-title'
         }
       }
     }
 
-    if (grafana.options.refreshTime !== 'off') {
-      spark1.chart.animations.enabled = false;
-    }
+
+    // if (grafana.options.refreshTime !== 'off') {
+    //   spark1.chart.animations.enabled = false;
+    // }
 
     //hyperapp
     const state = {
@@ -147,7 +146,7 @@ export default class SingleStatWidget extends AbstractGrafana {
       },
 
       setStatus: (el) => {
-        grafana.options.widgetOptions.singleStat.gradeThresholds.map( elem => {
+        grafana.options.widgetOptions.singleStatArea.gradeThresholds.map( elem => {
           if ( calcAvg >= elem.lowScore && calcAvg < elem.highScore){
             el.innerHTML = elem.title;
           }
@@ -155,7 +154,7 @@ export default class SingleStatWidget extends AbstractGrafana {
       }, 
 
       setGradientColor: (el) => {
-        grafana.options.widgetOptions.singleStat.gradeThresholds.map( elem => {
+        grafana.options.widgetOptions.singleStatArea.gradeThresholds.map( elem => {
           if ( calcAvg >= elem.lowScore && calcAvg < elem.highScore){
             //generate a gradient background color based on user chosen colors
             el.style.backgroundImage = "linear-gradient(170deg,"+ elem.color+" 10%,  #E7EFF1 100%)";
@@ -165,21 +164,14 @@ export default class SingleStatWidget extends AbstractGrafana {
 
     };
     const view = (state, actions) => (
-      
-      h('div', { class: 'outerDiv' , oncreate: el => actions.setGradientColor(el)}, [
-        h('div', { 
-          class:'sparkboxes',
-        },[  
-            h('div', { class: 'details' }, [
-              h('p', { class: 'singleValue' }, state.singleValue.toFixed(2) + grafana.options.unit),
-              h('p', { class: 'status' , oncreate: el => actions.setStatus(el)} )
-            ]),
-            h('div', { class: 'spark1' , oncreate: el => actions.makeSpark(el) } ),
-          ]),
-          h('div', { class: 'measurement' }, state.measurement)
-      ])
+        h('div', { oncreate: el => actions.setGradientColor(el) }, [
+          //  h('div', { class: " sparkgboxes2 " }, [
+              //  h('div', { class: "boxg box3g" }, [
+                    h('div', { id: 'spark2', oncreate: el => actions.makeSpark(el) }),
+               // ]),
+            //]),
+        ])
     );
-
     grafana.chart = app(state, actions, view, grafana.$mycontainer);
 
   }
@@ -197,7 +189,7 @@ export default class SingleStatWidget extends AbstractGrafana {
     const {translatable} = grafana.core.make('osjs/locale');
     const __ = translatable(translations);
     let arr = [];   // used for displaying previously set thresholds by opening dialog
-    grafana.options.widgetOptions.singleStat.gradeThresholds.map((item) => {
+    grafana.options.widgetOptions.singleStatArea.gradeThresholds.map((item) => {
       arr.push(item);
     });
     let suggestedThre = arr[arr.length - 1].lowScore;  // used for suggesting threshold value based on last set threshold on dialog
@@ -304,19 +296,19 @@ export default class SingleStatWidget extends AbstractGrafana {
     return {state, actions, view};
   }
   saveWidgetOptions(widgetOptions, advSetting) {
-    widgetOptions.singleStat.gradeThresholds = [];  // delete the previous set thresholds
+    widgetOptions.singleStatArea.gradeThresholds = [];  // delete the previous set thresholds
     advSetting.gradeThresholds.sort((a, b) => (a.lowScore > b.lowScore) ? 1 : (b.lowScore > a.lowScore) ? -1 : 0);  // sort based on lowscore
     advSetting.gradeThresholds = advSetting.gradeThresholds.filter(item => item.lowScore !== '' && !isNaN(item.lowScore));  // remove objects with undefined threshold
     for (let i = advSetting.gradeThresholds.length - 1; i >= 0; i--) {
       if (i === advSetting.gradeThresholds.length - 1) {
-        widgetOptions.singleStat.gradeThresholds.unshift({
+        widgetOptions.singleStatArea.gradeThresholds.unshift({
           title: advSetting.gradeThresholds[i].title,
           color: advSetting.gradeThresholds[i].color,
           lowScore: parseInt(advSetting.gradeThresholds[i].lowScore),
           highScore:100000000000
         });
       } else {
-        widgetOptions.singleStat.gradeThresholds.unshift({
+        widgetOptions.singleStatArea.gradeThresholds.unshift({
           title: advSetting.gradeThresholds[i].title,
           color: advSetting.gradeThresholds[i].color,
           lowScore: parseInt(advSetting.gradeThresholds[i].lowScore),

@@ -2,16 +2,26 @@ import * as am4core from '@amcharts/amcharts4/core';
 import * as am4charts from '@amcharts/amcharts4/charts';
 import am4themes_animated from '@amcharts/amcharts4/themes/animated';
 import AbstractGrafana from '../AbstractGrafana';
+import { serializeUrl } from '@amcharts/amcharts4/.internal/core/utils/Utils';
 
 export default class StatsdWidget extends AbstractGrafana {
   constructor(grafana) {
-    // custom widget option could be added here.
+
     super();
-    grafana.options.dimension.width = 300;
-    grafana.options.dimension.height= 200;
+
     grafana.attributes.minDimension.width = 300;
     grafana.attributes.minDimension.height = 200;
+    grafana.attributes.maxDimension.width = 500;
+    grafana.attributes.maxDimension.height = 350;
     this.chartSize = 0;
+
+    if (!('statsd' in grafana.options.widgetOptions)) {
+      grafana.options.widgetOptions.statsd = {
+          //empty
+      };
+      grafana.options.dimension.width = 300;
+      grafana.options.dimension.height = 200;
+  }
   }
   // Every rendering tick (or just once if no canvas)
   async printChart(grafana) {
@@ -25,13 +35,16 @@ export default class StatsdWidget extends AbstractGrafana {
     grafana.chart.paddingRight = 20;
 
     let title = grafana.chart.chartContainer.createChild(am4core.Label);
-    title.color = '#df1';
-    title.text = '- ' + grafana.options.measurement;
+    title.text = '- ';
+    title.text +=  grafana.options.title === '' ? grafana.options.measurement : grafana.options.title;
+    title.text +=  grafana.options.unit === '' ? '': ' (' + grafana.options.unit + ')'
+    title.fontSize = '1.5em';
 
     // get chart data and assigned it to this.chart.data
     this.updateChartData(grafana);
 
     let dateAxis = grafana.chart.xAxes.push(new am4charts.DateAxis());
+    dateAxis.fontSize = '1.2em';
 
 
     dateAxis.baseInterval = {
@@ -43,6 +56,7 @@ export default class StatsdWidget extends AbstractGrafana {
     let valueAxis = grafana.chart.yAxes.push(new am4charts.ValueAxis());
     valueAxis.tooltip.disabled = true;
     valueAxis.title.text = '';
+    valueAxis.fontSize = '1.2em';
 
     let series = grafana.chart.series.push(new am4charts.LineSeries());
     series.dataFields.dateX = 'date';

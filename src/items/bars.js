@@ -4,12 +4,21 @@ import AbstractGrafana from '../AbstractGrafana';
 
 export default class BarWidget extends AbstractGrafana {
     constructor(grafana) {
+
         super();
-        //custom widget option could be added here.
-        grafana.options.dimension.width = 300;
-        grafana.options.dimension.height= 200;
+
         grafana.attributes.minDimension.width = 300;
         grafana.attributes.minDimension.height = 200;
+        grafana.attributes.maxDimension.width = 500;
+        grafana.attributes.maxDimension.height = 400;
+
+        if (!('barChart' in grafana.options.widgetOptions)) {
+            grafana.options.widgetOptions.barChart = {
+                //empty
+            };
+            grafana.options.dimension.width = 300;
+            grafana.options.dimension.height = 200;
+        }
     }
 
     async printChart(grafana) {
@@ -35,9 +44,9 @@ export default class BarWidget extends AbstractGrafana {
 
         // customizing x axis according to the selected timerange
         let parseDate = null,
-        tickValues = [],
-        tickCount = 0,
-        startValue = 0;
+            tickValues = [],
+            tickCount = 0,
+            startValue = 0;
         if (grafana.options.timeRange >= 172800000) {
             parseDate = d3.timeFormat("%d %b");
             tickCount = 2;
@@ -55,23 +64,23 @@ export default class BarWidget extends AbstractGrafana {
             startValue += Math.round(data.length / tickCount);
         }
 
-        
+
         let yAxis = g => g
             .attr("transform", `translate(${margin.left},0)`)
             .call(d3.axisLeft(y).ticks(5, data.format))
             .selectAll("text")
-            .style("font-size","1.1em")
-            .style("color","black")
-            .style("font-weight","500");
+            .style("font-size", "0.9em")
+            .style("color", "black")
+            .style("font-weight", "500");
 
 
         let xAxis = g => g
             .attr("transform", `translate(0,${height - margin.bottom})`)
             .call(d3.axisBottom(x).tickValues(tickValues).tickFormat(i => parseDate(data[i].name)).tickSizeOuter(0))
             .selectAll("text")
-            .style("font-size","1.1em")
-            .style("color","black")
-            .style("font-weight","500");
+            .style("font-size", "0.9em")
+            .style("color", "black")
+            .style("font-weight", "500");
 
 
         grafana.chart = d3.select(grafana.$mycontainer)
@@ -98,11 +107,13 @@ export default class BarWidget extends AbstractGrafana {
             .call(yAxis)
 
         // text label for the x axis
-        grafana.chart.append("text")     
-            .attr("x", width / 2 )
-            .attr("y",  height - 5)
+        grafana.chart.append("text")
+            .attr("x", width / 2)
+            .attr("y", height - 10)
             .style("text-anchor", "middle")
-            .text(grafana.options.measurement);
+            .style("font-Size", "1.5em")
+            .text((grafana.options.title === '' ? grafana.options.measurement : grafana.options.title) + 
+                  (grafana.options.unit === '' ? '': ' (' + grafana.options.unit + ')'))
 
 
         if (grafana.options.refreshTime !== 'off') {
@@ -148,13 +159,13 @@ export default class BarWidget extends AbstractGrafana {
     saveWidgetOptions(widgetOptions, advSetting) {
     }
 
-    destroy(grafana){
+    destroy(grafana) {
 
-      }
+    }
 
-      resize(grafana){
+    resize(grafana) {
         grafana.$mycontainer.style.fontSize = parseInt(grafana.$mycontainer.parentElement.style.width) * 0.025 + 'px';
-      }
+    }
 
 
 }

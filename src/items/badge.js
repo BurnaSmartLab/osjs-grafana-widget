@@ -9,16 +9,21 @@ import * as translations from '../../locales';
 
 export default class BadgeWidget extends AbstractGrafana {
   constructor(grafana) {
-    grafana.options.dimension.width = 150;
-    grafana.options.dimension.height= 25;
-    grafana.attributes.minDimension.width = 150;
-    grafana.attributes.minDimension.height = 25;
+
     super();
+
+    //grafana.attributes.minDimension.width = 50;
+    grafana.attributes.minDimension.height = 30;
+    grafana.attributes.maxDimension.width = 600;
+    grafana.attributes.maxDimension.height = 30;
+
     // custom widget option could be added here.
     if (!('badge' in grafana.options.widgetOptions)) {
       grafana.options.widgetOptions.badge = {
         color: '#54b947'
       };
+      grafana.options.dimension.width = 200;
+      grafana.options.dimension.height= 30;
     }
   }
   // Every rendering tick (or just once if no canvas)

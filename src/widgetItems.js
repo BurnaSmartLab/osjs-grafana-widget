@@ -2,13 +2,14 @@ import StatsdWidget from './items/statsd';
 import GaugeWidget from './items/gauge';
 import BarWidget from './items/bars';
 import SingleStatWidget from './items/singlestat';
-//import BarChartAppexWidget from './items/barChart-apex';
+import SingleStatAreaWidget from './items/singleStatArea';
 import BadgeWidget from './items/badge';
 
 import statsdImage from '../XY-Chart.png';
 import gaugeImage from '../gauge-Chart.png';
 import barChartImage from '../bar-Chart.png';
 import singleStatImage from '../singleStat-Chart.png';
+import badgeImage from '../badge-Chart.png';
 
 const widgetItem = {
   statsd:{
@@ -31,16 +32,15 @@ const widgetItem = {
     name: 'SINGLESTAT',
     image: singleStatImage
   },
-  // barChartAppex:{
-  //   object: BarChartAppexWidget,
-  //   name: 'SINGLESTAT',
-  //   image: barChartImage
-  // },
-
+  singleStatArea:{
+    object: SingleStatAreaWidget,
+    name: 'SINGLESTATArea',
+    image: singleStatImage
+  },
   badge:{
     object: BadgeWidget,
     name: 'BADGE',
-    image: barChartImage
+    image:badgeImage
   },
 };
 export default widgetItem;

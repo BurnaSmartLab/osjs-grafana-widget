@@ -70,6 +70,8 @@ export default class GrafanaWidget extends Widget {
 
   // Every rendering tick (or just once if no canvas)
   async render() {
+    //console.log('sssssssssssssssssssss');
+    //console.log(document.getElementsByClassName('osjs-root').getAttribute('translate'));
     await this.widget.printChart(this);
   }
 
@@ -103,6 +105,7 @@ export default class GrafanaWidget extends Widget {
       if (key === this.options.widgetType) {
         //this.widget = new widgetItem[key].object(this.options.widgetOptions);
         this.widget = new widgetItem[key].object(this);
+        //console.log(this.options.dimension);
       }
     }
   }
