@@ -27,6 +27,9 @@ export default class GaugeWidget extends AbstractGrafana {
         maxRange: 100,
       };
     }
+
+    this.label1 = null;
+    this.label2 = null;
   }
   // Every rendering tick (or just once if no canvas)
   async printChart(grafana) {
@@ -52,9 +55,9 @@ export default class GaugeWidget extends AbstractGrafana {
     am4core.useTheme(am4themes_animated);
     grafana.chart = am4core.create(grafana.$mycontainer, am4charts.GaugeChart);
 
+    grafana.chart.rtl = document.getElementsByClassName('osjs-root')[0].getAttribute('data-dir') === 'rtl';
     let chartMin = grafana.options.widgetOptions.gauge.minRange;
     let chartMax = grafana.options.widgetOptions.gauge.maxRange;
-
 
     let data = {
       score: calcAvg,
@@ -136,7 +139,7 @@ export default class GaugeWidget extends AbstractGrafana {
      */
 
     let label = grafana.chart.radarContainer.createChild(am4core.Label);
-    label.isMeasured = false;
+    label.isMeasured = true;
     label.fontSize = '5em';
     label.x = am4core.percent(50);
     label.paddingBottom = 15;
@@ -146,19 +149,19 @@ export default class GaugeWidget extends AbstractGrafana {
     label.text = data.score.toFixed(1);
     // label.text = '{score}';
     label.fill = am4core.color(matchingGrade.color);
-
+    this.label1 = label;
     /**
      * Label 2
      */
 
     let label2 = grafana.chart.radarContainer.createChild(am4core.Label);
-    label2.isMeasured = false;
+    label2.isMeasured = true;
     label2.fontSize = '2em';
     label2.horizontalCenter = 'middle';
     label2.verticalCenter = 'bottom';
     label2.text = matchingGrade.title.toUpperCase();
     label2.fill = am4core.color(matchingGrade.color);
-
+    this.label2 = label2;
 
     /**
      * Hand
@@ -398,6 +401,21 @@ export default class GaugeWidget extends AbstractGrafana {
   }
 
   resize(grafana) {
-    grafana.$mycontainer.style.fontSize = parseInt(grafana.$mycontainer.parentElement.style.width) * 0.025 + 'px';
+    grafana.$mycontainer.style.fontSize = (grafana.$mycontainer.parentElement.offsetWidth) * 0.025 + 'px';
+    if(this.label1 !== null) {
+      this.label1.horizontalCenter = 'middle';
+      this.label2.horizontalCenter = 'middle';
+      this.label1.x = am4core.percent(50);
+      this.label1.verticalCenter = 'bottom';
+      this.label1.paddingBottom = 15;
+      // //////
+      this.label1.contentValign = 'middle';
+      this.label1.marginBottom = '70%';
+      this.label1.contentValign = 'middle';
+      this.label1.contentAlign = 'middle';
+      this.label2.contentAlign = 'middle';
+
+      // this.title.align = 'center';
+    }
   }
 }

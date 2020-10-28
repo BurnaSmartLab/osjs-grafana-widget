@@ -18,8 +18,8 @@ export default class StatsdWidget extends AbstractGrafana {
 
     // Create chart
     grafana.chart = am4core.create(grafana.$mycontainer, am4charts.XYChart);
+    grafana.chart.rtl = document.getElementsByClassName('osjs-root')[0].getAttribute('data-dir') === 'rtl';
     grafana.chart.paddingRight = 20;
-
     let title = grafana.chart.chartContainer.createChild(am4core.Label);
     title.color = '#df1';
     title.text = '- ' + grafana.options.measurement;

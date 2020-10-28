@@ -10,10 +10,12 @@
   "license": "ISC",
   "dependencies": {
     "@amcharts/amcharts4": "^4.10.3",
-    "apexcharts": "^3.22.0",
     "@grafana/data": "^7.2.1",
+    "@splidejs/splide": "^2.4.14",
+    "apexcharts": "^3.22.0",
     "bootstrap": "^4.5.3",
     "d3": "^6.2.0",
+    "hyperapp-render": "^3.4.0",
     "jquery": "^3.5.1",
     "select2": "^4.0.13"
   }
