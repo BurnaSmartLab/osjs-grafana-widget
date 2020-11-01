@@ -21,6 +21,7 @@ export const en_EN = {
   LBL_TITLE: 'Title',
   LBL_COLOR: 'Color',
   LBL_SET_COLOR: 'Set color',
+  LBL_SET_FONTCOLOR: 'Font Color',
   LBL_GAUGE_REMOVE: 'Remove',
   LBL_GAUGE_ADD_THRESHOLD: 'Add Threshold',
   BADGE: 'Badge',

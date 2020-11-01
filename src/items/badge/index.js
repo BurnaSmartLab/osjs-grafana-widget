@@ -1,20 +1,26 @@
-import AbstractGrafana from '../AbstractGrafana';
+import AbstractGrafana from '../../AbstractGrafana';
 
 import {app, h} from 'hyperapp';
 import {TextField, Button, Label, Box, BoxContainer} from '@osjs/gui';
-import '../../node_modules/bootstrap/dist/css/bootstrap.min.css';
-// import '../../node_modules/bootstrap/dist/js/bootstrap.bundle.min';
+import 'bootstrap/dist/css/bootstrap.min.css';
 import './badge.scss';
 import * as translations from '../../locales';
 
 export default class BadgeWidget extends AbstractGrafana {
-  constructor(widgetOptions) {
+  constructor(grafana) {
+
     super();
+    grafana.attributes.minDimension.height = 30;
+    grafana.attributes.maxDimension.width = 600;
+    grafana.attributes.maxDimension.height = 30;
+
     // custom widget option could be added here.
-    if (!('badge' in widgetOptions)) {
-      widgetOptions.badge = {
+    if (!('badge' in grafana.options.widgetOptions)) {
+      grafana.options.widgetOptions.badge = {
         color: '#54b947'
       };
+      grafana.options.dimension.width = 200;
+      grafana.options.dimension.height = 30;
     }
   }
   // Every rendering tick (or just once if no canvas)
@@ -82,7 +88,7 @@ export default class BadgeWidget extends AbstractGrafana {
         state.color = color;
         return ({color});
       },
-      // getValues: () => state => state,
+      getValues: () => state => state,
     };
 
     const view = (state, actions) => (
@@ -126,10 +132,15 @@ export default class BadgeWidget extends AbstractGrafana {
       title: grafana.options.title === '' ? grafana.options.measurement : grafana.options.title,
       unit: grafana.options.unit,
     };
-    const actions = {};
+    const actions = {
+      setColor: (el) => {
+        el.style.color = grafana.options.fontColor;
+      }
+    };
     const view = state => (
       h('div', {
-        class: 'double-val-label'
+        class: 'double-val-label',
+        oncreate: el => actions.setColor(el)
       }, [
         h('span', {}, state.title),
         h('span', {
@@ -145,4 +156,6 @@ export default class BadgeWidget extends AbstractGrafana {
   resize(grafana) {
     grafana.$mycontainer.style.fontSize = parseInt(grafana.$mycontainer.parentElement.style.width) * 0.025 + 'px';
   }
+
 }
+

@@ -1,22 +1,25 @@
 import * as am4core from '@amcharts/amcharts4/core';
 import * as am4charts from '@amcharts/amcharts4/charts';
 import am4themes_animated from '@amcharts/amcharts4/themes/animated';
-import AbstractGrafana from '../AbstractGrafana';
-
+import AbstractGrafana from '../../AbstractGrafana';
 import {h} from 'hyperapp';
 import {TextField, Button, Label, Box} from '@osjs/gui';
-
-import '../../customStyles.css';
+import '../../../customStyles.css';
 import './gauge.css';
 import * as translations from '../../locales';
-
 export default class GaugeWidget extends AbstractGrafana {
-  constructor(widgetOptions) {
+  constructor(grafana) {
     super();
     this.widgetHand = null;
-    // custom widget option could be added here.
-    if (!('gauge' in widgetOptions)) {
-      widgetOptions.gauge = {
+    this.label1 = null;
+    this.label2 = null;
+    this.title = null;
+    grafana.attributes.minDimension.width = 270;
+    grafana.attributes.minDimension.height = 190;
+    grafana.attributes.maxDimension.width = 400;
+    grafana.attributes.maxDimension.height = 300;
+    if (!('gauge' in grafana.options.widgetOptions)) {
+      grafana.options.widgetOptions.gauge = {
         gradeThresholds: [{
           title: 'status',
           color: '#54b947',
@@ -26,10 +29,9 @@ export default class GaugeWidget extends AbstractGrafana {
         minRange: 0,
         maxRange: 100,
       };
+      grafana.options.dimension.width = 270;
+      grafana.options.dimension.height = 190;
     }
-
-    this.label1 = null;
-    this.label2 = null;
   }
   // Every rendering tick (or just once if no canvas)
   async printChart(grafana) {
@@ -51,10 +53,15 @@ export default class GaugeWidget extends AbstractGrafana {
     } else {
       alert('HTTP-Error: ' + response.status);
     }
-
     am4core.useTheme(am4themes_animated);
     grafana.chart = am4core.create(grafana.$mycontainer, am4charts.GaugeChart);
-
+    let title = grafana.chart.chartContainer.createChild(am4core.Label);
+    title.text = '- ';
+    title.text +=  grafana.options.title === '' ? grafana.options.measurement : grafana.options.title;
+    title.text +=  grafana.options.unit === '' ? '' : ' (' + grafana.options.unit + ')';
+    title.fill = grafana.options.fontColor;
+    title.fontSize = '1.5em';
+    this.title = title;
     grafana.chart.rtl = document.getElementsByClassName('osjs-root')[0].getAttribute('data-dir') === 'rtl';
     let chartMin = grafana.options.widgetOptions.gauge.minRange;
     let chartMax = grafana.options.widgetOptions.gauge.maxRange;
@@ -63,21 +70,17 @@ export default class GaugeWidget extends AbstractGrafana {
       score: calcAvg,
       gradingData: grafana.options.widgetOptions.gauge.gradeThresholds
     };
-
     /**
      Grading Lookup
      */
-
     // create chart
     grafana.chart.hiddenState.properties.opacity = 0;
     grafana.chart.fontSize = '100%';
     grafana.chart.innerRadius = am4core.percent(80);
     grafana.chart.resizable = true;
-
     /**
      * Normal axis
      */
-
     let axis = grafana.chart.xAxes.push(new am4charts.ValueAxis());
     axis.min = chartMin;
     axis.max = chartMax;
@@ -90,9 +93,9 @@ export default class GaugeWidget extends AbstractGrafana {
     axis.renderer.ticks.template.strokeWidth = 0.5;
     axis.renderer.ticks.template.length = 5;
     axis.renderer.grid.template.disabled = true;
-    axis.renderer.labels.template.radius = am4core.percent(15);
-    axis.renderer.labels.template.fontSize = '0.9em';
-
+    axis.renderer.labels.template.radius = am4core.percent(22);
+    axis.renderer.labels.template.fontSize = '1.4em';
+    axis.renderer.labels.template.fill = grafana.options.fontColor;
     /**
      * Axis for ranges
      */
@@ -108,11 +111,10 @@ export default class GaugeWidget extends AbstractGrafana {
     axis2.renderer.labels.template.fill = am4core.color('#000');
     axis2.renderer.labels.template.fontWeight = 'bold';
     axis2.renderer.labels.template.fillOpacity = 0.3;
-
+    axis2.renderer.grid.template.stroke = grafana.options.fontColor;
     /**
      Ranges
      */
-
     for (let grading of data.gradingData) {
       let range = axis2.axisRanges.create();
       range.axisFill.fill = am4core.color(grading.color);
@@ -131,31 +133,25 @@ export default class GaugeWidget extends AbstractGrafana {
       range.label.paddingBottom = -5; // ~half font size
       range.label.fontSize = '0.9em';
     }
-
     let matchingGrade = lookUpGrade(data.score, data.gradingData);
-
     /**
      * Label 1
      */
-
     let label = grafana.chart.radarContainer.createChild(am4core.Label);
-    label.isMeasured = true;
-    label.fontSize = '5em';
+    label.isMeasured = false;
+    label.fontSize = '4em';
     label.x = am4core.percent(50);
     label.paddingBottom = 15;
     label.horizontalCenter = 'middle';
     label.verticalCenter = 'bottom';
-    // label.dataItem = data;
-    label.text = data.score.toFixed(1);
-    // label.text = '{score}';
+    label.text = data.score.toFixed(2);
     label.fill = am4core.color(matchingGrade.color);
     this.label1 = label;
     /**
      * Label 2
      */
-
     let label2 = grafana.chart.radarContainer.createChild(am4core.Label);
-    label2.isMeasured = true;
+    label2.isMeasured = false;
     label2.fontSize = '2em';
     label2.horizontalCenter = 'middle';
     label2.verticalCenter = 'bottom';
@@ -166,20 +162,17 @@ export default class GaugeWidget extends AbstractGrafana {
     /**
      * Hand
      */
-
     let hand = grafana.chart.hands.push(new am4charts.ClockHand());
     this.widgetHand = hand;
     hand.axis = axis2;
     hand.innerRadius = am4core.percent(55);
-    hand.startWidth = 8;
+    hand.startWidth = 6;
     hand.pin.disabled = true;
     hand.value = data.score;
-    hand.fill = am4core.color('#444');
-    hand.stroke = am4core.color('#000');
-
+    hand.fill = grafana.options.fontColor;
+    hand.stroke = grafana.options.fontColor;
     hand.events.on('positionchanged', () => {
       label.text = axis2.positionToValue(hand.currentPosition).toFixed(1);
-      // let value2 = axis.positionToValue(hand.currentPosition);
       let matchingGrade = lookUpGrade(axis.positionToValue(hand.currentPosition), data.gradingData);
       label2.text = matchingGrade.title.toUpperCase();
       label2.fill = am4core.color(matchingGrade.color);
@@ -193,21 +186,19 @@ export default class GaugeWidget extends AbstractGrafana {
       for (let i = 0; i < grades.length; i++) {
         if (
           grades[i].lowScore < lookupScore &&
-          grades[i].highScore >= lookupScore
+            grades[i].highScore >= lookupScore
         ) {
           return grades[i];
         }
       }
       return null;
     }
-
     if (grafana.options.refreshTime !== 'off') {
       this.startPoll(grafana);
     } else {
       grafana.stopPoll();
     }
   }
-
   startPoll(grafana) {
     grafana.stopPoll();
     grafana._interval = setInterval(async () => {
@@ -232,7 +223,6 @@ export default class GaugeWidget extends AbstractGrafana {
       this.widgetHand.showValue(calcAvgUpdated, grafana.options.refreshTime, am4core.ease.cubicOut);
     }, grafana.options.refreshTime);
   }
-
   showAdvancedSetting(grafana, dialogWindow) {
     const {translatable} = grafana.core.make('osjs/locale');
     const __ = translatable(translations);
@@ -295,7 +285,6 @@ export default class GaugeWidget extends AbstractGrafana {
         return {gradeThresholds};
       }
     };
-
     const view = (state, actions) => (
       h(Box, {
         class: 'outer'
@@ -369,7 +358,6 @@ export default class GaugeWidget extends AbstractGrafana {
     );
     return {state, actions, view};
   }
-
   saveWidgetOptions(widgetOptions, advSetting) {
     widgetOptions.gauge.minRange = parseInt(advSetting.minRange);
     widgetOptions.gauge.maxRange = parseInt(advSetting.maxRange);
@@ -394,28 +382,15 @@ export default class GaugeWidget extends AbstractGrafana {
       }
     }
   }
-
   destroy(grafana) {
     grafana.chart.data = null;
     grafana.chart.dispose();
   }
-
   resize(grafana) {
-    grafana.$mycontainer.style.fontSize = (grafana.$mycontainer.parentElement.offsetWidth) * 0.025 + 'px';
+    grafana.$mycontainer.style.fontSize = parseInt(grafana.$mycontainer.parentElement.style.width) * 0.025 + 'px';
     if(this.label1 !== null) {
-      this.label1.horizontalCenter = 'middle';
-      this.label2.horizontalCenter = 'middle';
-      this.label1.x = am4core.percent(50);
-      this.label1.verticalCenter = 'bottom';
-      this.label1.paddingBottom = 15;
-      // //////
-      this.label1.contentValign = 'middle';
-      this.label1.marginBottom = '70%';
-      this.label1.contentValign = 'middle';
-      this.label1.contentAlign = 'middle';
-      this.label2.contentAlign = 'middle';
-
-      // this.title.align = 'center';
+      this.label1.textAlign = 'middle';
+      this.label2.textAlign = 'middle';
     }
   }
 }

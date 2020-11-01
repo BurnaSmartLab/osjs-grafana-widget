@@ -34,28 +34,21 @@
 }
 
 .hidden-div{
-  /* visibility: hidden; */
   display: none;
   text-align: center;
 }
 
 * {
   box-sizing: border-box;
+  padding: 0;
 }
 
 /* The grid: Four equal columns that floats next to each other */
 .slider-column {
-  /*float: left;*/
   width: 25%;
   height: 70px;
   padding: 10px;
 }
-
-/* Style the images inside the grid */
-/*.column img {*/
-/*  opacity: 0.8;*/
-/*  cursor: pointer;*/
-/*}*/
 
 .slider-column img:hover {
   opacity: 1;
@@ -94,7 +87,6 @@
   height: 100%;
   transition: .5s ease;
   opacity:0;
-  /*font-size: 3rem;*/
   padding: 20px;
   text-align: center;
 }
@@ -115,7 +107,6 @@
   top: 53%;
   width: auto;
   padding: 5px;
-  /*margin-top: 15px;*/
   color: white;
   font-weight: bold;
   font-size: 14px;
@@ -134,7 +125,6 @@
 .prev:hover,
 .next:hover {
   color: seagreen;
-  /*background-color: rgba(0, 0, 0, 0.8);*/
   text-decoration: none;
 }
 
@@ -168,8 +158,6 @@
 }
 
 .item {
-  /*float: left;*/
-  /*background-color: #95dde0;*/
   display: inline-block;
   padding: 5px;
   width: 160px;
@@ -179,13 +167,4 @@
   opacity: 1;
 }
 
-.splide {
-  padding-top: 1em;
-}
-
-.splide__arrow--prev{
-  margin-top: -1em;
-}
-.splide__arrow--next{
-  margin-top: -1em;
-}
+.osjs-widget.active,.osjs-widget:hover{background-color:rgba(0,0,0,0)}

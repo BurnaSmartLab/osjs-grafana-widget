@@ -23,4 +23,8 @@ export default class AbstractGrafana {
   destroy() {
     throw new Error('Abstract Method has no implementation');
   }
+
+  resize() {
+    throw new Error('Abstract Method has no implementation');
+  }
 }

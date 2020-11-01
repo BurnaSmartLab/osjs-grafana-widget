@@ -2,17 +2,18 @@
   display: table;
   font-family: 'Roboto', sans-serif;
   margin: 0.4em;
+  width: 100%;
+  height: 100%;
 }
 .double-val-label>span {
-  background-color: #656565;
-  color: #ffffff;
+  background-image: linear-gradient(170deg, rgba(51, 209, 255,0.8), rgba(231,239,241,0));;
   display: table-cell;
-  font-size: 0.9em;
+  font-size: 2em;
   font-weight: 400;
   line-height: 1;
   padding: .3em .6em;
   text-align: center;
-  vertical-align: baseline;
+  vertical-align: middle;
   white-space: nowrap;
   &:first-child {
     border-bottom-left-radius: 0.25em;
@@ -22,19 +23,4 @@
     border-bottom-right-radius: 0.25em;
     border-top-right-radius: .25em;
   }
-}
-.double-val-label>span.primary {
-  background-color: #337ab7;
-}
-.double-val-label>span.success {
-  background-color: #5cb85c;
-}
-.double-val-label>span.info {
-  background-color: #5bc0de;
-}
-.double-val-label>span.warning {
-  background-color: #f0ad4e;
-}
-.double-val-label>span.danger {
-  background-color: #d9534f;
 }

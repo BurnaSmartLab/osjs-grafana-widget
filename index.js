@@ -3,8 +3,6 @@ import {Widget} from '@osjs/widgets';
 import * as translations from './locales.js';
 import widgetItem from './src/widgetItems';
 import dialogChoices from './dialogChoices';
-import {renderToString} from 'hyperapp-render';
-import Splide from '@splidejs/splide';
 import '@splidejs/splide/dist/css/splide-core.min.css';
 import '@splidejs/splide/dist/css/splide.min.css';
 import '@splidejs/splide/dist/css/themes/splide-sea-green.min.css';
@@ -21,10 +19,6 @@ export default class GrafanaWidget extends Widget {
   constructor(core, options) {
     super(core, options, {
       canvas: false,
-      dimension: {
-        width: 250,
-        height: 150
-      }
     }, {
       // Custom options that can be saved
       measurement: 'netdata.system.cpu.system',
@@ -36,7 +30,7 @@ export default class GrafanaWidget extends Widget {
       refreshTime: 'off',
       widgetType: null,
       widgetOptions: {},  // object properties of each widget class that must be saved
-
+      fontColor: '#fff'
     });
 
     this.$mycontainer = document.createElement('div');
@@ -105,7 +99,7 @@ export default class GrafanaWidget extends Widget {
   generateWidget() {
     for (const key in widgetItem) {
       if (key === this.options.widgetType) {
-        this.widget = new widgetItem[key].object(this.options.widgetOptions);
+        this.widget = new widgetItem[key].object(this);
       }
     }
   }
@@ -127,6 +121,7 @@ export default class GrafanaWidget extends Widget {
         aggregateSelectValue: this.options.aggregateSelect,
         titleValue: this.options.title,
         unitValue: this.options.unit,
+        fontColorValue: this.options.fontColor
       }, {
         // actions
         onMeasurementChange: measurementValue => state => ({measurementValue}),
@@ -136,6 +131,7 @@ export default class GrafanaWidget extends Widget {
         onRefreshTimeChange: refreshTimeValue => state => ({refreshTimeValue}),
         onGroupByChange: groupByValue => state => ({groupByValue}),
         onAggregateSelectChange: aggregateSelectValue => state => ({aggregateSelectValue}),
+        onFontColorChange: fontColorValue => state => ({fontColorValue}),
         createSelect2: el => (state, actions) => {
           let measurementSelect = $(el);
           measurementSelect.select2({
@@ -210,16 +206,6 @@ export default class GrafanaWidget extends Widget {
             }, __(widgetItem[item].name))])));
             view.push(slide);
           }
-          // adding prev and next
-          // const prev = h('a', {
-          //   class: 'prev',
-          //   onclick: console.log('prev')
-          // }, '❮');
-          // const next = h('a', {
-          //   class: 'next',
-          //   onclick: console.log('next')
-          // }, '❯');
-          // view.push(prev, next);
           const row = (state, actions) => (h('div', {class: 'slider-row'}, view));
           app(state, actions, row, el);
         },
@@ -242,8 +228,6 @@ export default class GrafanaWidget extends Widget {
         },
         pluseSlide: (scroll) => {
           if (typeof scroll === 'undefined') {
-            console.log($('.active').offset().left);
-            console.log($('.active').offset().top);
             $('.slider-row').animate({
               scrollLeft: $('.active').offset().left - 639
             }, 300, 'swing');
@@ -253,55 +237,10 @@ export default class GrafanaWidget extends Widget {
             }, 300, 'swing');
           }
         },
-        // createSplide: el => (state, actions) => {
-        //   const splide = new Splide(el, {
-        //     type: 'slide',
-        //     perPage: 3,
-        //     fixedWidth: '160px',
-        //     fixedHeight: '70px',
-        //     isNavigation: true,
-        //     padding: 10,
-        //     gap: 5,
-        //     focus: 'center',
-        //     pagination: true,
-        //     lazyLoad: true,
-        //     cover:true,
-        //     keyboard: true,
-        //     // direction: "rtl",
-        //   }).mount();
-        //   for (let item in widgetItem) {
-        //     const dom = (h('li', {
-        //       class: 'splide__slide',
-        //       oncreate: el => actions.setActiveClassSlide(el),
-        //       // onclick: el => actions.addActiveClass(el)
-        //       onclick: () => actions.onWidgetTypeChange(item)
-        //     },
-        //     h('div', {
-        //       class: 'splide__slide__container',
-        //       onclick: () => actions.onWidgetTypeChange(item)
-        //     },
-        //     h('img', {
-        //       class: 'thumb',
-        //       style: 'width: 100%',
-        //       'data-widget':item,
-        //       src: widgetItem[item].image,
-        //       alt: widgetItem[item].image,
-        //       onclick: () => actions.onWidgetTypeChange(item)
-        //     }))));
-        //     splide.add(renderToString(dom, state, actions));
-        //   }
-        //   return {state, actions};
-        // },
         getValues: () => state => state,
 
         onWidgetTypeChange: (widgetTypeValue) => {
           this.options.widgetType = widgetTypeValue;
-          // let tempWidget = null;
-          // for (const key in widgetItem) {
-          //   if (key === widgetTypeValue) {
-          //     tempWidget = new widgetItem[key].object(this.options.widgetOptions);
-          //   }
-          // }
           let div = document.getElementsByClassName('hidden-div');
           div[0].style.display = 'inline';
           this.generateWidget();
@@ -330,14 +269,6 @@ export default class GrafanaWidget extends Widget {
               oncreate: () => actions.startDialog(this.options.widgetType)
             }, [
               h(Label, {}, __('LBL_WIDGET_TYPE')),
-
-              // h(SelectField, {
-              //   choices: Object.assign({}, ...Object.keys(widgetItem).map(k => ({[k]: __(widgetItem[k].name)}))),
-              //   value: state.widgetTypeValue,
-              //   onchange: (ev, value) => actions.onWidgetTypeChange(value)
-              // })
-
-
               // custom slider
               h(BoxContainer, {
                 class: 'slider',
@@ -351,21 +282,6 @@ export default class GrafanaWidget extends Widget {
                 class: 'next',
                 onclick: () => actions.pluseSlide({sign: '+', time:'175'})
               }, '❯'),
-              // splideeeee
-              // h('div', {
-              //   class: 'splide',
-              //   oncreate: (el) => actions.createSplide(el),
-              //   // onchange: (ev, value) => actions.onWidgetTypeChange(value)
-              // },
-              // h('div', {class: 'splide__track'},
-              //   h('ul', {class:'splide__list'})
-              // )
-              // ),
-              // h(SelectField, {
-              //   choices: Object.assign({}, ...Object.keys(widgetItem).map(k => ({[k]: __(widgetItem[k].name)}))),
-              //   value: state.widgetTypeValue,
-              //   onchange: (ev, value) => actions.onWidgetTypeChange(value)
-              // })
             ]),
             h('div', {
               class: 'grid-container2'
@@ -425,6 +341,12 @@ export default class GrafanaWidget extends Widget {
                   Object.entries(dialogChoices.Selectors).map((x) => h('option', {value: x[0]}, x[1])),
                 ]),
               ]),
+              h(Label, {}, __('LBL_SET_FONTCOLOR')),
+              h(SelectField, {
+                choices:Object.assign({}, ...Object.keys(dialogChoices.FontColors).map(k => ({[k]: __(dialogChoices.FontColors[k])}))),
+                value: state.fontColorValue,
+                onchange: (ev, value) => actions.onFontColorChange(value)
+              }),
             ]),
             h('div', {class: 'hidden-div'}),
           ])
@@ -451,6 +373,7 @@ export default class GrafanaWidget extends Widget {
         this.options.timeGroupBy = value.groupByValue;
         this.options.refreshTime = value.refreshTimeValue;
         this.options.aggregateSelect = value.aggregateSelectValue;
+        this.options.fontColor = value.fontColorValue;
         this.widget.saveWidgetOptions(this.options.widgetOptions, advancedSetting.state);
         this.saveSettings();
         this.init();

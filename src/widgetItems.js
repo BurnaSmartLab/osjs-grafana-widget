@@ -1,20 +1,20 @@
-import StatsdWidget from './items/statsd';
+import AreaWidget from './items/area';
 import GaugeWidget from './items/gauge';
 import BarWidget from './items/bars';
-import SingleStatWidget from './items/singlestat';
-//import BarChartAppexWidget from './items/barChart-apex';
+import SingleStatWidget from './items/singleStat';
 import BadgeWidget from './items/badge';
 
-import statsdImage from '../XY-Chart.png';
-import gaugeImage from '../gauge-Chart.png';
-import barChartImage from '../bar-Chart.png';
-import singleStatImage from '../singleStat-Chart.png';
+import areaImage from './items/area/XY-Chart.png';
+import gaugeImage from './items/gauge/gauge-Chart.png';
+import barChartImage from './items/bars/bar-Chart.png';
+import singleStatImage from './items/singleStat/singleStat-Chart.png';
+import badgeImage from './items/badge/badge-Chart.png';
 
 const widgetItem = {
-  statsd:{
-    object: StatsdWidget,
-    name: 'STATSD',
-    image: statsdImage
+  area:{
+    object: AreaWidget,
+    name: 'AREA',
+    image: areaImage
   },
   gauge:{
     object: GaugeWidget,
@@ -31,16 +31,10 @@ const widgetItem = {
     name: 'SINGLESTAT',
     image: singleStatImage
   },
-  // barChartAppex:{
-  //   object: BarChartAppexWidget,
-  //   name: 'SINGLESTAT',
-  //   image: barChartImage
-  // },
-
   badge:{
     object: BadgeWidget,
     name: 'BADGE',
-    image: barChartImage
+    image: badgeImage
   },
 };
 export default widgetItem;
