@@ -6,8 +6,8 @@ import './singleStat.css';
 import {app, h} from 'hyperapp';
 import {Label, Box, TextField, Button} from '@osjs/gui';
 
-import '../../customStyles.css';
-import * as translations from '../../locales';
+import '../../../customStyles.css';
+import * as translations from '../../../locales';
 
 export default class SingleStatWidget extends AbstractGrafana {
   constructor(grafana) {
@@ -31,6 +31,12 @@ export default class SingleStatWidget extends AbstractGrafana {
       grafana.options.dimension.width = 200;
       grafana.options.dimension.height = 100;
     }
+    if (!('singleStat' in grafana.options.widgetOptions) ||
+    ('singleStat' in grafana.options.widgetOptions) && grafana.widgetTypeChangedFlag === true) {
+      grafana.options.dimension.width = 200;
+      grafana.options.dimension.height = 100;
+    }
+    grafana.widgetTypeChangedFlag = false;
   }
   // Every rendering tick (or just once if no canvas)
   async printChart(grafana) {
@@ -55,7 +61,6 @@ export default class SingleStatWidget extends AbstractGrafana {
     } else {
       alert('HTTP-Error: ' + response.status);
     }
-
 
     window.Apex = {
       chart: {
@@ -82,7 +87,6 @@ export default class SingleStatWidget extends AbstractGrafana {
         }
       }
     };
-
     let spark = {
       chart: {
         animations: {
@@ -228,12 +232,11 @@ export default class SingleStatWidget extends AbstractGrafana {
     const actions = {
       getValues: () => state => state,
       setThreshold: ({index, value}) => ({gradeThresholds}) => {
-        if (index === 0) {
-          // gradeThresholds[index].lowScore = 0;
-        } else {
-          gradeThresholds[index].lowScore = value;
-          gradeThresholds[index].highScore = value;
-          suggestedThre = parseInt(value);
+        // eslint-disable-next-line no-empty
+        if (index !== 0) {
+            gradeThresholds[index].lowScore = value;
+            gradeThresholds[index].highScore = value;
+            suggestedThre = parseInt(value);
         }
         return {gradeThresholds};
       },
@@ -273,7 +276,7 @@ export default class SingleStatWidget extends AbstractGrafana {
         h('hr', {}, ''),
         h('h6', { }, __('MSG_SINGLESTAT')),
         h('div', {class: 'grid-container3'}, [
-          h(Label, {}, __('LBL_GAUGE_THRESHOLD')),
+          h(Label, {}, __('LBL_THRESHOLD')),
           h(Label, {}, __('LBL_TITLE')),
           h(Label, {}, __('LBL_COLOR')),
         ]),
@@ -282,7 +285,7 @@ export default class SingleStatWidget extends AbstractGrafana {
             return h('div', {class: 'grid-container5'}, [
               h(TextField, {
                 box: {grow: 1, shrink: 1},
-                placeholder: __('LBL_GAUGE_THRESHOLD'),
+                placeholder: __('LBL_THRESHOLD'),
                 oninput: (ev, value) => actions.setThreshold({index, value}),
                 value: state.gradeThresholds[index].lowScore
               }),
@@ -294,8 +297,8 @@ export default class SingleStatWidget extends AbstractGrafana {
               }),
               h(TextField, {
                 box: {grow: 1, shrink: 1},
-                style: {'color':state.gradeThresholds[index].color},
                 placeholder: __('LBL_COLOR'),
+                style: {'color':state.gradeThresholds[index].color},
                 oninput: (ev, value) => actions.setColor({index, value}),
                 value: state.gradeThresholds[index].color
               }),
@@ -312,13 +315,13 @@ export default class SingleStatWidget extends AbstractGrafana {
               }, __('LBL_SET_COLOR')),
               h(Button, {
                 onclick: () => actions.removeField(index)
-              }, __('LBL_GAUGE_REMOVE'))
+              }, __('LBL_REMOVE'))
             ]);
           }),
           h('div', {class: 'grid-container1'}, [
             h(Button, {
               onclick: () => actions.addField()
-            }, __('LBL_GAUGE_ADD_THRESHOLD'))
+            }, __('LBL_ADD_THRESHOLD'))
           ])
         ])
       ])

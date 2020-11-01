@@ -6,7 +6,6 @@ export default class BarWidget extends AbstractGrafana {
   constructor(grafana) {
 
     super();
-
     grafana.attributes.minDimension.width = 300;
     grafana.attributes.minDimension.height = 200;
     grafana.attributes.maxDimension.width = 500;
@@ -16,9 +15,14 @@ export default class BarWidget extends AbstractGrafana {
       grafana.options.widgetOptions.barChart = {
         // empty
       };
+    }
+    // TODO: procedure must be modified.
+    if (!('barChart' in grafana.options.widgetOptions) ||
+        ('barChart' in grafana.options.widgetOptions) && grafana.widgetTypeChangedFlag === true) {
       grafana.options.dimension.width = 300;
       grafana.options.dimension.height = 200;
     }
+    grafana.widgetTypeChangedFlag = false;
   }
 
   async printChart(grafana) {
@@ -112,7 +116,7 @@ export default class BarWidget extends AbstractGrafana {
       .style('font-Size', '1.5em')
       .style('fill', grafana.options.fontColor)
       .text((grafana.options.title === '' ? grafana.options.measurement : grafana.options.title) +
-                (grafana.options.unit === '' ? '' : ' (' + grafana.options.unit + ')'));
+                  (grafana.options.unit === '' ? '' : ' (' + grafana.options.unit + ')'));
 
 
     if (grafana.options.refreshTime !== 'off') {
@@ -162,9 +166,9 @@ export default class BarWidget extends AbstractGrafana {
 
   }
 
+  // TODO: must be fixed.
   resize(grafana) {
     grafana.$mycontainer.style.fontSize = parseInt(grafana.$mycontainer.parentElement.style.width) * 0.025 + 'px';
   }
-
 }
 

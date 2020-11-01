@@ -2,9 +2,8 @@ import AbstractGrafana from '../../AbstractGrafana';
 
 import {app, h} from 'hyperapp';
 import {TextField, Button, Label, Box, BoxContainer} from '@osjs/gui';
-import 'bootstrap/dist/css/bootstrap.min.css';
 import './badge.scss';
-import * as translations from '../../locales';
+import * as translations from '../../../locales';
 
 export default class BadgeWidget extends AbstractGrafana {
   constructor(grafana) {
@@ -22,9 +21,18 @@ export default class BadgeWidget extends AbstractGrafana {
       grafana.options.dimension.width = 200;
       grafana.options.dimension.height = 30;
     }
+    // TODO: procedure must be modified.
+    if (!('badge' in grafana.options.widgetOptions) ||
+      ('badge' in grafana.options.widgetOptions) && grafana.widgetTypeChangedFlag === true) {
+      grafana.options.dimension.width = 200;
+      grafana.options.dimension.height = 30;
+    }
+    grafana.widgetTypeChangedFlag = false;
   }
   // Every rendering tick (or just once if no canvas)
   async printChart(grafana) {
+    grafana.$mycontainer.innerHTML = null;
+
     let calcAvg = 0;
     let badgeData = [];
     let url = `/grafana/api/datasources/proxy/1/query?db=opentsdb&q=SELECT ${grafana.options.aggregateSelect}("value") FROM "${grafana.options.measurement}" WHERE time >= now() - ${grafana.options.timeRange}ms GROUP BY time(${grafana.options.timeGroupBy}ms) fill(null)&epoch=ms`;

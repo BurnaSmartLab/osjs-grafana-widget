@@ -13,7 +13,6 @@ export default class GaugeWidget extends AbstractGrafana {
     this.widgetHand = null;
     this.label1 = null;
     this.label2 = null;
-    this.title = null;
     grafana.attributes.minDimension.width = 270;
     grafana.attributes.minDimension.height = 190;
     grafana.attributes.maxDimension.width = 400;
@@ -32,9 +31,17 @@ export default class GaugeWidget extends AbstractGrafana {
       grafana.options.dimension.width = 270;
       grafana.options.dimension.height = 190;
     }
+    if (!('gauge' in grafana.options.widgetOptions) ||
+      ('gauge' in grafana.options.widgetOptions) && grafana.widgetTypeChangedFlag === true) {
+      grafana.options.dimension.width = 270;
+      grafana.options.dimension.height = 190;
+    }
+    grafana.widgetTypeChangedFlag = false;
   }
   // Every rendering tick (or just once if no canvas)
   async printChart(grafana) {
+
+    grafana.$mycontainer.innerHTML = null;
     let calcAvg = 0;
     let chartData = [];
     let url = `/grafana/api/datasources/proxy/1/query?db=opentsdb&q=SELECT ${grafana.options.aggregateSelect}("value") FROM "${grafana.options.measurement}" WHERE time >= now() - ${grafana.options.timeRange}ms GROUP BY time(${grafana.options.timeGroupBy}ms) fill(null)&epoch=ms`;
@@ -61,8 +68,8 @@ export default class GaugeWidget extends AbstractGrafana {
     title.text +=  grafana.options.unit === '' ? '' : ' (' + grafana.options.unit + ')';
     title.fill = grafana.options.fontColor;
     title.fontSize = '1.5em';
-    this.title = title;
     grafana.chart.rtl = document.getElementsByClassName('osjs-root')[0].getAttribute('data-dir') === 'rtl';
+
     let chartMin = grafana.options.widgetOptions.gauge.minRange;
     let chartMax = grafana.options.widgetOptions.gauge.maxRange;
 
@@ -158,7 +165,6 @@ export default class GaugeWidget extends AbstractGrafana {
     label2.text = matchingGrade.title.toUpperCase();
     label2.fill = am4core.color(matchingGrade.color);
     this.label2 = label2;
-
     /**
      * Hand
      */
@@ -179,7 +185,6 @@ export default class GaugeWidget extends AbstractGrafana {
       label2.stroke = am4core.color(matchingGrade.color);
       label.fill = am4core.color(matchingGrade.color);
     });
-
     // ***** it searches in which grade the score will be places
     function lookUpGrade(lookupScore, grades) {
       // Only change code below this line
@@ -306,7 +311,7 @@ export default class GaugeWidget extends AbstractGrafana {
           }),
         ]),
         h('div', {class: 'grid-container3'}, [
-          h(Label, {}, __('LBL_GAUGE_THRESHOLD')),
+          h(Label, {}, __('LBL_THRESHOLD')),
           h(Label, {}, __('LBL_TITLE')),
           h(Label, {}, __('LBL_COLOR')),
         ]),
@@ -315,7 +320,7 @@ export default class GaugeWidget extends AbstractGrafana {
             return h('div', {class: 'grid-container5'}, [
               h(TextField, {
                 box: {grow: 1, shrink: 1},
-                placeholder: __('LBL_GAUGE_THRESHOLD'),
+                placeholder: __('LBL_THRESHOLD'),
                 oninput: (ev, value) => actions.setThreshold({index, value}),
                 value: state.gradeThresholds[index].lowScore
               }),
@@ -327,7 +332,7 @@ export default class GaugeWidget extends AbstractGrafana {
               }),
               h(TextField, {
                 box: {grow: 1, shrink: 1},
-                placeholder: __('LBL_GAUGE_COLOR'),
+                placeholder: __('LBL_COLOR'),
                 style: {'color': state.gradeThresholds[index].color},
                 oninput: (ev, value) => actions.setColor({index, value}),
                 value: state.gradeThresholds[index].color
@@ -345,13 +350,13 @@ export default class GaugeWidget extends AbstractGrafana {
               }, __('LBL_SET_COLOR')),
               h(Button, {
                 onclick: () => actions.removeField(index)
-              }, __('LBL_GAUGE_REMOVE'))
+              }, __('LBL_REMOVE'))
             ]);
           }),
           h('div', {class: 'grid-container1'}, [
             h(Button, {
               onclick: () => actions.addField()
-            }, __('LBL_GAUGE_ADD_THRESHOLD'))
+            }, __('LBL_ADD_THRESHOLD'))
           ])
         ])
       ])
@@ -393,4 +398,5 @@ export default class GaugeWidget extends AbstractGrafana {
       this.label2.textAlign = 'middle';
     }
   }
+
 }

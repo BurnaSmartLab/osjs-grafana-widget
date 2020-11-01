@@ -39,6 +39,7 @@ export default class GrafanaWidget extends Widget {
     this._interval = null;
     this.chart = null;
     this.widget = null;
+    this.widgetTypeChangedFlag = false;
   }
   init() {
     if (this.options.widgetType === null) {
@@ -72,7 +73,6 @@ export default class GrafanaWidget extends Widget {
   }
 
   saveSettings() {
-    // debugger;
     if (this.options.refreshTime !== 'off') {
       this.widget.startPoll(this);
     } else {
@@ -184,6 +184,7 @@ export default class GrafanaWidget extends Widget {
           });
           $('b[role="presentation"]').hide();
         },
+
         createSlider: el => (state, actions) => {
           let view = [];
           for (const item in widgetItem) {
@@ -238,8 +239,8 @@ export default class GrafanaWidget extends Widget {
           }
         },
         getValues: () => state => state,
-
         onWidgetTypeChange: (widgetTypeValue) => {
+          this.widgetTypeChangedFlag = true;
           this.options.widgetType = widgetTypeValue;
           let div = document.getElementsByClassName('hidden-div');
           div[0].style.display = 'inline';
@@ -305,7 +306,6 @@ export default class GrafanaWidget extends Widget {
               h(Label, {}, __('LBL_SET_UNIT')),
               h(TextField, {
                 placeholder: 'Example: %, /s, Mb, Gb',
-                // value: state.groupByRange,
                 oninput: (ev, value) => actions.onUnitChange(value),
                 value: state.unitValue,
               }),
@@ -319,7 +319,6 @@ export default class GrafanaWidget extends Widget {
               h(SelectField, {
                 choices: Object.assign({}, ...Object.keys(dialogChoices.GroupBy).map(k => ({[k]: __(dialogChoices.GroupBy[k])}))),
                 value: state.groupByValue,
-                // value: state.groupByRange,
                 onchange: (ev, value) => actions.onGroupByChange(value)
               }),
               h(Label, {}, __('LBL_SET_REFRESH')),

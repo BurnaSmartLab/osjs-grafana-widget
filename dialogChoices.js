@@ -1,18 +1,6 @@
 
 const dialogChoices =
 {
-  // TimeRange: {
-  //     '300000': 'LBL_5_MIN',
-  //     '900000': 'LBL_15_MIN',
-  //     '1800000': 'LBL_30_MIN',
-  //     '3600000': 'LBL_1_HOUR',
-  //     '10800000': 'LBL_3_HOUR',
-  //     '21600000': 'LBL_6_HOUR',
-  //     '43200000': 'LBL_12_HOUR',
-  //     '86400000': 'LBL_24_HOUR',
-  //     '172800000': 'LBL_2_DAYS',
-  //     '604800000': 'LBL_7_DAYS',
-  // },
   TimeRange: {
     '300000': 'Last 5 minutes',
     '900000': 'Last 15 minutes',
@@ -66,7 +54,5 @@ const dialogChoices =
     '#000': 'Black',
     '#fff': 'White',
   }
-
-
 };
 export default dialogChoices;

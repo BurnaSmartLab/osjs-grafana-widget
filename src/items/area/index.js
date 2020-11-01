@@ -17,12 +17,19 @@ export default class AreaWidget extends AbstractGrafana {
       grafana.options.widgetOptions.statsd = {
         // empty
       };
+    }
+    // TODO: procedure must be modified.
+    if (!('statsd' in grafana.options.widgetOptions) ||
+      ('statsd' in grafana.options.widgetOptions) && grafana.widgetTypeChangedFlag === true) {
       grafana.options.dimension.width = 300;
       grafana.options.dimension.height = 200;
     }
+    grafana.widgetTypeChangedFlag = false;
   }
+
   // Every rendering tick (or just once if no canvas)
   async printChart(grafana) {
+    grafana.$mycontainer.innerHTML = null;
     /* Chart code */
     // Themes begin
     am4core.useTheme(am4themes_animated);
@@ -33,14 +40,13 @@ export default class AreaWidget extends AbstractGrafana {
     grafana.chart.paddingRight = 20;
     let title = grafana.chart.chartContainer.createChild(am4core.Label);
     title.text = '- ';
-    title.text +=  grafana.options.title === '' ? grafana.options.measurement : grafana.options.title;
-    title.text +=  grafana.options.unit === '' ? '' : ' (' + grafana.options.unit + ')';
+    title.text += grafana.options.title === '' ? grafana.options.measurement : grafana.options.title;
+    title.text += grafana.options.unit === '' ? '' : ' (' + grafana.options.unit + ')';
     title.fill = grafana.options.fontColor;
     title.fontSize = '1.5em';
 
     grafana.chart.rtl = document.getElementsByClassName('osjs-root')[0].getAttribute('data-dir') === 'rtl';
 
-    // get chart data and assigned it to this.chart.data
     this.updateChartData(grafana);
 
     let dateAxis = grafana.chart.xAxes.push(new am4charts.DateAxis());
@@ -83,7 +89,7 @@ export default class AreaWidget extends AbstractGrafana {
 
     if (grafana.options.refreshTime !== 'off') {
       this.startPoll(grafana);
-    }else {
+    } else {
       grafana.stopPoll();
     }
 
@@ -103,7 +109,7 @@ export default class AreaWidget extends AbstractGrafana {
       });
       this.chartSize = chartData.length;
       grafana.chart.data = chartData;
-    }else {
+    } else {
       alert('HTTP-Error: ' + response.status);
     }
   }
@@ -138,7 +144,7 @@ export default class AreaWidget extends AbstractGrafana {
   }
 
   showAdvancedSetting(grafana) {
-    return{};
+    return {};
   }
   saveWidgetOptions(widgetOptions, advSetting) {
   }

@@ -6,12 +6,10 @@
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     align-items: center;
-}
-
-
-.sparkboxes .details {
+  }
+  .sparkboxes .details {
     font-size:2.5em;
-}
+  }
 
 .outerDiv{
     width: 100%;
@@ -22,6 +20,13 @@
     text-shadow: 0 1px 1px 1px #666;
     box-shadow: 0px 1px 15px 1px rgba(69, 65, 78, 0.08);
     border-radius: 8px;
+ }
+ 
+ .outerDiv .measurement{
+  font-size: 2em;
+  display: table-cell;
+  float:left;
+  bottom: 0;
 }
 
 .outerDiv .measurement{
@@ -30,7 +35,6 @@
     float:left;
     bottom: 0;
 }
-
 
 .singleValue{
     font-weight:800 ;
