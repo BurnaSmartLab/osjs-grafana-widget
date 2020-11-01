@@ -274,7 +274,7 @@ export default class SingleStatWidget extends AbstractGrafana {
         class: 'outer'
       }, [
         h('hr', {}, ''),
-        h('h6', { }, __('MSG_SINGLESTAT')),
+        h('h5', { }, __('MSG_SINGLESTAT')),
         h('div', {class: 'grid-container3'}, [
           h(Label, {}, __('LBL_THRESHOLD')),
           h(Label, {}, __('LBL_TITLE')),

@@ -102,7 +102,7 @@ export default class BadgeWidget extends AbstractGrafana {
     const view = (state, actions) => (
       h(Box, {}, [
         h('hr', {}, ''),
-        h('h6', {}, __('MSG_BADGE')),
+        h('h5', {}, __('MSG_BADGE')),
         h(BoxContainer, {}, [
           h(Label, {box: {grow: 1}}, __('LBL_COLOR')),
           h(TextField, {

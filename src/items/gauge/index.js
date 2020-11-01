@@ -6,7 +6,7 @@ import {h} from 'hyperapp';
 import {TextField, Button, Label, Box} from '@osjs/gui';
 import '../../../customStyles.css';
 import './gauge.css';
-import * as translations from '../../locales';
+import * as translations from '../../../locales';
 export default class GaugeWidget extends AbstractGrafana {
   constructor(grafana) {
     super();
@@ -295,7 +295,7 @@ export default class GaugeWidget extends AbstractGrafana {
         class: 'outer'
       }, [
         h('hr', {}, ''),
-        h('h6', { }, __('MSG_GAUGE')),
+        h('h5', { }, __('MSG_GAUGE')),
         h('div', {
           class: 'grid-container4'
         }, [
