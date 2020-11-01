@@ -1,12 +1,53 @@
 {
-  "name": "@burna/grafana-widget",
+  "name": "@burna/osjs-grafana-widget",
   "version": "1.0.0",
-  "description": "Widget for Grafana",
+  "description": "A Widget for os.js to work with Grafana.",
   "main": "index.js",
+  "files": [
+    "index.js",
+    "README.md",
+    "locales.js",
+    "dialogChoices.js",
+    "customStyles.css",
+    "src/AbstractGrafana.js",
+    "src/widgetItems.js",
+    "src/items/area/index.js",
+    "src/items/area/XY-Chart.png",
+    "src/items/badge/index.js",
+    "src/items/badge/badge.scss",
+    "src/items/badge/badge-Chart.png",
+    "src/items/bars/index.js",
+    "src/items/bars/bar-Chart.png",
+    "src/items/gauge/index.js",
+    "src/items/gauge/gauge.css",
+    "src/items/gauge/gauge-Chart.png",
+    "src/items/singleStat/index.js",
+    "src/items/singleStat/singleStat.css",
+    "src/items/singleStat/singleStat-Chart.png"
+  ],
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "eslint": "eslint"
   },
-  "author": "Seyed Milad Hashemi",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/BurnaSmartLab/osjs-grafana-widget.git"
+  },
+  "keywords": [
+    "widget",
+    "os.js",
+    "grafana",
+    "area-chart",
+    "badge-chart",
+    "gauge-chart",
+    "singlestat-chart",
+    "bar-chart",
+    "visualization",
+    "statistics",
+    "diagram"
+  ],
+  "homepage": "https://github.com/BurnaSmartLab/osjs-grafana-widget/blob/master/README.md",
+  "authors": "Seyed Milad Hashemi, Mahsa Shadi",
   "license": "ISC",
   "dependencies": {
     "@amcharts/amcharts4": "^4.10.3",
@@ -14,5 +55,11 @@
     "d3": "^6.2.0",
     "jquery": "^3.5.1",
     "select2": "^4.0.13"
+  },
+  "devDependencies": {
+    "@osjs/eslint-config": "^1.1.0"
+  },
+  "eslintConfig": {
+    "extends": "@osjs/eslint-config"
   }
 }
