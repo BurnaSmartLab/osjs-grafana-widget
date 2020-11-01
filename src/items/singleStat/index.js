@@ -3,8 +3,8 @@ import AbstractGrafana from '../../AbstractGrafana';
 import ApexCharts from 'apexcharts';
 import './singleStat.css';
 
-import { app, h } from 'hyperapp';
-import { Label, Box, TextField, Button } from '@osjs/gui';
+import {app, h} from 'hyperapp';
+import {Label, Box, TextField, Button} from '@osjs/gui';
 
 import '../../../customStyles.css';
 import * as translations from '../../../locales';
@@ -32,13 +32,13 @@ export default class SingleStatWidget extends AbstractGrafana {
     if (!('singleStat' in grafana.options.widgetOptions) ||
     ('singleStat' in grafana.options.widgetOptions) && grafana.widgetTypeChangedFlag === true) {
       grafana.options.dimension.width = 200;
-      grafana.options.dimension.height= 100;
+      grafana.options.dimension.height = 100;
+    }
+    grafana.widgetTypeChangedFlag = false;
   }
-grafana.widgetTypeChangedFlag =false;
-}
   // Every rendering tick (or just once if no canvas)
   async printChart(grafana) {
-    //getting data
+    // getting data
     let calcAvg = 0;
     let values = [];
     let chartData = [];
@@ -77,7 +77,7 @@ grafana.widgetTypeChangedFlag =false;
         theme: 'dark'
       },
       grid: {
-        borderColor: "#535A6C",
+        borderColor: '#535A6C',
         xaxis: {
           lines: {
             show: true
@@ -90,7 +90,7 @@ grafana.widgetTypeChangedFlag =false;
       chart: {
         animations: {
           enabled: true,
-      },
+        },
         id: 'spark1',
         type: 'line',
         sparkline: {
@@ -132,13 +132,13 @@ grafana.widgetTypeChangedFlag =false;
           }
         }
       }
-    }
+    };
 
     if (grafana.options.refreshTime !== 'off') {
       spark1.chart.animations.enabled = false;
     }
 
-    //hyperapp
+    // hyperapp
     const state = {
       singleValue: calcAvg,
       measurement:  grafana.options.title === '' ? grafana.options.measurement : grafana.options.title,
@@ -149,45 +149,45 @@ grafana.widgetTypeChangedFlag =false;
       },
 
       setStatus: (el) => {
-        grafana.options.widgetOptions.singleStat.gradeThresholds.map( elem => {
-          if ( calcAvg >= elem.lowScore && calcAvg < elem.highScore){
+        grafana.options.widgetOptions.singleStat.gradeThresholds.map(elem => {
+          if (calcAvg >= elem.lowScore && calcAvg < elem.highScore) {
             el.innerHTML = elem.title;
           }
-        })
-      }, 
+        });
+      },
 
       setColor: (el) => {
-        //setting font color
+        // setting font color
         el.style.color = grafana.options.fontColor;
-        grafana.options.widgetOptions.singleStat.gradeThresholds.map( elem => {
-          if ( calcAvg >= elem.lowScore && calcAvg < elem.highScore){
+        grafana.options.widgetOptions.singleStat.gradeThresholds.map(elem => {
+          if (calcAvg >= elem.lowScore && calcAvg < elem.highScore) {
             let result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(elem.color);
             result = {
               r: parseInt(result[1], 16),
               g: parseInt(result[2], 16),
               b: parseInt(result[3], 16)
             };
-            //generate gradient transparent color 
+            // generate gradient transparent color
             el.style.backgroundImage = `linear-gradient(170deg, rgba(${result.r},${result.g}, ${result.b},0.8), rgba(231,239,241,0))`;
           }
-        })
+        });
       }
 
 
     };
     const view = (state, actions) => (
-      
-      h('div', { class: 'outerDiv' , oncreate: el => actions.setColor(el)}, [
-        h('div', { 
+
+      h('div', {class: 'outerDiv', oncreate: el => actions.setColor(el)}, [
+        h('div', {
           class:'sparkboxes',
-        },[  
-            h('div', { class: 'details' }, [
-              h('p', { class: 'singleValue' }, state.singleValue.toFixed(2) + grafana.options.unit),
-              h('p', { class: 'status' , oncreate: el => actions.setStatus(el)} )
-            ]),
-            h('div', { class: 'spark1' , oncreate: el => actions.makeSpark(el) } ),
+        }, [
+          h('div', {class: 'details'}, [
+            h('p', {class: 'singleValue'}, state.singleValue.toFixed(2) + grafana.options.unit),
+            h('p', {class: 'status', oncreate: el => actions.setStatus(el)})
           ]),
-          h('div', { class: 'measurement' }, state.measurement)
+          h('div', {class: 'spark1', oncreate: el => actions.makeSpark(el)}),
+        ]),
+        h('div', {class: 'measurement'}, state.measurement)
       ])
     );
 
@@ -218,6 +218,7 @@ grafana.widgetTypeChangedFlag =false;
     const actions = {
       getValues: () => state => state,
       setThreshold: ({index, value}) => ({gradeThresholds}) => {
+        // eslint-disable-next-line no-empty
         if (index === 0) {
         } else {
           gradeThresholds[index].lowScore = value;
@@ -238,8 +239,8 @@ grafana.widgetTypeChangedFlag =false;
         if (index !== 0) {   // first threshold (min) is essentially needed and can not be removed
           gradeThresholds.splice(index, 1);
           suggestedThre = gradeThresholds[gradeThresholds.length - 1].lowScore;
-          setTimeout(() => dialogWindow.emit("num-row-changed"), 100);
-          return { gradeThresholds };
+          setTimeout(() => dialogWindow.emit('num-row-changed'), 100);
+          return {gradeThresholds};
         }
       },
       addField: () => ({gradeThresholds}) => {
@@ -250,67 +251,67 @@ grafana.widgetTypeChangedFlag =false;
           highScore: '',
           color: '#' + (Math.random() * 0xfffff * 1000000).toString(16).slice(0, 6)
         });
-        setTimeout(() => dialogWindow.emit("num-row-changed"), 100);
-        return { gradeThresholds };
+        setTimeout(() => dialogWindow.emit('num-row-changed'), 100);
+        return {gradeThresholds};
       }
     };
 
     const view = (state, actions) => (
       h(Box, {
         class: 'outer'
-      },[
+      }, [
         h('hr', {}, ''),
         h('h6', { }, __('MSG_SINGLESTAT')),
-      h('div', {class: 'grid-container3' },[
-        h(Label, {}, __('LBL_THRESHOLD')),
-        h(Label, {}, __('LBL_TITLE')),
-        h(Label, {}, __('LBL_COLOR')),
-      ]),
-      h(Box, { grow: 1, shrink: 1 }, [
-        state.gradeThresholds.map((name, index) => {
-          return h('div', {class: 'grid-container5'}, [
-            h(TextField, {
-              box: { grow: 1, shrink: 1 },
-              placeholder: __('LBL_THRESHOLD'),
-              oninput: (ev, value) => actions.setThreshold({ index, value }),
-              value: state.gradeThresholds[index].lowScore
-            }),
-            h(TextField, {
-              box: { grow: 1, shrink: 1 },
-              placeholder: __('LBL_TITLE'),
-              oninput: (ev, value) => actions.setTitle({ index, value }),
-              value: state.gradeThresholds[index].title
-            }),
-            h(TextField, {
-              box: { grow: 1, shrink: 1 },
-              placeholder: __('LBL_COLOR'),
-              style: {'color':state.gradeThresholds[index].color},
-              oninput: (ev, value) => actions.setColor({ index, value }),
-              value: state.gradeThresholds[index].color
-            }),
+        h('div', {class: 'grid-container3'}, [
+          h(Label, {}, __('LBL_THRESHOLD')),
+          h(Label, {}, __('LBL_TITLE')),
+          h(Label, {}, __('LBL_COLOR')),
+        ]),
+        h(Box, {grow: 1, shrink: 1}, [
+          state.gradeThresholds.map((name, index) => {
+            return h('div', {class: 'grid-container5'}, [
+              h(TextField, {
+                box: {grow: 1, shrink: 1},
+                placeholder: __('LBL_THRESHOLD'),
+                oninput: (ev, value) => actions.setThreshold({index, value}),
+                value: state.gradeThresholds[index].lowScore
+              }),
+              h(TextField, {
+                box: {grow: 1, shrink: 1},
+                placeholder: __('LBL_TITLE'),
+                oninput: (ev, value) => actions.setTitle({index, value}),
+                value: state.gradeThresholds[index].title
+              }),
+              h(TextField, {
+                box: {grow: 1, shrink: 1},
+                placeholder: __('LBL_COLOR'),
+                style: {'color':state.gradeThresholds[index].color},
+                oninput: (ev, value) => actions.setColor({index, value}),
+                value: state.gradeThresholds[index].color
+              }),
+              h(Button, {
+                onclick: () => grafana.core.make('osjs/dialog', 'color', {
+                  color: state.gradeThresholds[index].color
+                }, (btn, value) => {
+                  if (btn === 'ok') {
+                    let hexCode = value.hex;
+                    actions.setColor({index, hexCode});
+                    state.gradeThresholds[index].color = hexCode;
+                  }
+                })
+              }, __('LBL_SET_COLOR')),
+              h(Button, {
+                onclick: () => actions.removeField(index)
+              }, __('LBL_REMOVE'))
+            ]);
+          }),
+          h('div', {class: 'grid-container1'}, [
             h(Button, {
-              onclick: () => grafana.core.make('osjs/dialog', 'color', {
-                color: state.gradeThresholds[index].color
-              }, (btn, value) => {
-                if (btn === 'ok') {
-                  let hexCode = value.hex;
-                  actions.setColor({ index, hexCode });
-                  state.gradeThresholds[index].color = hexCode;
-                }
-              })
-            }, __('LBL_SET_COLOR')),
-            h(Button, {
-              onclick: () => actions.removeField(index)
-            }, __('LBL_REMOVE'))
-          ]);
-        }),
-        h('div', {class: 'grid-container1'}, [
-        h(Button, {
-          onclick: () => actions.addField()
-        }, __('LBL_ADD_THRESHOLD'))
+              onclick: () => actions.addField()
+            }, __('LBL_ADD_THRESHOLD'))
+          ])
+        ])
       ])
-    ])
-    ])
     );
     return {state, actions, view};
   }
@@ -340,8 +341,8 @@ grafana.widgetTypeChangedFlag =false;
     grafana.chart.data = null;
   }
 
-  resize(grafana){
-   grafana.$mycontainer.style.fontSize = parseInt(grafana.$mycontainer.parentElement.style.width) * 0.025 + 'px';
+  resize(grafana) {
+    grafana.$mycontainer.style.fontSize = parseInt(grafana.$mycontainer.parentElement.style.width) * 0.025 + 'px';
   }
 
 }

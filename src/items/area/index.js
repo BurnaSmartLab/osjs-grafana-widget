@@ -16,7 +16,7 @@ export default class AreaWidget extends AbstractGrafana {
 
     if (!('statsd' in grafana.options.widgetOptions)) {
       grafana.options.widgetOptions.statsd = {
-        //empty
+        // empty
       };
     }
     if (!('statsd' in grafana.options.widgetOptions) ||
@@ -29,7 +29,7 @@ export default class AreaWidget extends AbstractGrafana {
 
   // Every rendering tick (or just once if no canvas)
   async printChart(grafana) {
-    grafana.$mycontainer.innerHTML = null
+    grafana.$mycontainer.innerHTML = null;
     /* Chart code */
     // Themes begin
     am4core.useTheme(am4themes_animated);
@@ -74,7 +74,7 @@ export default class AreaWidget extends AbstractGrafana {
     series.dataFields.valueY = 'events';
     series.tooltipText = 'Events: [bold]{valueY}[/]';
     series.fillOpacity = 0.8;
-    series.fill = '#33D1FF'
+    series.fill = '#33D1FF';
 
 
     grafana.chart.cursor = new am4charts.XYCursor();

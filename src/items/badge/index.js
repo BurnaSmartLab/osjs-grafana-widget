@@ -25,29 +25,29 @@ export default class BadgeWidget extends AbstractGrafana {
       grafana.options.dimension.width = 200;
       grafana.options.dimension.height = 30;
     }
-  grafana.widgetTypeChangedFlag =false;
+    grafana.widgetTypeChangedFlag = false;
   }
   // Every rendering tick (or just once if no canvas)
   async printChart(grafana) {
-    grafana.$mycontainer.innerHTML = null
-    
+    grafana.$mycontainer.innerHTML = null;
+
     let calcAvg = 0;
     let badgeData = [];
     let url = `/grafana/api/datasources/proxy/1/query?db=opentsdb&q=SELECT ${grafana.options.aggregateSelect}("value") FROM "${grafana.options.measurement}" WHERE time >= now() - ${grafana.options.timeRange}ms GROUP BY time(${grafana.options.timeGroupBy}ms) fill(null)&epoch=ms`;
     let response = await fetch(url);
     if (response.ok) {
       let data = await response.json();
-     if (!data.results['error']) {
-       badgeData = data.results[0].series[0].values;
-       let sum = 0, count = 0;
-       for (let elem of badgeData) {
-         if (elem[1] !== null) {
-           sum += elem[1];
-           count += 1;
-         }
-       }
-       calcAvg = (sum / count).toFixed(2);
-     }
+      if (!data.results['error']) {
+        badgeData = data.results[0].series[0].values;
+        let sum = 0, count = 0;
+        for (let elem of badgeData) {
+          if (elem[1] !== null) {
+            sum += elem[1];
+            count += 1;
+          }
+        }
+        calcAvg = (sum / count).toFixed(2);
+      }
     } else {
       alert('HTTP-Error: ' + response.status);
     }
@@ -140,26 +140,26 @@ export default class BadgeWidget extends AbstractGrafana {
     };
     const actions = {
       setColor: (el) => {
-            el.style.color = grafana.options.fontColor;
+        el.style.color = grafana.options.fontColor;
       }
     };
     const view = state => (
-        h('div', {
-          class: 'double-val-label',
-          oncreate: el => actions.setColor(el)
-        }, [
-          h('span', {}, state.title),
-          h('span', {
-            style: `background-color: ${state.color}`
-          }, `${calcAvg} ${state.unit}`)
-        ])
+      h('div', {
+        class: 'double-val-label',
+        oncreate: el => actions.setColor(el)
+      }, [
+        h('span', {}, state.title),
+        h('span', {
+          style: `background-color: ${state.color}`
+        }, `${calcAvg} ${state.unit}`)
+      ])
     );
-    return {state, actions, view}
+    return {state, actions, view};
   }
   destroy(grafana) {
     grafana = null;
   }
-  resize(grafana){
+  resize(grafana) {
     grafana.$mycontainer.style.fontSize = parseInt(grafana.$mycontainer.parentElement.style.width) * 0.025 + 'px';
   }
 

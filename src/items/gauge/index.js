@@ -36,18 +36,18 @@ export default class GaugeWidget extends AbstractGrafana {
     }
     if (!('gauge' in grafana.options.widgetOptions) ||
       ('gauge' in grafana.options.widgetOptions) && grafana.widgetTypeChangedFlag === true) {
-        grafana.options.dimension.width = 270;
-        grafana.options.dimension.height= 190;
+      grafana.options.dimension.width = 270;
+      grafana.options.dimension.height = 190;
     }
-  grafana.widgetTypeChangedFlag =false;
+    grafana.widgetTypeChangedFlag = false;
   }
   // Every rendering tick (or just once if no canvas)
   async printChart(grafana) {
-    
+
     grafana.$mycontainer.innerHTML = null;
     let calcAvg = 0;
     let chartData = [];
-    let url = `/grafana/api/datasources/proxy/1/query?db=opentsdb&q=SELECT ${grafana.options.aggregateSelect}("value") FROM "${grafana.options.measurement}" WHERE time >= now() - ${grafana.options.timeRange}ms GROUP BY time(${grafana.options.timeGroupBy}ms) fill(null)&epoch=ms`; 
+    let url = `/grafana/api/datasources/proxy/1/query?db=opentsdb&q=SELECT ${grafana.options.aggregateSelect}("value") FROM "${grafana.options.measurement}" WHERE time >= now() - ${grafana.options.timeRange}ms GROUP BY time(${grafana.options.timeGroupBy}ms) fill(null)&epoch=ms`;
     let response = await fetch(url);
     if (response.ok) {
       let data = await response.json();
@@ -70,7 +70,7 @@ export default class GaugeWidget extends AbstractGrafana {
     let title = grafana.chart.chartContainer.createChild(am4core.Label);
     title.text = '- ';
     title.text +=  grafana.options.title === '' ? grafana.options.measurement : grafana.options.title;
-    title.text +=  grafana.options.unit === '' ? '': ' (' + grafana.options.unit + ')'
+    title.text +=  grafana.options.unit === '' ? '' : ' (' + grafana.options.unit + ')';
     title.fill = grafana.options.fontColor;
     title.fontSize = '1.5em';
 
@@ -96,7 +96,7 @@ export default class GaugeWidget extends AbstractGrafana {
     grafana.chart.resizable = true;
 
     /**
-     * Normal axis 
+     * Normal axis
      */
 
     let axis = grafana.chart.xAxes.push(new am4charts.ValueAxis());
@@ -170,7 +170,7 @@ export default class GaugeWidget extends AbstractGrafana {
     label.verticalCenter = 'bottom';
     label.text = data.score.toFixed(2);
     label.fill = am4core.color(matchingGrade.color);
-    this.label1 = label
+    this.label1 = label;
 
     /**
      * Label 2
@@ -183,7 +183,7 @@ export default class GaugeWidget extends AbstractGrafana {
     label2.verticalCenter = 'bottom';
     label2.text = matchingGrade.title.toUpperCase();
     label2.fill = am4core.color(matchingGrade.color);
-    this.label2 = label2
+    this.label2 = label2;
 
 
     /**
