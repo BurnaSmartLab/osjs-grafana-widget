@@ -1,0 +1,32 @@
+.grid-container3 {
+    display: grid;
+    grid-template-columns:130px 130px 130px ;
+    padding: 15px;
+    padding-bottom: 0px;
+    grid-gap: 0px;
+    text-align: left;
+  }
+  
+  .grid-container5 {
+    display: grid;
+    grid-template-columns:130px 130px 130px 91px 92px;
+    padding: 10px;
+    padding-top: 0px;
+    grid-gap: 0px;
+    text-align: left;
+  }
+  
+  .grid-container1 {
+    display: grid;
+    grid-template-columns:575px;
+    padding: 10px;
+    grid-gap: 0px;
+    text-align: left;
+  }
+
+  hr{
+    width:90%;
+    text-align:center;
+    color: #292929;
+  }
+  

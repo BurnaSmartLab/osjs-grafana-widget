@@ -6,7 +6,7 @@ import dialogChoices from './dialogChoices';
 
 
 import {h, app} from 'hyperapp';
-import {Label, Box, SelectField, Image, TextField} from '@osjs/gui';
+import {Label, Box, SelectField, Image, TextField, BoxContainer} from '@osjs/gui';
 
 import $ from 'jquery';
 import './node_modules/select2/dist/css/select2.min.css';
@@ -17,10 +17,6 @@ export default class GrafanaWidget extends Widget {
   constructor(core, options) {
     super(core, options, {
       canvas: false,
-      // dimension: {
-      //   width: 250,
-      //   height: 150
-      // }
     }, {
       // Custom options that can be saved
       measurement: 'netdata.system.cpu.system',
@@ -42,6 +38,7 @@ export default class GrafanaWidget extends Widget {
     this._interval = null;
     this.chart = null;
     this.widget = null;
+    this.widgetTypeChangedFlag = false;
   }
   init() {
     if (this.options.widgetType === null) {
@@ -71,13 +68,10 @@ export default class GrafanaWidget extends Widget {
 
   // Every rendering tick (or just once if no canvas)
   async render() {
-    //console.log('sssssssssssssssssssss');
-    //console.log(document.getElementsByClassName('osjs-root').getAttribute('data-dir'));
     await this.widget.printChart(this);
   }
 
   saveSettings() {
-    // debugger;
     if (this.options.refreshTime !== 'off') {
       this.widget.startPoll(this);
     } else {
@@ -104,9 +98,7 @@ export default class GrafanaWidget extends Widget {
   generateWidget() {
     for (const key in widgetItem) {
       if (key === this.options.widgetType) {
-        //this.widget = new widgetItem[key].object(this.options.widgetOptions);
         this.widget = new widgetItem[key].object(this);
-        //console.log(this.options.dimension);
       }
     }
   }
@@ -192,6 +184,7 @@ export default class GrafanaWidget extends Widget {
           });
           $('b[role="presentation"]').hide();
         },
+
         createSlider: el => (state, actions) => {
           let view = [];
           for (const item in widgetItem) {
@@ -211,24 +204,12 @@ export default class GrafanaWidget extends Widget {
               'data-widget':item,
               oncreate: el => actions.setActiveClassSlide(el),
               onclick: el => actions.addActiveClass(el)
-            //  todo:multilangual
             }, __(widgetItem[item].name))])));
             view.push(slide);
           }
-          // adding prev and next
-          // const prev = h('a', {
-          //   class: 'prev',
-          //   onclick: console.log('prev')
-          // }, '❮');
-          // const next = h('a', {
-          //   class: 'next',
-          //   onclick: console.log('next')
-          // }, '❯');
-          // view.push(prev, next);
           const row = (state, actions) => (h('div', {class: 'slider-row'}, view));
           app(state, actions, row, el);
         },
-        // todo: inner text is not correct.
         setActiveClassSlide: (el) => (state, actions) => {
           if (this.options.widgetType === null) {
             this.options.widgetType = el.getAttribute('data-widget');
@@ -236,61 +217,33 @@ export default class GrafanaWidget extends Widget {
           }
           if (el.getAttribute('data-widget') === this.options.widgetType) {
             el.className += ' active';
+            actions.pluseSlide();
           }
         },
-        addActiveClass: el => {
+        addActiveClass: el => (state, actions) => {
           let dots = document.getElementsByClassName('cursor');
           for (let i = 0; i < dots.length; i++) {
             dots[i].className = dots[i].className.replace(' active', '');
           }
           el.currentTarget.className += ' active';
         },
-        // createSplide: el => (state, actions) => {
-        //   const splide = new Splide(el, {
-        //     type: 'slide',
-        //     perPage: 3,
-        //     fixedWidth: '12rem',
-        //     fixedHeight: '5rem',
-        //     // padding:5,
-        //     gap: 5,
-        //     // focus: 0,
-        //     pagination: false,
-        //     lazyLoad: true,
-        //     cover:true,
-        //     keyboard: true,
-        //     // direction: "rtl",
-        //   }).mount();
-        //   let view = [];
-        //   for (let item in widgetItem) {
-        //     const dom = (item, state, actions) => h('li', {
-        //           class: 'splide__slide'
-        //         },
-        //         h('div', {
-        //               class: 'splide__slide__container',
-        //               onclick: (item) => actions.onWidgetTypeChange(item)
-        //             },
-        //             h('img', {
-        //               alt: item,
-        //               src: './gauge-Chart.png'
-        //             })));
-        //     console.log(dom);
-        //     splide.add(renderToString(dom(state, actions)));
-        //     console.log(item);
-        //     app(state, actions, dom, el.childNodes[1].childNodes[0]);
-        //   }
-        //   return {state, actions};
-        //   // console.log(view);
-        // },
+        pluseSlide: (scroll) => {
+          if (typeof scroll === 'undefined') {
+            $('.slider-row').animate({
+              scrollLeft: $('.active').offset().left - 639
+            }, 300, 'swing');
+          } else {
+            $('.slider-row').animate({
+              scrollLeft: `${scroll.sign}=${scroll.time}`
+            }, 300, 'swing');
+          }
+        },
+
         getValues: () => state => state,
 
         onWidgetTypeChange: (widgetTypeValue) => {
+          this.widgetTypeChangedFlag= true;
           this.options.widgetType = widgetTypeValue;
-          // let tempWidget = null;
-          // for (const key in widgetItem) {
-          //   if (key === widgetTypeValue) {
-          //     tempWidget = new widgetItem[key].object(this.options.widgetOptions);
-          //   }
-          // }
           let div = document.getElementsByClassName('hidden-div');
           div[0].style.display = 'inline';
           this.generateWidget();
@@ -319,42 +272,19 @@ export default class GrafanaWidget extends Widget {
               oncreate: () => actions.startDialog(this.options.widgetType)
             }, [
               h(Label, {}, __('LBL_WIDGET_TYPE')),
-
-              // h(SelectField, {
-              //   choices: Object.assign({}, ...Object.keys(widgetItem).map(k => ({[k]: __(widgetItem[k].name)}))),
-              //   value: state.widgetTypeValue,
-              //   onchange: (ev, value) => actions.onWidgetTypeChange(value)
-              // })
-
-
               // custom slider
-              h('div', {
+              h(BoxContainer, {
                 class: 'slider',
                 oncreate: (el) => actions.createSlider(el)
-              }, [
-                // h('a', {
-                //   class: 'prev',
-                //   onclick: () => actions.pluseSlide(-1)
-                // }, '❮'),
-                // h('a', {
-                //   class: 'next',
-                //   onclick: () => actions.pluseSlide(1)
-                // }, '❯')
-              ]),
-              // splideeeee
-              // h('div', {
-              //       class: 'splide',
-              //       oncreate: (el) => actions.createSplide(el),
-              //       // onchange: (ev, value) => actions.onWidgetTypeChange(value)
-              //     },
-              //     h('div', {class: 'splide__track'},
-              //         h('ul', {class:'splide__list'}))
-              // ),
-              // h(SelectField, {
-              //   choices: Object.assign({}, ...Object.keys(widgetItem).map(k => ({[k]: __(widgetItem[k].name)}))),
-              //   value: state.widgetTypeValue,
-              //   onchange: (ev, value) => actions.onWidgetTypeChange(value)
-              // })
+              }, {}),
+              h('a', {
+                class: 'prev',
+                onclick: () => actions.pluseSlide({sign: '-', time:'175'})
+              }, '❮'),
+              h('a', {
+                class: 'next',
+                onclick: () => actions.pluseSlide({sign: '+', time:'175'})
+              }, '❯'),
             ]),
             h('div', {
               class: 'grid-container2'
@@ -378,7 +308,6 @@ export default class GrafanaWidget extends Widget {
               h(Label, {}, __('LBL_SET_UNIT')),
               h(TextField, {
                 placeholder: 'Example: %, /s, Mb, Gb',
-                // value: state.groupByRange,
                 oninput: (ev, value) => actions.onUnitChange(value),
                 value: state.unitValue,
               }),
@@ -392,7 +321,6 @@ export default class GrafanaWidget extends Widget {
               h(SelectField, {
                 choices: Object.assign({}, ...Object.keys(dialogChoices.GroupBy).map(k => ({ [k]: __(dialogChoices.GroupBy[k]) }))),
                 value: state.groupByValue,
-                // value: state.groupByRange,
                 onchange: (ev, value) => actions.onGroupByChange(value)
               }),
               h(Label, {}, __('LBL_SET_REFRESH')),

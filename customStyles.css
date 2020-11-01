@@ -45,17 +45,11 @@
 
 /* The grid: Four equal columns that floats next to each other */
 .slider-column {
-  float: left;
+  /*float: left;*/
   width: 25%;
   height: 70px;
   padding: 10px;
 }
-
-/* Style the images inside the grid */
-/*.column img {*/
-/*  opacity: 0.8;*/
-/*  cursor: pointer;*/
-/*}*/
 
 .slider-column img:hover {
   opacity: 1;
@@ -65,20 +59,17 @@
   opacity: 1;
 }
 
-/* Clear floats after the columns */
+.slider {
+  background-color: rgba(32, 178, 170, 0.2);
+}
+.slider-row {
+  overflow-x: hidden;
+  white-space: nowrap;
+}
 .slider-row:after {
   content: "";
   display: table;
   clear: both;
-}
-
-/* Expanding image text */
-#imgtext {
-  position: absolute;
-  bottom: 15px;
-  left: 15px;
-  color: white;
-  font-size: 20px;
 }
 
 /* Container needed to position the overlay. Adjust the width as needed */
@@ -112,18 +103,19 @@
 /* Next & previous buttons */
 .prev,
 .next {
+  background-color: rgba(0, 0, 0, 0.8);
   cursor: pointer;
   position: absolute;
-  top: 40%;
+  top: 53%;
   width: auto;
   padding: 5px;
-  margin-top: 15px;
   color: white;
   font-weight: bold;
   font-size: 14px;
   border-radius: 0 3px 3px 0;
   user-select: none;
   -webkit-user-select: none;
+  text-decoration: none;
 }
 /* Position the "next button" to the right */
 .next {
@@ -134,7 +126,9 @@
 /* On hover, add a black background color with a little bit see-through */
 .prev:hover,
 .next:hover {
-  background-color: rgba(0, 0, 0, 0.8);
+  color: seagreen;
+  /*background-color: rgba(0, 0, 0, 0.8);*/
+  text-decoration: none;
 }
 
 /* Add a transparency effect for thumnbail images */
@@ -166,43 +160,25 @@
   height: 60px;
 }
 
-.wrapper {
-  background-color: rgba(0, 252, 109, 0.42);
-  overflow-x: scroll;
-  overflow-y: hidden;
-  margin: 0 auto;
-
-  display: grid;
-  grid-template-columns: repeat(6, auto);
-  grid-gap: 0 50px;
-
-  padding-right: 0;
-
-  -ms-overflow-style: none;  /* IE and Edge */
-  scrollbar-width: none;  /* Firefox */
-}
-
-.wrapper::-webkit-scrollbar {
-  display: none; /* Chrome, Safari and Opera */
-}
-.wrapper:after {
-  content: "";
-  display: table;
-  clear: both;
-}
 .item {
-  float: left;
-  /*background-color: #95dde0;*/
-  padding: 0 10px;
-  width: 25%;
+  display: inline-block;
+  padding: 5px;
+  width: 160px;
   height: 70px;
 }
 .item img:hover {
   opacity: 1;
 }
 
-.empty {
-  width: 10px;
-}
 .osjs-widget.active,.osjs-widget:hover{background-color:rgba(0,0,0,0)}
 
+.splide {
+  padding-top: 1em;
+}
+
+.splide__arrow--prev{
+  margin-top: -1em;
+}
+.splide__arrow--next{
+  margin-top: -1em;
+}

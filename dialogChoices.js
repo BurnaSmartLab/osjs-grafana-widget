@@ -61,6 +61,10 @@ const dialogChoices =
         'min': 'Min',
         'percentile': 'Percentile',
         'top': 'Top'
+    },
+    FontColors: {
+        '#000': 'Black',
+        '#fff': 'White',
     }
 
 };
