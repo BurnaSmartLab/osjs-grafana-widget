@@ -3,9 +3,6 @@ import {Widget} from '@osjs/widgets';
 import * as translations from './locales.js';
 import widgetItem from './src/widgetItems';
 import dialogChoices from './dialogChoices';
-import '@splidejs/splide/dist/css/splide-core.min.css';
-import '@splidejs/splide/dist/css/splide.min.css';
-import '@splidejs/splide/dist/css/themes/splide-sea-green.min.css';
 
 import {h, app} from 'hyperapp';
 import {Label, Box, SelectField, Image, TextField, BoxContainer} from '@osjs/gui';
