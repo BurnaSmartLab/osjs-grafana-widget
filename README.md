@@ -3,7 +3,7 @@ A widget to show Grafana data in multiple types of charts
 
 ![Screenshot from 2020-11-02 10-45-21](https://user-images.githubusercontent.com/70196035/97840561-7a58b380-1cf9-11eb-8d3b-9e6e02ca15c4.png)
 ## Introduction
-[OS.js Widget](https://manual.os-js.org/tutorial/widget/) is a module of [OS.js web desktop platform](https://www.os-js.org/), which we utilize it to develop a widget named **GrafanaWidget**. </br>  
+[OS.js Widget](https://manual.os-js.org/tutorial/widget/) is a module of [OS.js web desktop platform](https://www.os-js.org/), which we utilize it to develop a widget named **GrafanaWidget**. 
 This widget shows [Grafana](https://grafana.com/) data in different types of charts.
 ## Installation
 #### 1. Installation by by using source code:
