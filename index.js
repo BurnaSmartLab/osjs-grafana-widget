@@ -27,9 +27,8 @@ export default class GrafanaWidget extends Widget {
       refreshTime: 'off',
       widgetType: null,
       widgetOptions: {},  // object properties of each widget class that must be saved
-      fontColor: '#fff'
+      fontColor: '#fff',
     });
-
     this.$mycontainer = document.createElement('div');
     this.$mycontainer.setAttribute('style', 'height:100%; width: 100%; font-size:18px');
     this.$element.appendChild(this.$mycontainer);
@@ -37,6 +36,7 @@ export default class GrafanaWidget extends Widget {
     this.chart = null;
     this.widget = null;
     this.widgetTypeChangedFlag = false;
+    this.default = 'area';
   }
   init() {
     if (this.options.widgetType === null) {
@@ -211,8 +211,8 @@ export default class GrafanaWidget extends Widget {
         },
         setActiveClassSlide: (el) => (state, actions) => {
           if (this.options.widgetType === null) {
-            this.options.widgetType = el.getAttribute('data-widget');
-            actions.onWidgetTypeChange(el.getAttribute('data-widget'));
+            this.options.widgetType = this.default;
+            actions.onWidgetTypeChange(this.default);
           }
           if (el.getAttribute('data-widget') === this.options.widgetType) {
             el.className += ' active';
