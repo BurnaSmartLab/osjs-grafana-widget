@@ -8,8 +8,9 @@ import {h, app} from 'hyperapp';
 import {Label, Box, SelectField, Image, TextField, BoxContainer} from '@osjs/gui';
 
 import $ from 'jquery';
-import './node_modules/select2/dist/css/select2.min.css';
-import './node_modules/select2/dist/js/select2.min';
+import './src/components/select2/dist/css/select2.min.css';
+import './src/components/select2/dist/js/select2.full.min';
+import './src/components/select2/dist/js/i18n/fr';
 import './customStyles.css';
 
 export default class GrafanaWidget extends Widget {
@@ -132,6 +133,8 @@ export default class GrafanaWidget extends Widget {
         createSelect2: el => (state, actions) => {
           let measurementSelect = $(el);
           measurementSelect.select2({
+            dir: document.getElementsByClassName('osjs-root')[0].getAttribute('data-dir') === 'rtl'? 'rtl':'ltr',
+            // language: document.getElementsByClassName('osjs-root')[0].getAttribute('data-dir') === 'rtl'? 'fr':'en',
             ajax: {
               url: '/grafana/api/datasources/proxy/1/query',
               dataType: 'json',
