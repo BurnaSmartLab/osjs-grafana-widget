@@ -10,7 +10,6 @@ import {Label, Box, SelectField, Image, TextField, BoxContainer} from '@osjs/gui
 import $ from 'jquery';
 import './src/components/select2/dist/css/select2.min.css';
 import './src/components/select2/dist/js/select2.full.min';
-import './src/components/select2/dist/js/i18n/fr';
 import './customStyles.css';
 
 export default class GrafanaWidget extends Widget {
@@ -277,12 +276,16 @@ export default class GrafanaWidget extends Widget {
               }, {}),
               h('a', {
                 class: 'prev',
+                style: document.getElementsByClassName('osjs-root')[0].getAttribute('data-dir') === 'rtl'?
+                    'left: 0;':'',
                 onclick: () => actions.pluseSlide({sign: '-', time:'175'})
-              }, '❮'),
+              }, document.getElementsByClassName('osjs-root')[0].getAttribute('data-dir') === 'rtl'?
+                  '❯':'❮'),
               h('a', {
                 class: 'next',
                 onclick: () => actions.pluseSlide({sign: '+', time:'175'})
-              }, '❯'),
+              }, document.getElementsByClassName('osjs-root')[0].getAttribute('data-dir') === 'rtl'?
+                  '❮':'❯'),
             ]),
             h('div', {
               class: 'grid-container2'
