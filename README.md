@@ -3,11 +3,12 @@ A widget to show Grafana data in multiple types of charts
 
 ![Screenshot from 2020-11-02 10-45-21](https://user-images.githubusercontent.com/70196035/97840561-7a58b380-1cf9-11eb-8d3b-9e6e02ca15c4.png)
 ## Introduction
-[OS.js Widget](https://manual.os-js.org/tutorial/widget/) is a module of [OS.js web desktop platform](https://www.os-js.org/), which we utilize it to develop a widget named **GrafanaWidget**. 
-This widget shows [Grafana](https://grafana.com/) data in different types of charts.
+OS.js Widget is a module of OS.js web desktop platform, which we utilize it to develop a widget named **GrafanaWidget**. 
+This widget shows [Grafana](https://grafana.com/) data in different types of charts. </br></br>
+You need to clone [official OS.js repository](https://github.com/os-js/OS.js) and install [OS.js Widget module](https://github.com/os-js/osjs-widgets), prior to installing GrafanaWidget.
 ## Installation
 #### 1. Installation by by using source code:
-1- Navigate to the following directory <br /><br />
+1- Navigate to the following directory of OS.js project <br /><br />
 `cd src/client` <br /><br />
 2- Clone GrafanaWidget in this directory <br /><br />
 `git clone https://github.com/BurnaSmartLab/osjs-grafana-widget.git` <br /><br />
@@ -23,7 +24,10 @@ Just execute the following command:<br /><br />
 1- Add following lines to the `src/client/index.js` file
 ```js
 // import GrafanaWidget from its directory
-import GrafanaWidget  from './grafana-widget';
+// use following line, if the first approach for installation has been used
+import GrafanaWidget  from './osjs-grafana-widget';
+// use following line, if the second approach for installation has been used
+import {GrafanaWidget} from '@burna/osjs-grafana-widget'
 
 // register GrafanaWidget
   osjs.register(WidgetServiceProvider, {
@@ -52,4 +56,7 @@ import GrafanaWidget  from './grafana-widget';
   }]
   ```
   ## Links
- [OS.js Widget](https://manual.os-js.org/tutorial/widget/)
+ [OS.js](https://github.com/os-js/OS.js) </br>
+ [OS.js Widget](https://manual.os-js.org/tutorial/widget/) </br>
+ [Grafana](https://grafana.com/)
+ 
