@@ -59,4 +59,3 @@ import {GrafanaWidget} from '@burna/osjs-grafana-widget'
  [OS.js](https://github.com/os-js/OS.js) </br>
  [OS.js Widget](https://manual.os-js.org/tutorial/widget/) </br>
  [Grafana](https://grafana.com/)
- 
