@@ -1,6 +1,6 @@
 {
   "name": "@burna/osjs-grafana-widget",
-  "version": "1.0.0",
+  "version": "1.0.5",
   "description": "A Widget for os.js to work with Grafana.",
   "main": "index.js",
   "files": [
@@ -23,7 +23,9 @@
     "src/items/gauge/gauge-Chart.png",
     "src/items/singleStat/index.js",
     "src/items/singleStat/singleStat.css",
-    "src/items/singleStat/singleStat-Chart.png"
+    "src/items/singleStat/singleStat-Chart.png",
+    "src/components/select2/dist/css/select2.min.css",
+    "src/components/select2/dist/js/select2.full.min.js"
   ],
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
