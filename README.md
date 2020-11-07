@@ -27,7 +27,7 @@ Just execute the following command:<br /><br />
 // use following line, if the first approach for installation has been used
 import GrafanaWidget  from './osjs-grafana-widget';
 // use following line, if the second approach for installation has been used
-import {GrafanaWidget} from '@burna/osjs-grafana-widget'
+import GrafanaWidget from '@burna/osjs-grafana-widget'
 
 // register GrafanaWidget
   osjs.register(WidgetServiceProvider, {
