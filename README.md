@@ -18,7 +18,7 @@ You need to clone [official OS.js repository](https://github.com/os-js/OS.js) an
 `npm install` <br /><br />
 #### 2. Installion by using npm dependency manager: <br /><br />
 Just execute the following command:<br /><br />
-`@burna/osjs-grafana-widget`
+`npm install @burna/osjs-grafana-widget`
 
 ## Usage
 1- Add following lines to the `src/client/index.js` file
