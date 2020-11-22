@@ -28,6 +28,8 @@ export default class GrafanaWidget extends Widget {
       widgetType: null,
       widgetOptions: {},  // object properties of each widget class that must be saved
       fontColor: '#fff',
+      hostName: '',
+      dataSource: '',
     });
     this.$mycontainer = document.createElement('div');
     this.$mycontainer.setAttribute('style', 'height:100%; width: 100%; font-size:18px');
@@ -118,7 +120,9 @@ export default class GrafanaWidget extends Widget {
         aggregateSelectValue: this.options.aggregateSelect,
         titleValue: this.options.title,
         unitValue: this.options.unit,
-        fontColorValue: this.options.fontColor
+        fontColorValue: this.options.fontColor,
+        hostNameValue: this.options.hostName,
+        dataSourceValue: this.options.dataSource
       }, {
         // actions
         onMeasurementChange: measurementValue => state => ({measurementValue}),
@@ -288,6 +292,21 @@ export default class GrafanaWidget extends Widget {
                   '❮':'❯'),
             ]),
             h('div', {
+              class: 'grid-container4'
+            }, [
+              h(Label, {}, __('LBL_HOST_NAME')),
+              h(TextField, {
+                placeholder: 'Host name',
+                oninput: (ev, value) => actions.onTitleChange(value),
+                value: state.titleValue
+              }),
+              h(Label, {}, __('LBL_DATA_SOURCE')),
+              h(TextField, {
+                placeholder: 'Data source',
+                oninput: (ev, value) => actions.onUnitChange(value),
+                value: state.unitValue,
+              })]),
+            h('div', {
               class: 'grid-container2'
             }, [
               h(Label, {}, __('LBL_SET_MEASUREMENT')),
@@ -389,10 +408,15 @@ export default class GrafanaWidget extends Widget {
         dimension: {width: 600},
       }
     };
-    this.core
-      .make('osjs/dialogs')
-      .create(options, callbackValue, callbackButton)
-      .render(callbackRender);
+    const dialog = this.core
+      .make('osjs/dialogs').create(options, callbackValue, callbackButton).render(callbackRender);
+    dialog.win.on('destroy',()=> {
+      if (this.chart === null) {
+        this.init();
+        this.core.make('osjs/widgets').remove(this);
+        this.core.make('osjs/widgets').save();
+      }
+    });
   }
 
   getNewWindowHeight(dialogWindow, $target) {
