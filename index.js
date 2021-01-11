@@ -126,6 +126,9 @@ export default class GrafanaWidget extends Widget {
       }, {
         // actions
         onMeasurementChange: measurementValue => state => ({measurementValue}),
+        onHostChange: hostNameValue => state => {
+          console.log(hostNameValue); return{hostNameValue};
+        },
         onTitleChange: titleValue => state => ({titleValue}),
         onUnitChange: unitValue => state => ({unitValue}),
         onTimeRangeChange: timeRangeValue => state => ({timeRangeValue}),
@@ -136,7 +139,7 @@ export default class GrafanaWidget extends Widget {
         createSelect2: el => (state, actions) => {
           let measurementSelect = $(el);
           measurementSelect.select2({
-            dir: document.getElementsByClassName('osjs-root')[0].getAttribute('data-dir') === 'rtl'? 'rtl':'ltr',
+            dir: document.getElementsByClassName('osjs-root')[0].getAttribute('data-dir') === 'rtl' ? 'rtl' : 'ltr',
             // language: document.getElementsByClassName('osjs-root')[0].getAttribute('data-dir') === 'rtl'? 'fr':'en',
             ajax: {
               url: '/grafana/api/datasources/proxy/1/query',
@@ -184,6 +187,66 @@ export default class GrafanaWidget extends Widget {
           });
           measurementSelect.on('change', (e) => {
             actions.onMeasurementChange(measurementSelect.val());
+          });
+          $('b[role="presentation"]').hide();
+        },
+        createHost: el => (state, actions) => {
+          let hostSelect = $(el);
+          if (state.hostNameValue) {
+            hostSelect.append(`<option selected value="${state.hostNameValue}"> 
+                                       ${state.hostNameValue} 
+                                  </option>`);
+          }
+          hostSelect.select2({
+            dir: document.getElementsByClassName('osjs-root')[0].getAttribute('data-dir') === 'rtl' ? 'rtl' : 'ltr',
+            // language: document.getElementsByClassName('osjs-root')[0].getAttribute('data-dir') === 'rtl'? 'fr':'en',
+            ajax: {
+              url: '/grafana/api/datasources/proxy/1/query',
+              dataType: 'json',
+              data: (params) => ({
+                db: 'opentsdb',
+                q: 'SHOW TAG VALUES WITH KEY ="host"',
+                epoch: 'ms'
+              }),
+              processResults: data => {
+                if (typeof data.results[0].series !== 'undefined') {
+                  let hosts = data.results[0].series[0].values;
+                  hosts.map(arr => {
+                    arr.id = arr[1];
+                    arr.text = arr[1];
+                    arr.selected = (arr[1] === this.options.hostName) ? true : false;
+                    delete arr[1];
+                  });
+
+                  return {
+                    results: hosts
+                  };
+                }
+                return {results: []};
+              }
+            },
+          });
+
+          $.ajax({
+            type: 'GET',
+            url: '/grafana/api/datasources/proxy/1/query?db=opentsdb&q=SHOW TAG VALUES WITH KEY ="host"/&epoch=ms',
+          }).then((data) => {
+            // create the option and append to Select2
+            let host = data.results[0].series[0].values[0];
+            state.hostNameValue = host[0];
+            this.options.hostName = host[0];
+            let option = new Option(state.hostNameValue, state.hostNameValue, true, true);
+            hostSelect.append(option).trigger('change');
+            // manually trigger the `select2:select` event
+            hostSelect.trigger({
+              type: 'select2:select',
+              params: {
+                data: data
+              }
+            });
+          });
+          hostSelect.on('change', (e) => {
+            actions.onHostChange(hostSelect.val());
           });
           $('b[role="presentation"]').hide();
         },
@@ -280,31 +343,33 @@ export default class GrafanaWidget extends Widget {
               }, {}),
               h('a', {
                 class: 'prev',
-                style: document.getElementsByClassName('osjs-root')[0].getAttribute('data-dir') === 'rtl'?
-                    'left: 0;':'',
+                style: document.getElementsByClassName('osjs-root')[0].getAttribute('data-dir') === 'rtl' ?
+                  'left: 0;' : '',
                 onclick: () => actions.pluseSlide({sign: '-', time:'175'})
-              }, document.getElementsByClassName('osjs-root')[0].getAttribute('data-dir') === 'rtl'?
-                  '❯':'❮'),
+              }, document.getElementsByClassName('osjs-root')[0].getAttribute('data-dir') === 'rtl' ?
+                '❯' : '❮'),
               h('a', {
                 class: 'next',
                 onclick: () => actions.pluseSlide({sign: '+', time:'175'})
-              }, document.getElementsByClassName('osjs-root')[0].getAttribute('data-dir') === 'rtl'?
-                  '❮':'❯'),
+              }, document.getElementsByClassName('osjs-root')[0].getAttribute('data-dir') === 'rtl' ?
+                '❮' : '❯'),
             ]),
             h('div', {
               class: 'grid-container4'
             }, [
               h(Label, {}, __('LBL_HOST_NAME')),
-              h(TextField, {
-                placeholder: 'Host name',
-                oninput: (ev, value) => actions.onTitleChange(value),
-                value: state.titleValue
+              h(SelectField, {
+                placeholder: __('LBL_HOST_NAME'),
+                oncreate: el => actions.createHost(el),
+                onchange: (ev, value) => actions.onHostChange(value),
+                value: state.hostNameValue
               }),
               h(Label, {}, __('LBL_DATA_SOURCE')),
               h(TextField, {
                 placeholder: 'Data source',
-                oninput: (ev, value) => actions.onUnitChange(value),
-                value: state.unitValue,
+                disabled: 'true',
+                // oninput: (ev, value) => actions.onUnitChange(value),
+                // value: state.unitValue,
               })]),
             h('div', {
               class: 'grid-container2'
@@ -395,6 +460,7 @@ export default class GrafanaWidget extends Widget {
         this.options.refreshTime = value.refreshTimeValue;
         this.options.aggregateSelect = value.aggregateSelectValue;
         this.options.fontColor = value.fontColorValue;
+        this.options.hostName = value.hostNameValue;
         this.widget.saveWidgetOptions(this.options.widgetOptions, advancedSetting.state);
         this.saveSettings();
         this.init();
@@ -410,7 +476,7 @@ export default class GrafanaWidget extends Widget {
     };
     const dialog = this.core
       .make('osjs/dialogs').create(options, callbackValue, callbackButton).render(callbackRender);
-    dialog.win.on('destroy',()=> {
+    dialog.win.on('destroy', ()=> {
       if (this.chart === null) {
         this.init();
         this.core.make('osjs/widgets').remove(this);
