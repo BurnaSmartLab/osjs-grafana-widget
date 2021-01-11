@@ -1,6 +1,6 @@
 {
   "name": "@burna/osjs-grafana-widget",
-  "version": "1.0.5",
+  "version": "1.1.5",
   "description": "A Widget for os.js to work with Grafana.",
   "main": "index.js",
   "files": [
