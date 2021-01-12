@@ -29,7 +29,7 @@ export default class GrafanaWidget extends Widget {
       widgetOptions: {},  // object properties of each widget class that must be saved
       fontColor: '#fff',
       hostName: '',
-      dataSource: '',
+      dataSource: {}
     });
     this.$mycontainer = document.createElement('div');
     this.$mycontainer.setAttribute('style', 'height:100%; width: 100%; font-size:18px');
@@ -39,6 +39,7 @@ export default class GrafanaWidget extends Widget {
     this.widget = null;
     this.widgetTypeChangedFlag = false;
     this.default = 'area';
+    this.dataSourceList = [];
   }
   init() {
     if (this.options.widgetType === null) {
@@ -125,10 +126,11 @@ export default class GrafanaWidget extends Widget {
         dataSourceValue: this.options.dataSource
       }, {
         // actions
-        onMeasurementChange: measurementValue => state => ({measurementValue}),
-        onHostChange: hostNameValue => state => {
-          console.log(hostNameValue); return{hostNameValue};
+        onDataSourceChange: dataSourceValue => state => {
+          state.dataSourceValue = this.dataSourceList.filter(ds => ds.id === parseInt(dataSourceValue))[0];
         },
+        onHostChange: hostNameValue => state => ({hostNameValue}),
+        onMeasurementChange: measurementValue => state => ({measurementValue}),
         onTitleChange: titleValue => state => ({titleValue}),
         onUnitChange: unitValue => state => ({unitValue}),
         onTimeRangeChange: timeRangeValue => state => ({timeRangeValue}),
@@ -188,6 +190,30 @@ export default class GrafanaWidget extends Widget {
           measurementSelect.on('change', (e) => {
             actions.onMeasurementChange(measurementSelect.val());
           });
+          $('b[role="presentation"]').hide();
+        },
+        createDataSource: el => async (state, actions) => {
+          let url = '/grafana/api/datasources';
+          let response = await fetch(url);
+          if (response.ok) {
+            let data = await response.json();
+            this.dataSourceList = data;
+            if (Object.keys(state.dataSourceValue).length === 0) {
+              state.dataSourceValue = data[0];
+              actions.onDataSourceChange(data[0].id);
+            }
+            data.forEach(ds => {
+              let selected = state.dataSourceValue.id === ds.id;
+              let option = document.createElement('option');
+              option.text = ds.name;
+              option.value = ds.id;
+              option.selected = selected;
+              el.add(option);
+            });
+          } else {
+            alert('HTTP-Error(datasource): ' + response.status);
+          }
+          $(el).select2();
           $('b[role="presentation"]').hide();
         },
         createHost: el => (state, actions) => {
@@ -250,7 +276,6 @@ export default class GrafanaWidget extends Widget {
           });
           $('b[role="presentation"]').hide();
         },
-
         createSlider: el => (state, actions) => {
           let view = [];
           for (const item in widgetItem) {
@@ -357,19 +382,19 @@ export default class GrafanaWidget extends Widget {
             h('div', {
               class: 'grid-container4'
             }, [
+              h(Label, {}, __('LBL_DATA_SOURCE')),
+              h(SelectField, {
+                placeholder: __('LBL_DATA_SOURCE'),
+                choices: {},
+                oncreate: el => actions.createDataSource(el),
+                onchange: (ev, value) => actions.onDataSourceChange(value),
+              }),
               h(Label, {}, __('LBL_HOST_NAME')),
               h(SelectField, {
                 placeholder: __('LBL_HOST_NAME'),
                 oncreate: el => actions.createHost(el),
                 onchange: (ev, value) => actions.onHostChange(value),
                 value: state.hostNameValue
-              }),
-              h(Label, {}, __('LBL_DATA_SOURCE')),
-              h(TextField, {
-                placeholder: 'Data source',
-                disabled: 'true',
-                // oninput: (ev, value) => actions.onUnitChange(value),
-                // value: state.unitValue,
               })]),
             h('div', {
               class: 'grid-container2'
@@ -461,6 +486,7 @@ export default class GrafanaWidget extends Widget {
         this.options.aggregateSelect = value.aggregateSelectValue;
         this.options.fontColor = value.fontColorValue;
         this.options.hostName = value.hostNameValue;
+        this.options.dataSource = value.dataSourceValue;
         this.widget.saveWidgetOptions(this.options.widgetOptions, advancedSetting.state);
         this.saveSettings();
         this.init();
