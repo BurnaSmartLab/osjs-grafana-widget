@@ -126,7 +126,7 @@ export default class GrafanaWidget extends Widget {
         dataSourceValue: this.options.dataSource
       }, {
         // actions
-        onDataSourceChange: dataSourceValue => state => {
+        onDataSourceChange: dataSourceValue => (state, actions) => {
           console.log(dataSourceValue);
           state.dataSourceValue = this.dataSourceList.filter(ds => ds.id === parseInt(dataSourceValue))[0];
         },
@@ -139,16 +139,50 @@ export default class GrafanaWidget extends Widget {
         onGroupByChange: groupByValue => state => ({groupByValue}),
         onAggregateSelectChange: aggregateSelectValue => state => ({aggregateSelectValue}),
         onFontColorChange: fontColorValue => state => ({fontColorValue}),
+        createDataSource: el => async (state, actions) => {
+          let dataSourceSelect = $(el);
+          let url = '/grafana/api/datasources';
+          let response = await fetch(url);
+          if (response.ok) {
+            let data = await response.json();
+            this.dataSourceList = data;
+            if (Object.keys(state.dataSourceValue).length === 0) {
+              state.dataSourceValue = data[0];
+              actions.onDataSourceChange(data[0].id);
+            }
+            data.forEach(ds => {
+              let selected = state.dataSourceValue.id === ds.id;
+              let option = document.createElement('option');
+              option.text = ds.name;
+              option.value = ds.id;
+              option.selected = selected;
+              el.add(option);
+            });
+          } else {
+            alert('HTTP-Error(datasource): ' + response.status);
+          }
+          dataSourceSelect.select2({
+            dir: document.getElementsByClassName('osjs-root')[0].getAttribute('data-dir') === 'rtl' ? 'rtl' : 'ltr'
+          });
+          dataSourceSelect.on('change', (e) => {
+            actions.onDataSourceChange(dataSourceSelect.val());
+            actions.createSelect2(document.getElementById('measurement'));
+            actions.createHost(document.getElementById('host'));
+          });
+          $('b[role="presentation"]').hide();
+          actions.createSelect2(document.getElementById('measurement'));
+          actions.createHost(document.getElementById('host'));
+        },
         createSelect2: el => (state, actions) => {
           let measurementSelect = $(el);
           measurementSelect.select2({
             dir: document.getElementsByClassName('osjs-root')[0].getAttribute('data-dir') === 'rtl' ? 'rtl' : 'ltr',
             // language: document.getElementsByClassName('osjs-root')[0].getAttribute('data-dir') === 'rtl'? 'fr':'en',
             ajax: {
-              url: `/grafana/api/datasources/${this.options.dataSource.access}/${this.options.dataSource.id}/query`,
+              url: `/grafana/api/datasources/${state.dataSourceValue.access}/${state.dataSourceValue.id}/query`,
               dataType: 'json',
               data: (params) => ({
-                db: this.options.dataSource.database,
+                db: state.dataSourceValue.database,
                 q: `SHOW MEASUREMENTS WITH MEASUREMENT =~ /${typeof params.term !== 'undefined' ? params.term : ''}/ ${this.options.hostName !== '' ? `WHERE ("host" = '${this.options.hostName}')` : ''} LIMIT 100`,
                 epoch: 'ms'
               }),
@@ -172,7 +206,7 @@ export default class GrafanaWidget extends Widget {
 
           $.ajax({
             type: 'GET',
-            url: `/grafana/api/datasources/${this.options.dataSource.access}/${this.options.dataSource.id}/query?db=${this.options.dataSource.database}&q=SHOW MEASUREMENTS WITH MEASUREMENT =~ /${typeof this.options.measurement !== 'undefined' ? this.options.measurement : ''}/ ${this.options.hostName !== '' ? `WHERE ("host" = '${this.options.hostName}')` : ''} &epoch=ms `,
+            url: `/grafana/api/datasources/${state.dataSourceValue.access}/${state.dataSourceValue.id}/query?db=${state.dataSourceValue.database}&q=SHOW MEASUREMENTS WITH MEASUREMENT =~ /${typeof this.options.measurement !== 'undefined' ? this.options.measurement : ''}/ ${this.options.hostName !== '' ? `WHERE ("host" = '${this.options.hostName}')` : ''} &epoch=ms `,
           }).then((data) => {
             // create the option and append to Select2
             let measurement = data.results[0].series[0].values[0];
@@ -190,118 +224,47 @@ export default class GrafanaWidget extends Widget {
           });
           measurementSelect.on('change', (e) => {
             actions.onMeasurementChange(measurementSelect.val());
-          });
-          $('b[role="presentation"]').hide();
-        },
-        createDataSource: el => async (state, actions) => {
-          let url = '/grafana/api/datasources';
-          let response = await fetch(url);
-          if (response.ok) {
-            let data = await response.json();
-            this.dataSourceList = data;
-            if (Object.keys(state.dataSourceValue).length === 0) {
-              state.dataSourceValue = data[0];
-              actions.onDataSourceChange(data[0].id);
-            }
-            data.forEach(ds => {
-              let selected = state.dataSourceValue.id === ds.id;
-              let option = document.createElement('option');
-              option.text = ds.name;
-              option.value = ds.id;
-              option.selected = selected;
-              el.add(option);
-            });
-          } else {
-            alert('HTTP-Error(datasource): ' + response.status);
-          }
-          $(el).select2({
-            dir: document.getElementsByClassName('osjs-root')[0].getAttribute('data-dir') === 'rtl' ? 'rtl' : 'ltr'
+            actions.createHost(document.getElementById('host'));
           });
           $('b[role="presentation"]').hide();
         },
         createHost: el => async (state, actions) => {
-          // let url = '/grafana/api/datasources/';
-          // let response = await fetch(url);
-          // if (response.ok) {
-          //   let data = await response.json();
-          //   this.dataSourceList = data;
-          //   if (Object.keys(state.dataSourceValue).length === 0) {
-          //     state.dataSourceValue = data[0];
-          //     actions.onDataSourceChange(data[0].id);
-          //   }
-          //   data.forEach(ds => {
-          //     let selected = state.dataSourceValue.id === ds.id;
-          //     let option = document.createElement('option');
-          //     option.text = ds.name;
-          //     option.value = ds.id;
-          //     option.selected = selected;
-          //     el.add(option);
-          //   });
-          // } else {
-          //   alert('HTTP-Error(datasource): ' + response.status);
-          // }
-          // $(el).select2({
-          //   dir: document.getElementsByClassName('osjs-root')[0].getAttribute('data-dir') === 'rtl' ? 'rtl' : 'ltr'
-          // });
-          // $('b[role="presentation"]').hide();
-
-          // old code
           let hostSelect = $(el);
-          if (state.hostNameValue) {
-            hostSelect.append(`<option selected value="${state.hostNameValue}"> 
-                                       ${state.hostNameValue} 
-                                  </option>`);
+          let url = `/grafana/api/datasources/${state.dataSourceValue.access}/${state.dataSourceValue.id}/query?db=${state.dataSourceValue.database}&q=SHOW TAG VALUES ${state.measurementValue !== '' ? `FROM "${state.measurementValue}"` : ''} WITH KEY ="host"&epoch=ms`;
+          let response = await fetch(url);
+          if (response.ok) {
+            let data = await response.json();
+            if (typeof data.results[0].series !== 'undefined') {
+              let tempHosts = [];
+              for (let i = 0; i < data.results[0].series.length; i++) {
+                tempHosts.push(data.results[0].series[i].values[0][1]);
+              }
+              let hosts = [...new Set(tempHosts)];
+              let option = document.createElement('option');
+              option.text = 'Select a host...';
+              option.selected = true;
+              option.disabled = true;
+              el.add(option);
+              hosts.forEach(ds => {
+                let selected = state.hostNameValue === ds;
+                let option = document.createElement('option');
+                option.text = ds;
+                option.value = ds;
+                option.selected = selected;
+                el.add(option);
+              });
+            }
+          } else {
+            alert('HTTP-Error(datasource): ' + response.status);
           }
           hostSelect.select2({
-            dir: document.getElementsByClassName('osjs-root')[0].getAttribute('data-dir') === 'rtl' ? 'rtl' : 'ltr',
-            // language: document.getElementsByClassName('osjs-root')[0].getAttribute('data-dir') === 'rtl'? 'fr':'en',
-            ajax: {
-              url: '/grafana/api/datasources/proxy/1/query',
-              dataType: 'json',
-              data: (params) => ({
-                db: 'opentsdb',
-                q: 'SHOW TAG VALUES WITH KEY ="host"',
-                epoch: 'ms'
-              }),
-              processResults: data => {
-                if (typeof data.results[0].series !== 'undefined') {
-                  let hosts = data.results[0].series[0].values;
-                  hosts.map(arr => {
-                    arr.id = arr[1];
-                    arr.text = arr[1];
-                    arr.selected = (arr[1] === this.options.hostName) ? true : false;
-                    delete arr[1];
-                  });
-
-                  return {
-                    results: hosts
-                  };
-                }
-                return {results: []};
-              }
-            },
+            dir: document.getElementsByClassName('osjs-root')[0].getAttribute('data-dir') === 'rtl' ? 'rtl' : 'ltr'
           });
 
-          $.ajax({
-            type: 'GET',
-            url: '/grafana/api/datasources/proxy/1/query?db=opentsdb&q=SHOW TAG VALUES WITH KEY ="host"&epoch=ms',
-          }).then((data) => {
-            // create the option and append to Select2
-            let host = data.results[0].series[0].values[0];
-            state.hostNameValue = host[0];
-            this.options.hostName = host[0];
-            let option = new Option(state.hostNameValue, state.hostNameValue, true, true);
-            hostSelect.append(option).trigger('change');
-            // manually trigger the `select2:select` event
-            hostSelect.trigger({
-              type: 'select2:select',
-              params: {
-                data: data
-              }
-            });
-          });
+          // //////////////////////////////////////////// olddddddddddddddddddddddddddddddddddddddddd code
           hostSelect.on('change', (e) => {
             actions.onHostChange(hostSelect.val());
+            actions.createSelect2(hostSelect.val());
           });
           $('b[role="presentation"]').hide();
         },
@@ -421,7 +384,8 @@ export default class GrafanaWidget extends Widget {
               h(Label, {}, __('LBL_HOST_NAME')),
               h(SelectField, {
                 placeholder: __('LBL_HOST_NAME'),
-                oncreate: el => actions.createHost(el),
+                // oncreate: el => actions.createHost(el),
+                id: 'host',
                 onchange: (ev, value) => actions.onHostChange(value),
                 value: state.hostNameValue
               })]),
@@ -432,7 +396,8 @@ export default class GrafanaWidget extends Widget {
               h(SelectField, {
                 choices: {},
                 value: state.measurementValue,
-                oncreate: el => actions.createSelect2(el),
+                id: 'measurement'
+                // oncreate: el => actions.createSelect2(el),
               }),
             ]),
             h('div', {
