@@ -18,7 +18,7 @@ export default class GrafanaWidget extends Widget {
       canvas: false,
     }, {
       // Custom options that can be saved
-      measurement: 'netdata.system.cpu.system',
+      measurement: 'netdata.apps.cpu.X',
       timeRange: '300000',
       timeGroupBy: '1000',
       aggregateSelect: 'integral',
@@ -167,11 +167,9 @@ export default class GrafanaWidget extends Widget {
           dataSourceSelect.on('change', (e) => {
             actions.onDataSourceChange(dataSourceSelect.val());
             actions.createSelect2(document.getElementById('measurement'));
-            actions.createHost(document.getElementById('host'));
           });
           $('b[role="presentation"]').hide();
           actions.createSelect2(document.getElementById('measurement'));
-          actions.createHost(document.getElementById('host'));
         },
         createSelect2: el => (state, actions) => {
           let measurementSelect = $(el);
@@ -230,6 +228,7 @@ export default class GrafanaWidget extends Widget {
         },
         createHost: el => async (state, actions) => {
           let hostSelect = $(el);
+          hostSelect.html('');
           let url = `/grafana/api/datasources/${state.dataSourceValue.access}/${state.dataSourceValue.id}/query?db=${state.dataSourceValue.database}&q=SHOW TAG VALUES ${state.measurementValue !== '' ? `FROM "${state.measurementValue}"` : ''} WITH KEY ="host"&epoch=ms`;
           let response = await fetch(url);
           if (response.ok) {
@@ -352,7 +351,6 @@ export default class GrafanaWidget extends Widget {
             h(Box, {
               oncreate: () => actions.startDialog(this.options.widgetType)
             }, [
-              h(Label, {}, __('LBL_WIDGET_TYPE')),
               // custom slider
               h(BoxContainer, {
                 class: 'slider',
@@ -380,17 +378,9 @@ export default class GrafanaWidget extends Widget {
                 choices: {},
                 oncreate: el => actions.createDataSource(el),
                 onchange: (ev, value) => actions.onDataSourceChange(value),
-              }),
-              h(Label, {}, __('LBL_HOST_NAME')),
-              h(SelectField, {
-                placeholder: __('LBL_HOST_NAME'),
-                // oncreate: el => actions.createHost(el),
-                id: 'host',
-                onchange: (ev, value) => actions.onHostChange(value),
-                value: state.hostNameValue
               })]),
             h('div', {
-              class: 'grid-container2'
+              class: 'grid-3'
             }, [
               h(Label, {}, __('LBL_SET_MEASUREMENT')),
               h(SelectField, {
@@ -399,6 +389,25 @@ export default class GrafanaWidget extends Widget {
                 id: 'measurement'
                 // oncreate: el => actions.createSelect2(el),
               }),
+              h(SelectField, {
+                placeholder: __('LBL_HOST_NAME'),
+                id: 'host',
+                onchange: (ev, value) => actions.onHostChange(value),
+                value: state.hostNameValue
+              })
+            ]),
+            h('div', {
+              class: 'grid-3'
+            }, [
+              h(Label, {}, __('LBL_SET_UNIT')),
+              h(TextField, {
+                placeholder: 'Formula: (x/1024)',
+              }),
+              h(TextField, {
+                placeholder: 'Example: %, /s, Mb, Gb',
+                oninput: (ev, value) => actions.onUnitChange(value),
+                value: state.unitValue
+              })
             ]),
             h('div', {
               class: 'grid-container4'
@@ -408,12 +417,6 @@ export default class GrafanaWidget extends Widget {
                 placeholder: 'Default: Measurement',
                 oninput: (ev, value) => actions.onTitleChange(value),
                 value: state.titleValue
-              }),
-              h(Label, {}, __('LBL_SET_UNIT')),
-              h(TextField, {
-                placeholder: 'Example: %, /s, Mb, Gb',
-                oninput: (ev, value) => actions.onUnitChange(value),
-                value: state.unitValue,
               }),
               h(Label, {}, __('LBL_SET_TIME_RANGE')),
               h(SelectField, {
