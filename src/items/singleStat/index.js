@@ -154,7 +154,7 @@ export default class SingleStatWidget extends AbstractGrafana {
 
     // hyperapp
     const state = {
-      singleValue: calcAvg,
+      singleValue: grafana.eval(calcAvg),
       measurement:  grafana.options.title === '' ? grafana.options.measurement : grafana.options.title,
     };
     const actions = {

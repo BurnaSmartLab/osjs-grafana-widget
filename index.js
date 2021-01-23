@@ -11,6 +11,8 @@ import $ from 'jquery';
 import './src/components/select2/dist/css/select2.min.css';
 import './src/components/select2/dist/js/select2.full.min';
 import './customStyles.css';
+import {type} from "@amcharts/amcharts4/core";
+import {keys} from "@amcharts/amcharts4/.internal/core/utils/Object";
 
 export default class GrafanaWidget extends Widget {
   constructor(core, options) {
@@ -23,6 +25,7 @@ export default class GrafanaWidget extends Widget {
       timeGroupBy: '1000',
       aggregateSelect: 'integral',
       title: '',
+      formula: '',
       unit: '',
       refreshTime: 'off',
       widgetType: null,
@@ -120,6 +123,7 @@ export default class GrafanaWidget extends Widget {
         groupByValue: this.options.timeGroupBy,
         aggregateSelectValue: this.options.aggregateSelect,
         titleValue: this.options.title,
+        formulaValue: this.options.formula,
         unitValue: this.options.unit,
         fontColorValue: this.options.fontColor,
         hostNameValue: this.options.hostName,
@@ -133,6 +137,7 @@ export default class GrafanaWidget extends Widget {
         onHostChange: hostNameValue => state => ({hostNameValue}),
         onMeasurementChange: measurementValue => state => ({measurementValue}),
         onTitleChange: titleValue => state => ({titleValue}),
+        onFormulaChange: formulaValue => state => ({formulaValue}),
         onUnitChange: unitValue => state => ({unitValue}),
         onTimeRangeChange: timeRangeValue => state => ({timeRangeValue}),
         onRefreshTimeChange: refreshTimeValue => state => ({refreshTimeValue}),
@@ -402,6 +407,8 @@ export default class GrafanaWidget extends Widget {
               h(Label, {}, __('LBL_SET_UNIT')),
               h(TextField, {
                 placeholder: 'Formula: (x/1024)',
+                oninput: (ev, value) => actions.onFormulaChange(value),
+                value: state.formulaValue
               }),
               h(TextField, {
                 placeholder: 'Example: %, /s, Mb, Gb',
@@ -476,6 +483,7 @@ export default class GrafanaWidget extends Widget {
       if (button === 'ok') {
         this.options.measurement = value.measurementValue;
         this.options.title = value.titleValue;
+        this.options.formula = value.formulaValue;
         this.options.unit = value.unitValue;
         this.options.timeRange = value.timeRangeValue;
         this.options.timeGroupBy = value.groupByValue;
@@ -525,6 +533,26 @@ export default class GrafanaWidget extends Widget {
       toolbarMargin;
 
     return height;
+  }
+
+  eval(data) {
+    // data.map(x => Function('"use strict";let p = ' + x + ';return p/10')());
+    try {
+      if (this.options.formula !== '') {
+        if (typeof data === 'object' && data !== null) {
+          let keys = Object.keys(data[0]);
+          return data.map(a => ({
+            [keys[0]]: Object.values(a)[0],
+            [keys[1]]: Function('"use strict";let x = ' + Object.values(a)[1] + '; return ' + this.options.formula)()
+          }));
+        } else if (!isNaN(data)) {
+          return Function('"use strict";let x = ' + data + '; return ' + this.options.formula)();
+        }
+      }
+      return data;
+    }catch (e) {
+      console.log(e);
+    }
   }
   static metadata(core) {
     const {translatable} = core.make('osjs/locale');

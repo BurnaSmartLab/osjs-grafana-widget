@@ -108,7 +108,7 @@ export default class AreaWidget extends AbstractGrafana {
         delete arr[1];
       });
       this.chartSize = chartData.length;
-      grafana.chart.data = chartData;
+      grafana.chart.data = grafana.eval(chartData);
     } else {
       alert('HTTP-Error: ' + response.status);
     }
@@ -134,7 +134,7 @@ export default class AreaWidget extends AbstractGrafana {
           alert('HTTP-Error: ' + response.status);
         }
         grafana.chart.addData(
-          chartData,
+          grafana.eval(chartData),
           1
         );
         this.chartSize = chartData.length;

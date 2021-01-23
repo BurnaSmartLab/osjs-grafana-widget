@@ -75,7 +75,7 @@ export default class GaugeWidget extends AbstractGrafana {
     let chartMax = grafana.options.widgetOptions.gauge.maxRange;
 
     let data = {
-      score: calcAvg,
+      score: grafana.eval(calcAvg),
       gradingData: grafana.options.widgetOptions.gauge.gradeThresholds
     };
     /**
@@ -226,7 +226,7 @@ export default class GaugeWidget extends AbstractGrafana {
       } else {
         alert('HTTP-Error: ' + response.status);
       }
-      this.widgetHand.showValue(calcAvgUpdated, grafana.options.refreshTime, am4core.ease.cubicOut);
+      this.widgetHand.showValue(grafana.eval(calcAvgUpdated), grafana.options.refreshTime, am4core.ease.cubicOut);
     }, grafana.options.refreshTime);
   }
   showAdvancedSetting(grafana, dialogWindow) {
