@@ -21,19 +21,19 @@
 .grid-container4 {
   display: grid;
   grid-template-columns:100px 172px 100px 172px;
-  padding: 15px;
+  padding: 6.5px 15px;
   grid-gap: 10px;
 }
 .grid-3 {
   display: grid;
   grid-template-columns:100px 282px 172px;
-  padding: 15px;
+  padding: 6.5px 15px;
   grid-gap: 10px;
 }
 .grid-container2 {
   display: grid;
   grid-template-columns:100px 462px;
-  padding: 15px;
+  padding: 6.5px 15px;
   grid-gap: 10px;
 }
 
