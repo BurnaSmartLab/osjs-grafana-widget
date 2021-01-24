@@ -147,7 +147,7 @@ export default class GrafanaWidget extends Widget {
 
         createDataSource: el => async (state, actions) => {
           let dataSourceSelect = $(el);
-          if( Object.keys(this.options.dataSource).length === 0){
+          if( this.dataSourceList.length === 0){
             let url = '/grafana/api/datasources';
             let response = await fetch(url);
             if (response.ok) {
@@ -173,20 +173,22 @@ export default class GrafanaWidget extends Widget {
             dir: document.getElementsByClassName('osjs-root')[0].getAttribute('data-dir') === 'rtl' ? 'rtl' : 'ltr'
           });
           dataSourceSelect.on('change', (e) => {
+            console.log('dataSource changed & calls CreateMeasurement')
             actions.onDataSourceChange(dataSourceSelect.val());
-            actions.createSelect2({el:document.getElementById('measurement'), bool:true});
+            actions.createMeasurement({el:document.getElementById('measurement'), bool:true});
           });
           $('b[role="presentation"]').hide();
-          actions.createSelect2({el:document.getElementById('measurement'), bool:false});
+          console.log('CreateDataSource calls createMeasurement')
+          actions.createMeasurement({el:document.getElementById('measurement'), bool:false});
         },
 
         //true bool parameter shows that measurement will be changed due to dataSource changing
-        createSelect2: ({el ,bool}) => (state, actions) => {
+        createMeasurement: ({el ,bool}) => async (state, actions) => {
           let measurementSelect = $(el);
           measurementSelect.select2({
             dir: document.getElementsByClassName('osjs-root')[0].getAttribute('data-dir') === 'rtl' ? 'rtl' : 'ltr',
             // language: document.getElementsByClassName('osjs-root')[0].getAttribute('data-dir') === 'rtl'? 'fr':'en',
-            ajax: {
+            ajax: await {
               url: `/grafana/api/datasources/${state.dataSourceValue.access}/${state.dataSourceValue.id}/query`,
               dataType: 'json',
               data: (params) => ({
@@ -212,31 +214,33 @@ export default class GrafanaWidget extends Widget {
             },
           });
           if(this.options.measurement === '' || bool === true){
-            $.ajax({
+            await $.ajax({
               type: 'GET',
-              url: `/grafana/api/datasources/${state.dataSourceValue.access}/${state.dataSourceValue.id}/query?db=${state.dataSourceValue.database}&q=SHOW MEASUREMENTS WITH MEASUREMENT =~ /${typeof this.options.measurement !== 'undefined' ? this.options.measurement : ''}/ ${this.options.hostName !== '' ? `WHERE ("host" = '${this.options.hostName}')` : ''} &epoch=ms `,
+              url: `/grafana/api/datasources/${state.dataSourceValue.access}/${state.dataSourceValue.id}/query?db=${state.dataSourceValue.database}&q=SHOW MEASUREMENTS ${this.options.hostName !== '' ? `WHERE ("host" = '${this.options.hostName}')` : ''} &epoch=ms `,
             }).then((data) => {
               // create the option and append to Select2
               let measurement = data.results[0].series[0].values[0];
               state.measurementValue = measurement[0];
-              this.options.measurement = measurement[0];
-              let option = new Option(state.measurementValue, state.measurementValue, true, true);
-              measurementSelect.append(option).trigger('change');
+              //this.options.measurement = measurement[0];
+              //let option = new Option(state.measurementValue, state.measurementValue, true, true);
+              //measurementSelect.append(option).trigger('change');
+              //measurementSelect.append(option)
               // manually trigger the `select2:select` event
-              measurementSelect.trigger({
-                type: 'select2:select',
-                params: {
-                  data: data
-                }
-              });
+              // measurementSelect.trigger({
+              //   type: 'select2:select',
+              //   params: {
+              //     data: data
+              //   }
+              // });
             });
         }
-
           let option = new Option(state.measurementValue, state.measurementValue, true, true);
-          measurementSelect.append(option).trigger('change');
-          actions.createHost({el:document.getElementById('host'), bool:false})
-
+          // measurementSelect.append(option).trigger('change');
+          measurementSelect.append(option)
+          console.log('CreateMeasurement called CreateHost')
+          actions.createHost({el:document.getElementById('host'), bool:false})  
           measurementSelect.on('change', (e) => {
+            console.log('measurement changed & called CreateHost');
             actions.onMeasurementChange(measurementSelect.val());
             actions.createHost({el:document.getElementById('host'), bool:true});
           });
@@ -246,17 +250,16 @@ export default class GrafanaWidget extends Widget {
          //true bool parameter shows that host will be changed due to dataSource changing
         createHost: ({el, bool}) => async (state, actions) => {
           let hostSelect = $(el);
-          //$(el).empty();
-          if(this.options.hostName === '' || bool=== true){
-            //hostSelect.html('');
+          hostSelect.html('');
+          if( this.hostList.length === 0 || bool=== true){
             let url = `/grafana/api/datasources/${state.dataSourceValue.access}/${state.dataSourceValue.id}/query?db=${state.dataSourceValue.database}&q=SHOW TAG VALUES ${state.measurementValue !== '' ? `FROM "${state.measurementValue}"` : ''} WITH KEY ="host"&epoch=ms`;
             let response = await fetch(url);
             if (response.ok) {
               let data = await response.json();
               if (typeof data.results[0].series !== 'undefined') {
                 let tempHosts = [];
-                for (let i = 0; i < data.results[0].series.length; i++) {
-                  tempHosts.push(data.results[0].series[i].values[0][1]);
+                for (let i = 0; i < data.results[0].series[0].values.length; i++) {
+                  tempHosts.push(data.results[0].series[0].values[i][1]);
                 }
                 this.hostList =  [...new Set(tempHosts)];
               }
@@ -283,7 +286,7 @@ export default class GrafanaWidget extends Widget {
 
           hostSelect.on('change', (e) => {
             actions.onHostChange(hostSelect.val());
-            //actions.createSelect2({el:hostSelect.val(), bool:true});
+            //actions.createMeasurement({el:hostSelect.val(), bool:true});
           });
           $('b[role="presentation"]').hide();
         },
@@ -407,7 +410,7 @@ export default class GrafanaWidget extends Widget {
                 choices: {},
                 value: state.measurementValue,
                 id: 'measurement'
-                // oncreate: el => actions.createSelect2(el),
+                // oncreate: el => actions.createMeasurement(el),
               }),
               h(SelectField, {
                 placeholder: __('LBL_HOST_NAME'),
