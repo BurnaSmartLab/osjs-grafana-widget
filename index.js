@@ -19,7 +19,9 @@ export default class GrafanaWidget extends Widget {
     }, {
       // Custom options that can be saved
       start: true,
+      dataSource: {},
       measurement: '',
+      hostName: '',
       timeRange: '300000',
       timeGroupBy: '1000',
       aggregateSelect: 'integral',
@@ -29,9 +31,7 @@ export default class GrafanaWidget extends Widget {
       refreshTime: 'off',
       widgetType: null,
       widgetOptions: {},  // object properties of each widget class that must be saved
-      fontColor: '#fff',
-      hostName: '',
-      dataSource: {}
+      fontColor: '#fff'
     });
     this.$mycontainer = document.createElement('div');
     this.$mycontainer.setAttribute('style', 'height:100%; width: 100%; font-size:18px');
@@ -500,7 +500,9 @@ export default class GrafanaWidget extends Widget {
     const callbackValue = dialog => dialog.app.getValues();
     const callbackButton = (button, value) => {
       if (button === 'ok') {
+        this.options.dataSource = value.dataSourceValue;
         this.options.measurement = value.measurementValue;
+        this.options.hostName = value.hostNameValue;
         this.options.title = value.titleValue;
         this.options.formula = value.formulaValue;
         this.options.unit = value.unitValue;
@@ -509,8 +511,13 @@ export default class GrafanaWidget extends Widget {
         this.options.refreshTime = value.refreshTimeValue;
         this.options.aggregateSelect = value.aggregateSelectValue;
         this.options.fontColor = value.fontColorValue;
-        this.options.hostName = value.hostNameValue;
-        this.options.dataSource = value.dataSourceValue;
+        if ((Object.keys(this.options.dataSource).length === 0) || (this.options.measurement === '')) {
+          this.core.make('osjs/dialog', 'alert', {
+            message: `${this.options.dataSource === '' ? `${__('LBL_DATA_SOURCE')} field is empty` : ''}/n ${this.options.measurement === '' ? `${__('LBL_SET_MEASUREMENT')} field is empty` : ''}`,
+            type: 'error'}, options, ()=>{
+            this.init();
+          });
+        }
         this.widget.saveWidgetOptions(this.options.widgetOptions, advancedSetting.state);
         this.saveSettings();
         this.init();
