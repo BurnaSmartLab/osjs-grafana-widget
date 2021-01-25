@@ -18,6 +18,7 @@ export default class GrafanaWidget extends Widget {
       canvas: false,
     }, {
       // Custom options that can be saved
+      start: true,
       measurement: '',
       timeRange: '300000',
       timeGroupBy: '1000',
@@ -47,6 +48,7 @@ export default class GrafanaWidget extends Widget {
     if (this.options.widgetType === null) {
       this.createSettingDialog();
     } else {
+      this.options.start = false;
       this.generateWidget();
       this.saveSettings();
       super.init();
@@ -525,7 +527,7 @@ export default class GrafanaWidget extends Widget {
     const dialog = this.core
       .make('osjs/dialogs').create(options, callbackValue, callbackButton).render(callbackRender);
     dialog.win.on('destroy', ()=> {
-      if (this.chart === null) {
+      if (this.options.start) {
         this.init();
         this.core.make('osjs/widgets').remove(this);
         this.core.make('osjs/widgets').save();
