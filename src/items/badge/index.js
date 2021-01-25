@@ -53,7 +53,7 @@ export default class BadgeWidget extends AbstractGrafana {
     } else {
       alert('HTTP-Error: ' + response.status);
     }
-    let appParams = this.renderBadge(grafana, calcAvg);
+    let appParams = this.renderBadge(grafana, grafana.eval(calcAvg));
     app(appParams.state, appParams.actions, appParams.view, grafana.$mycontainer);
   }
 
@@ -80,7 +80,7 @@ export default class BadgeWidget extends AbstractGrafana {
       } else {
         alert('HTTP-Error: ' + response.status);
       }
-      let appParams = this.renderBadge(grafana, calcAvgUpdated);
+      let appParams = this.renderBadge(grafana, grafana.eval(calcAvgUpdated));
       app(appParams.state, appParams.actions, appParams.view, grafana.$mycontainer);
     }, grafana.options.refreshTime);
   }

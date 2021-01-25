@@ -140,7 +140,7 @@ export default class BarWidget extends AbstractGrafana {
         delete arr[0];
         delete arr[1];
       });
-      return chartData;
+      return grafana.eval(chartData);
     } else {
       alert('HTTP-Error: ' + response.status);
     }
