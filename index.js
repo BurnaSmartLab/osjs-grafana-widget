@@ -146,8 +146,8 @@ export default class GrafanaWidget extends Widget {
         onFontColorChange: fontColorValue => state => ({fontColorValue}),
         createDataSource: el => async (state, actions) => {
           let dataSourceSelect = $(el);
-          //fetch data sources
-          if(this.dataSourceList.length === 0){
+          // fetch data sources
+          if(this.dataSourceList.length === 0) {
             let url = '/grafana/api/datasources';
             let response = await fetch(url);
             if (response.ok) {
@@ -183,7 +183,7 @@ export default class GrafanaWidget extends Widget {
 
         createMeasurement: ({el, bool}) => async (state, actions) => {
           let measurementSelect = $(el);
-          //onclick event
+          // onclick event
           measurementSelect.select2({
             dir: document.getElementsByClassName('osjs-root')[0].getAttribute('data-dir') === 'rtl' ? 'rtl' : 'ltr',
             // language: document.getElementsByClassName('osjs-root')[0].getAttribute('data-dir') === 'rtl'? 'fr':'en',
@@ -213,8 +213,8 @@ export default class GrafanaWidget extends Widget {
             },
           });
           $('b[role="presentation"]').hide();
-          //very first opening
-          if(this.options.measurement === '' && bool=== false){
+          // very first opening
+          if(this.options.measurement === '' && bool === false) {
             let option = document.createElement('option');
             option.text = 'Select measurement...';
             option.selected = true;
@@ -222,20 +222,20 @@ export default class GrafanaWidget extends Widget {
             measurementSelect.append(option);
             actions.createHost({el:document.getElementById('host'), bool:false});
           }
-          //loading previous selected value (opening sessting dialog after creating or even refreshing )
-          if(this.options.measurement !== '' && bool === false){
+          // loading previous selected value (opening sessting dialog after creating or even refreshing )
+          if(this.options.measurement !== '' && bool === false) {
             let option = new Option(state.measurementValue, state.measurementValue, true, true);
             measurementSelect.append(option);
             actions.createHost({el:document.getElementById('host'), bool:false});
           }
-          //changes in dependendent elements
+          // changes in dependendent elements
           if(bool === true) {
             let option = document.createElement('option');
             option.text = 'Select measurement...';
             option.selected = true;
             option.disabled = true;
             measurementSelect.append(option);
-            state.measurementValue= '';
+            state.measurementValue = '';
             actions.createHost({el:document.getElementById('host'), bool:true});
           }
           measurementSelect.on('change', (e) => {
@@ -246,7 +246,7 @@ export default class GrafanaWidget extends Widget {
 
         createHost: ({el, bool}) => async (state, actions) => {
           let hostSelect = $(el);
-          //onclick event
+          // onclick event
           hostSelect.select2({
             dir: document.getElementsByClassName('osjs-root')[0].getAttribute('data-dir') === 'rtl' ? 'rtl' : 'ltr',
             // language: document.getElementsByClassName('osjs-root')[0].getAttribute('data-dir') === 'rtl'? 'fr':'en',
@@ -265,15 +265,15 @@ export default class GrafanaWidget extends Widget {
                     tempHosts.push(data.results[0].series[0].values[i][1]);
                   }
                   this.hostList = [...new Set(tempHosts)];
-                  let item = null
-                  let arr = []
+                  let item = null;
+                  let arr = [];
                   this.hostList.map(ele => {
                     item = {};
                     item.id = ele;
                     item.text = ele;
                     item.selected = (ele === this.options.hostName) ? true : false;
                     arr.push(item);
-                });
+                  });
                   return {
                     results: arr
                   };
@@ -281,31 +281,31 @@ export default class GrafanaWidget extends Widget {
               }
             },
           });
-          //very first opening or when hostName is not selected 
-          if(this.options.hostName === '' && bool=== false){
+          // very first opening or when hostName is not selected
+          if(this.options.hostName === '' && bool === false) {
             let option = document.createElement('option');
             option.text = 'Select a host...';
             option.selected = true;
             option.disabled = true;
             hostSelect.append(option);
-            state.measurementValue=== '' ? hostSelect.prop('disabled', true): hostSelect.prop('disabled', false);
+            state.measurementValue === '' ? hostSelect.prop('disabled', true) : hostSelect.prop('disabled', false);
           }
-          //loading previous selected value (opening sessting dialog after creating or even refreshing )
-          if((this.hostList.length !== 0 || this.options.hostName !== '' ) && bool === false ){
-            let option = state.hostNameValue !==''? new Option(state.hostNameValue, state.hostNameValue, true, true):
-                          new Option('Select a host...', 'Select a host...', true, true)     ;
+          // loading previous selected value (opening sessting dialog after creating or even refreshing )
+          if((this.hostList.length !== 0 || this.options.hostName !== '') && bool === false) {
+            let option = state.hostNameValue !== '' ? new Option(state.hostNameValue, state.hostNameValue, true, true) :
+              new Option('Select a host...', 'Select a host...', true, true)     ;
             hostSelect.append(option);
             hostSelect.prop('disabled', false);
           }
-          //changes in dependendent elements
+          // changes in dependendent elements
           if(bool === true) {
             let option = document.createElement('option');
             option.text = 'Select a host...';
             option.selected = true;
             option.disabled = true;
             hostSelect.append(option);
-            state.measurementValue === ''? hostSelect.prop('disabled', true): hostSelect.prop('disabled', false) ;
-            state.hostNameValue= '';
+            state.measurementValue === '' ? hostSelect.prop('disabled', true) : hostSelect.prop('disabled', false) ;
+            state.hostNameValue = '';
           }
           hostSelect.on('change', (e) => {
             actions.onHostChange(hostSelect.val());
@@ -532,16 +532,22 @@ export default class GrafanaWidget extends Widget {
         this.options.refreshTime = value.refreshTimeValue;
         this.options.aggregateSelect = value.aggregateSelectValue;
         this.options.fontColor = value.fontColorValue;
-        // if ((Object.keys(this.options.dataSource).length === 0) || (this.options.measurement === '')) {
-        //   this.core.make('osjs/dialog', 'alert', {
-        //     message: `${this.options.dataSource === '' ? `${__('LBL_DATA_SOURCE')} field is empty` : ''}/n ${this.options.measurement === '' ? `${__('LBL_SET_MEASUREMENT')} field is empty` : ''}`,
-        //     type: 'error'}, options, ()=>{
-        //     this.init();
-        //   });
-        // }
-        this.widget.saveWidgetOptions(this.options.widgetOptions, advancedSetting.state);
-        this.saveSettings();
-        this.init();
+        if ((Object.keys(this.options.dataSource).length === 0) || (this.options.measurement === '')) {
+          this.core.make('osjs/dialog', 'alert', {
+            message: `${this.options.dataSource === '' ? `${__('LBL_DATA_SOURCE')} field is required\n` : ''} ${this.options.measurement === '' ? `${__('LBL_SET_MEASUREMENT')} field is required` : ''}`,
+            type: 'warning'}, (btn, value)=>{
+            this.options.widgetType = null;
+            this.options.dataSource = null;
+            // this.widget.saveWidgetOptions(this.options.widgetOptions, advancedSetting.state);
+            // this.saveSettings();
+            this.init();
+            console.log('milad');
+          });
+        } else {
+          this.widget.saveWidgetOptions(this.options.widgetOptions, advancedSetting.state);
+          this.saveSettings();
+          this.init();
+        }
       }
     };
     const options = {
