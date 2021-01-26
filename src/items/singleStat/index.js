@@ -48,16 +48,20 @@ export default class SingleStatWidget extends AbstractGrafana {
     let response = await fetch(url);
     if (response.ok) {
       let data = await response.json();
-      chartData = data.results[0].series[0].values;
-      let sum = 0, count = 0;
-      for (let elem of chartData) {
-        if (elem[1] !== null) {
-          sum += elem[1];
-          values.push(elem[1]);
-          count += 1;
+      if ((!data.results['error']) && (data.results[0].hasOwnProperty('series'))) {
+        chartData = data.results[0].series[0].values;
+        let sum = 0, count = 0;
+        for (let elem of chartData) {
+          if (elem[1] !== null) {
+            sum += elem[1];
+            values.push(elem[1]);
+            count += 1;
+          }
         }
+        calcAvg = (sum / count).toFixed(2);
+      }else {
+        calcAvg = 'no data';
       }
-      calcAvg = sum / count;
     } else {
       alert('HTTP-Error: ' + response.status);
     }
@@ -174,14 +178,17 @@ export default class SingleStatWidget extends AbstractGrafana {
         // setting font color
         el.style.color = grafana.options.fontColor;
         grafana.options.widgetOptions.singleStat.gradeThresholds.map(elem => {
+          let result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(elem.color);
+          result = {
+            r: parseInt(result[1], 16),
+            g: parseInt(result[2], 16),
+            b: parseInt(result[3], 16)
+          };
           if (calcAvg >= elem.lowScore && calcAvg < elem.highScore) {
-            let result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(elem.color);
-            result = {
-              r: parseInt(result[1], 16),
-              g: parseInt(result[2], 16),
-              b: parseInt(result[3], 16)
-            };
             // generate gradient transparent color
+            el.style.backgroundImage = `linear-gradient(170deg, rgba(${result.r},${result.g}, ${result.b},0.8), rgba(231,239,241,0))`;
+          } else {
+            console.log('man');
             el.style.backgroundImage = `linear-gradient(170deg, rgba(${result.r},${result.g}, ${result.b},0.8), rgba(231,239,241,0))`;
           }
         });
@@ -196,7 +203,7 @@ export default class SingleStatWidget extends AbstractGrafana {
           class:'sparkboxes',
         }, [
           h('div', {class: 'details'}, [
-            h('p', {class: 'singleValue'}, state.singleValue.toFixed(2) + grafana.options.unit),
+            h('p', {class: 'singleValue'}, state.singleValue + grafana.options.unit),
             h('p', {class: 'status', oncreate: el => actions.setStatus(el)})
           ]),
           h('div', {class: 'spark1', oncreate: el => actions.makeSpark(el)}),

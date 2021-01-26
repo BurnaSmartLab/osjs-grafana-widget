@@ -532,13 +532,13 @@ export default class GrafanaWidget extends Widget {
         this.options.refreshTime = value.refreshTimeValue;
         this.options.aggregateSelect = value.aggregateSelectValue;
         this.options.fontColor = value.fontColorValue;
-        if ((Object.keys(this.options.dataSource).length === 0) || (this.options.measurement === '')) {
-          this.core.make('osjs/dialog', 'alert', {
-            message: `${this.options.dataSource === '' ? `${__('LBL_DATA_SOURCE')} field is empty` : ''}/n ${this.options.measurement === '' ? `${__('LBL_SET_MEASUREMENT')} field is empty` : ''}`,
-            type: 'error'}, options, ()=>{
-            this.init();
-          });
-        }
+        // if ((Object.keys(this.options.dataSource).length === 0) || (this.options.measurement === '')) {
+        //   this.core.make('osjs/dialog', 'alert', {
+        //     message: `${this.options.dataSource === '' ? `${__('LBL_DATA_SOURCE')} field is empty` : ''}/n ${this.options.measurement === '' ? `${__('LBL_SET_MEASUREMENT')} field is empty` : ''}`,
+        //     type: 'error'}, options, ()=>{
+        //     this.init();
+        //   });
+        // }
         this.widget.saveWidgetOptions(this.options.widgetOptions, advancedSetting.state);
         this.saveSettings();
         this.init();
