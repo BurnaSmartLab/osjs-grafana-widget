@@ -39,7 +39,7 @@ export default class BadgeWidget extends AbstractGrafana {
     let response = await fetch(url);
     if (response.ok) {
       let data = await response.json();
-      if (!data.results['error']) {
+      if ((!data.results['error']) && (data.results[0].hasOwnProperty('series'))) {
         badgeData = data.results[0].series[0].values;
         let sum = 0, count = 0;
         for (let elem of badgeData) {
@@ -49,6 +49,8 @@ export default class BadgeWidget extends AbstractGrafana {
           }
         }
         calcAvg = (sum / count).toFixed(2);
+      } else {
+        calcAvg = 'no data';
       }
     } else {
       alert('HTTP-Error: ' + response.status);
@@ -66,7 +68,7 @@ export default class BadgeWidget extends AbstractGrafana {
       let response = await fetch(url);
       if (response.ok) {
         let data = await response.json();
-        if (!data.results['error']) {
+        if ((!data.results['error']) && (data.results[0].hasOwnProperty('series'))) {
           chartData = data.results[0].series[0].values;
           let sum = 0, count = 0;
           for (let elem of chartData) {
@@ -76,6 +78,8 @@ export default class BadgeWidget extends AbstractGrafana {
             }
           }
           calcAvgUpdated = (sum / count).toFixed(2);
+        }else {
+          calcAvgUpdated = 'No Data';
         }
       } else {
         alert('HTTP-Error: ' + response.status);

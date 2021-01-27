@@ -75,7 +75,6 @@ export default class BarWidget extends AbstractGrafana {
       .style('color', grafana.options.fontColor)
       .style('font-weight', '500');
 
-
     let xAxis = g => g
       .attr('transform', `translate(0,${height - margin.bottom})`)
       .call(d3.axisBottom(x).tickValues(tickValues).tickFormat(i => parseDate(data[i].name)).tickSizeOuter(0))
@@ -133,13 +132,15 @@ export default class BarWidget extends AbstractGrafana {
     let response = await fetch(url);
     if (response.ok) {
       let data = await response.json();
-      chartData = data.results[0].series[0].values;
-      chartData.map(arr => {
-        arr.name = arr[0];
-        arr.value = arr[1];
-        delete arr[0];
-        delete arr[1];
-      });
+      if ((!data.results['error']) && (data.results[0].hasOwnProperty('series'))) {
+        chartData = data.results[0].series[0].values;
+        chartData.map(arr => {
+          arr.name = arr[0];
+          arr.value = arr[1];
+          delete arr[0];
+          delete arr[1];
+        });
+      }
       return grafana.eval(chartData);
     } else {
       alert('HTTP-Error: ' + response.status);

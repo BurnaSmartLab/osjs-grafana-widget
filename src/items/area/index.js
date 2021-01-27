@@ -100,15 +100,19 @@ export default class AreaWidget extends AbstractGrafana {
     let response = await fetch(url);
     if (response.ok) {
       let data = await response.json();
-      chartData = data.results[0].series[0].values;
-      chartData.map(arr => {
-        arr.date = arr[0];
-        arr.events = arr[1];
-        delete arr[0];
-        delete arr[1];
-      });
-      this.chartSize = chartData.length;
-      grafana.chart.data = grafana.eval(chartData);
+      if ((!data.results['error']) && (data.results[0].hasOwnProperty('series'))) {
+        console.warn('test');
+        chartData = data.results[0].series[0].values;
+        chartData.map(arr => {
+          arr.date = arr[0];
+          arr.events = arr[1];
+          delete arr[0];
+          delete arr[1];
+        });
+        this.chartSize = chartData.length;
+        grafana.chart.data = grafana.eval(chartData);
+      }
+
     } else {
       alert('HTTP-Error: ' + response.status);
     }
@@ -123,13 +127,15 @@ export default class AreaWidget extends AbstractGrafana {
         let response = await fetch(url);
         if (response.ok) {
           let data = await response.json();
-          chartData = data.results[0].series[0].values;
-          chartData.map(arr => {
-            arr.date = arr[0];
-            arr.events = arr[1];
-            delete arr[0];
-            delete arr[1];
-          });
+          if ((!data.results['error']) && (data.results[0].hasOwnProperty('series'))) {
+            chartData = data.results[0].series[0].values;
+            chartData.map(arr => {
+              arr.date = arr[0];
+              arr.events = arr[1];
+              delete arr[0];
+              delete arr[1];
+            });
+          }
         } else {
           alert('HTTP-Error: ' + response.status);
         }
