@@ -532,22 +532,9 @@ export default class GrafanaWidget extends Widget {
         this.options.refreshTime = value.refreshTimeValue;
         this.options.aggregateSelect = value.aggregateSelectValue;
         this.options.fontColor = value.fontColorValue;
-        if ((Object.keys(this.options.dataSource).length === 0) || (this.options.measurement === '')) {
-          this.core.make('osjs/dialog', 'alert', {
-            message: `${this.options.dataSource === '' ? `${__('LBL_DATA_SOURCE')} field is required\n` : ''} ${this.options.measurement === '' ? `${__('LBL_SET_MEASUREMENT')} field is required` : ''}`,
-            type: 'warning'}, (btn, value)=>{
-            this.options.widgetType = null;
-            this.options.dataSource = null;
-            // this.widget.saveWidgetOptions(this.options.widgetOptions, advancedSetting.state);
-            // this.saveSettings();
-            this.init();
-            console.log('milad');
-          });
-        } else {
-          this.widget.saveWidgetOptions(this.options.widgetOptions, advancedSetting.state);
-          this.saveSettings();
-          this.init();
-        }
+        this.widget.saveWidgetOptions(this.options.widgetOptions, advancedSetting.state);
+        this.saveSettings();
+        this.init();
       }
     };
     const options = {
