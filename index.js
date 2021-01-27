@@ -42,7 +42,6 @@ export default class GrafanaWidget extends Widget {
     this.widgetTypeChangedFlag = false;
     this.default = 'area';
     this.dataSourceList = [];
-    this.hostList = [];
   }
   init() {
     if (this.options.widgetType === null) {
@@ -264,10 +263,10 @@ export default class GrafanaWidget extends Widget {
                   for (let i = 0; i < data.results[0].series[0].values.length; i++) {
                     tempHosts.push(data.results[0].series[0].values[i][1]);
                   }
-                  this.hostList = [...new Set(tempHosts)];
-                  let item = null;
-                  let arr = [];
-                  this.hostList.map(ele => {
+                  let hostList = [...new Set(tempHosts)];
+                  let item = null
+                  let arr = []
+                  hostList.map(ele => {
                     item = {};
                     item.id = ele;
                     item.text = ele;
@@ -290,10 +289,10 @@ export default class GrafanaWidget extends Widget {
             hostSelect.append(option);
             state.measurementValue === '' ? hostSelect.prop('disabled', true) : hostSelect.prop('disabled', false);
           }
-          // loading previous selected value (opening sessting dialog after creating or even refreshing )
-          if((this.hostList.length !== 0 || this.options.hostName !== '') && bool === false) {
-            let option = state.hostNameValue !== '' ? new Option(state.hostNameValue, state.hostNameValue, true, true) :
-              new Option('Select a host...', 'Select a host...', true, true)     ;
+          //loading previous selected value (opening sessting dialog after creating or even refreshing )
+          if(this.options.hostName !== '' && bool === false ){
+            let option = state.hostNameValue !==''? new Option(state.hostNameValue, state.hostNameValue, true, true):
+                          new Option('Select a host...', 'Select a host...', true, true)     ;
             hostSelect.append(option);
             hostSelect.prop('disabled', false);
           }
