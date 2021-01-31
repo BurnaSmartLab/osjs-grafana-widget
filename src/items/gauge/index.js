@@ -49,15 +49,19 @@ export default class GaugeWidget extends AbstractGrafana {
     let response = await fetch(url);
     if (response.ok) {
       let data = await response.json();
-      chartData = data.results[0].series[0].values;
-      let sum = 0, count = 0;
-      for (let elem of chartData) {
-        if (elem[1] !== null) {
-          sum += elem[1];
-          count += 1;
+      if ((!data.results['error']) && (data.results[0].hasOwnProperty('series'))) {
+        chartData = data.results[0].series[0].values;
+        let sum = 0, count = 0;
+        for (let elem of chartData) {
+          if (elem[1] !== null) {
+            sum += elem[1];
+            count += 1;
+          }
         }
+        calcAvg = sum / count;
+      } else {
+        calcAvg = 'no data';
       }
-      calcAvg = sum / count;
     } else {
       alert('HTTP-Error: ' + response.status);
     }
@@ -73,9 +77,8 @@ export default class GaugeWidget extends AbstractGrafana {
 
     let chartMin = grafana.options.widgetOptions.gauge.minRange;
     let chartMax = grafana.options.widgetOptions.gauge.maxRange;
-
     let data = {
-      score: calcAvg,
+      score: grafana.eval(calcAvg),
       gradingData: grafana.options.widgetOptions.gauge.gradeThresholds
     };
     /**
@@ -214,19 +217,23 @@ export default class GaugeWidget extends AbstractGrafana {
       let response = await fetch(url);
       if (response.ok) {
         let data = await response.json();
-        chartData = data.results[0].series[0].values;
-        let sum = 0, count = 0;
-        for (let elem of chartData) {
-          if (elem[1] !== null) {
-            sum += elem[1];
-            count += 1;
+        if ((!data.results['error']) && (data.results[0].hasOwnProperty('series'))) {
+          chartData = data.results[0].series[0].values;
+          let sum = 0, count = 0;
+          for (let elem of chartData) {
+            if (elem[1] !== null) {
+              sum += elem[1];
+              count += 1;
+            }
           }
           calcAvgUpdated = sum / count;
+        } else {
+          calcAvgUpdated = 'no data';
         }
       } else {
         alert('HTTP-Error: ' + response.status);
       }
-      this.widgetHand.showValue(calcAvgUpdated, grafana.options.refreshTime, am4core.ease.cubicOut);
+      this.widgetHand.showValue(grafana.eval(calcAvgUpdated), grafana.options.refreshTime, am4core.ease.cubicOut);
     }, grafana.options.refreshTime);
   }
   showAdvancedSetting(grafana, dialogWindow) {
