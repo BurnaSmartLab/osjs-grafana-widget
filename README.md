@@ -11,9 +11,9 @@ You need to clone [official OS.js repository](https://github.com/os-js/OS.js) an
 1- Navigate to the following directory of OS.js project <br /><br />
 `cd src/client` <br /><br />
 2- Clone GrafanaWidget in this directory <br /><br />
-`git clone https://opengit.ir/smartlab/hafez/grafana-widget.git` <br /><br />
-3- Then navigate to grafana-widget directory <br /><br />
-`cd grafana-widget` <br /><br />
+`git clone https://github.com/BurnaSmartLab/osjs-grafana-widget.git` <br /><br />
+3- Then navigate to osjs-grafana-widget directory <br /><br />
+`cd osjs-grafana-widget` <br /><br />
 5- Run following command in the current directory to install dependencies <br /><br />
 `npm install` <br /><br />
 #### 2. Installion by using npm dependency manager: <br /><br />
@@ -25,7 +25,7 @@ Just execute the following command:<br /><br />
 ```js
 // import GrafanaWidget from its directory
 // use following line, if the first approach for installation has been used
-import GrafanaWidget  from './grafana-widget';
+import GrafanaWidget  from './osjs-grafana-widget';
 // use following line, if the second approach for installation has been used
 import GrafanaWidget from '@burna/osjs-grafana-widget'
 
