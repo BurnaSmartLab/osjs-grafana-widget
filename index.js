@@ -174,6 +174,7 @@ export default class GrafanaWidget extends Widget {
           dataSourceSelect.on('change', (e) => {
             $('#measurement').off('change');
             $('#host').off('change');
+            actions.onDataSourceChange(dataSourceSelect.val());
             actions.createMeasurement({el:document.getElementById('measurement'), bool:true});
           });
           $('b[role="presentation"]').hide();
@@ -264,8 +265,8 @@ export default class GrafanaWidget extends Widget {
                     tempHosts.push(data.results[0].series[0].values[i][1]);
                   }
                   let hostList = [...new Set(tempHosts)];
-                  let item = null
-                  let arr = []
+                  let item = null;
+                  let arr = [];
                   hostList.map(ele => {
                     item = {};
                     item.id = ele;
@@ -289,10 +290,10 @@ export default class GrafanaWidget extends Widget {
             hostSelect.append(option);
             state.measurementValue === '' ? hostSelect.prop('disabled', true) : hostSelect.prop('disabled', false);
           }
-          //loading previous selected value (opening sessting dialog after creating or even refreshing )
-          if(this.options.hostName !== '' && bool === false ){
-            let option = state.hostNameValue !==''? new Option(state.hostNameValue, state.hostNameValue, true, true):
-                          new Option('Select a host...', 'Select a host...', true, true)     ;
+          // loading previous selected value (opening sessting dialog after creating or even refreshing )
+          if(this.options.hostName !== '' && bool === false) {
+            let option = state.hostNameValue !== '' ? new Option(state.hostNameValue, state.hostNameValue, true, true) :
+              new Option('Select a host...', 'Select a host...', true, true)     ;
             hostSelect.append(option);
             hostSelect.prop('disabled', false);
           }
